@@ -14,16 +14,19 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new QGraphicsScene(this);
 
     ui->graphicsView->setScene(scene);
+    scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
     world = new World();
 
     vector<std::unique_ptr<Tile>> tiles = world->createWorld(":/worldmap4.png");
     vector<std::shared_ptr<QGraphicsRectItem>> rects;
-            for(auto & tile: tiles){
+
+    QBrush brush;
+    QPen pen;
+    pen.setWidth(0);
+    for(auto & tile: tiles){
         float greyscale = 0.0f;
-        QBrush brush;
-        QPen pen;
-        pen.setWidth(0);
+
         if(tile->getValue() != INFINITY && tile->getValue() != 1.0f){
             greyscale = tile->getValue()*255.0f;
             brush.setColor(QColor(greyscale,greyscale,greyscale));

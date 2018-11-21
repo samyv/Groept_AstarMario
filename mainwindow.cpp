@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Model * m = new Model();
     map = m->makeMap(tiles, world->getRows(), world->getCols());
     cout << "success " << map.size() << endl;
-    m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
+    vector<tile_t *> path = m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
 
 }
 

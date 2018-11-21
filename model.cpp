@@ -34,7 +34,7 @@ vector<shared_ptr<tile_t>> Model::makeMap(vector<unique_ptr<Tile>> & tiles, int 
 }
 
 
-int Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal, vector<shared_ptr<tile_t>> & map){
+vector<tile_t *> Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal, vector<shared_ptr<tile_t>> & map){
     this->goal = goal;
 
     int x = start->t->getXPos();
@@ -58,29 +58,41 @@ int Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal, vector<share
     while(!open.empty()){
         //run algorithm
         current = open.front();
-        pop_heap(open.begin(), open.end());
+        pop_heap(open.begin(), open.end(), comp);
         open.pop_back();
 
-        //cout << "Current: " << current->t->getXPos() << ", " << current->t->getYPos() << " F: " << current->f << endl;
+//        cout << "Current: " << current->t->getXPos() << ", " << current->t->getYPos() << " F: " << current->f << endl;
 
         current->closed = true;
 
         if(current == goal){
             //get path and initiate draw
-            cout << "GOT TO GOAL" << endl;
+
+
+            while(current != nullptr){
+                path.push_back(current.get());
+                if(current->prev != nullptr){
+                    current = make_shared<tile_t>(*(current->prev));
+                } else {
+                    current = nullptr;
+                }
+
+            }
+
+            cout << "GOT TO GOAL IN " << path.size() << " STEPS" << endl;
             break;
         }
 
         checkNeighbours(current, map);
-        //printqueue(open);
+//        printqueue(open);
         count++;
-        //        if(count >= 5){
-        //            break;
-        //        }
+//                if(count >= 5){
+//                    break;
+//                }
 
     }
     cout << "Time passed: " <<(clock() - st)/(CLOCKS_PER_SEC/1000) << endl;
-    return SUCCESS;
+    return path;
 }
 
 
@@ -130,7 +142,7 @@ void Model::checkNeighbours(shared_ptr<tile_t> t, vector<shared_ptr<tile_t>> & m
                         tile->f = newg + tile->h;
                         tile->g = newg;
                         tile->prev = t.get();
-                        push_heap(open.begin(), open.end());
+                        push_heap(open.begin(), open.end(), comp);
                     }
                 }
             }
@@ -172,5 +184,5 @@ void Model::printqueue(vector<shared_ptr<tile_t>> list){
 
 bool Model::comp(shared_ptr<tile_t> a, shared_ptr<tile_t> b)
 {
-    return a->f < b->f;
+    return a->f > b->f;
 }

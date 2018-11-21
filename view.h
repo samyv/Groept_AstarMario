@@ -8,6 +8,7 @@ class view: public DisplayManner
 public:
     view();
     void displayEnemies();
+
 };
 
 #endif // VIEW_H

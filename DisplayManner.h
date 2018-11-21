@@ -1,12 +1,15 @@
 #ifndef DISPLAYMANNER_H
 #define DISPLAYMANNER_H
 
+using namespace std;
+
 class DisplayManner
 {
 public:
-#endif // DISPLAYMANNER_H
+    DisplayManner(){}
+    virtual ~DisplayManner() = default;
+    virtual void displayEnemies() = 0;
 
-    DisplayManner();
-    virtual void displayEnemies();
-    virtual ~DisplayManner();
 };
+
+#endif // DISPLAYMANNER_H

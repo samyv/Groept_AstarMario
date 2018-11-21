@@ -16,14 +16,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(scene);
 
     world = new World();
+    QImage image = QImage(":/worldmap4.png");
+    QPixmap pix = QPixmap::fromImage(image);
+    scene->addPixmap(pix);
+
 
     vector<std::unique_ptr<Tile>> tiles = world->createWorld(":/worldmap4.png");
     vector<std::shared_ptr<QGraphicsRectItem>> rects;
-            for(auto & tile: tiles){
-        float greyscale = 0.0f;
-        QBrush brush;
-        QPen pen;
-        pen.setWidth(0);
+    QBrush brush(Qt::SolidPattern);
+    QPen pen(Qt::NoPen);
+    float greyscale = 0.0f;
+    for(auto & tile: tiles){
+
+
+
         if(tile->getValue() != INFINITY && tile->getValue() != 1.0f){
             greyscale = tile->getValue()*255.0f;
             brush.setColor(QColor(greyscale,greyscale,greyscale));
@@ -38,9 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
             brush.setColor(Qt::white);
             pen.setColor(Qt::white);
         }
-//        shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->getXPos()*displaySize,tile->getYPos()*displaySize, displaySize,displaySize,nullptr);
-//        rects.push_back(rect);
-//        scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
+        //        shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->getXPos()*displaySize,tile->getYPos()*displaySize, displaySize,displaySize,nullptr);
+        //        rects.push_back(rect);
+        //        scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
     }
 
 

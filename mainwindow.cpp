@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "model.h"
 
 #include <iostream>
 #include <QDesktopWidget>
@@ -16,12 +17,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(scene);
 
     world = new World();
-    QImage image = QImage(":/worldmap4.png");
+    QImage image = QImage(":/maze1.png");
     QPixmap pix = QPixmap::fromImage(image);
     scene->addPixmap(pix);
 
-
-    vector<std::unique_ptr<Tile>> tiles = world->createWorld(":/worldmap4.png");
+    vector<std::unique_ptr<Tile>> tiles = world->createWorld(":/maze1.png");
     vector<std::shared_ptr<QGraphicsRectItem>> rects;
     QBrush brush(Qt::SolidPattern);
     QPen pen(Qt::NoPen);
@@ -49,6 +49,12 @@ MainWindow::MainWindow(QWidget *parent) :
         //        scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
     }
 
+    vector<shared_ptr<tile_t>> map;
+
+    Model * m = new Model();
+    map = m->makeMap(tiles, world->getRows(), world->getCols());
+    cout << "success " << map.size() << endl;
+    m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
 
 }
 

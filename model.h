@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <limits>
 #include <iostream>
-#include <queue>
+#include <vector>
 #include "world.h"
 #include "world_global.h"
 
@@ -24,35 +24,29 @@ typedef tile tile_t;
 typedef struct tile{
     Tile * t;
     tile_t * prev;
-    int f;
-    int g;
-    int h;
+    double f;
+    double g;
+    double h;
     bool open;
     bool closed;
 } tile_t;
-
-struct CustomCompare
-{
-    bool operator()(shared_ptr<tile_t> a, shared_ptr<tile_t> b)
-    {
-        return a->f > b->f;
-    }
-};
 
 class Model
 {
 public:
     Model();
     ~Model();
-    vector<shared_ptr<tile_t>> makeMap(vector<unique_ptr<Tile>> & tiles);
-
+    vector<shared_ptr<tile_t>> makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols);
     int aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal,  vector<shared_ptr<tile_t>> & map);
 private:
-    priority_queue<shared_ptr<tile_t>, vector<shared_ptr<tile_t>>, CustomCompare> open;
-    void printqueue(priority_queue<shared_ptr<tile_t>, vector<shared_ptr<tile_t>>, CustomCompare> q);
+    vector<shared_ptr<tile_t>> open;
+    void printqueue(vector<shared_ptr<tile_t>> list);
     double heuristic(shared_ptr<tile_t> a, shared_ptr<tile_t> b);
-    void checkNeighbours(shared_ptr<tile_t> t);
-
+    void checkNeighbours(shared_ptr<tile_t> t, vector<shared_ptr<tile_t>> & map);
+    int cols;
+    int rows;
+    shared_ptr<tile_t> goal;
+    static bool comp(shared_ptr<tile_t> a, shared_ptr<tile_t> b);
 };
 
 

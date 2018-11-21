@@ -27,11 +27,21 @@ CONFIG += c++14
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    model.cpp
+    model.cpp \
+    game.cpp \
+    view.cpp \
+    gview.cpp \
+    tview.cpp \
+    DisplayManner.cpp
 
 HEADERS += \
         mainwindow.h \
-    model.h
+    model.h \
+    game.h \
+    view.h \
+    gview.h \
+    tview.h \
+    DisplayManner.h
 
 FORMS += \
         mainwindow.ui

@@ -24,13 +24,15 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
     world = new World();
+    QImage image = QImage(":/worldmap4.png");
+    QPixmap pix = QPixmap::fromImage(image);
+    scene->addPixmap(pix);
 
     vector<std::unique_ptr<Tile>> tiles = world->createWorld(":/worldmap4.png");
     vector<std::shared_ptr<QGraphicsRectItem>> rects;
 
-    QBrush brush;
-    QPen pen;
-    pen.setWidth(0);
+    QBrush brush(Qt::SolidPattern);
+    QPen pen(Qt::NoPen);
     for(auto & tile: tiles){
         float greyscale = 0.0f;
 
@@ -48,9 +50,9 @@ MainWindow::MainWindow(QWidget *parent) :
             brush.setColor(Qt::white);
             pen.setColor(Qt::white);
         }
-        shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->getXPos()*displaySize,tile->getYPos()*displaySize, displaySize,displaySize,nullptr);
-        rects.push_back(rect);
-        scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
+        //shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,nullptr);
+        //rects.push_back(rect);
+        //scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
     }
 
     //better way would be to store in array

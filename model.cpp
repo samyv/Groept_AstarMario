@@ -52,7 +52,7 @@ vector<tile_t *> Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal,
     cout << "start value " << val << " at " << x << ", " << y << endl;
     cout << "goal value " << goal->t->getValue() << " at " << goal->t->getXPos() << ", " << goal->t->getYPos() << endl;
 
-    printqueue(open);
+    //    printqueue(open);
     clock_t st = clock();
     int count = 0;
     while(!open.empty()){
@@ -68,13 +68,14 @@ vector<tile_t *> Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal,
         if(current == goal){
             //get path and initiate draw
 
-
-            while(current != nullptr){
-                path.push_back(current.get());
-                if(current->prev != nullptr){
-                    current = make_shared<tile_t>(*(current->prev));
+            path.push_back(current.get());
+            tile_t * temp = current->prev;
+            while(temp != nullptr){
+                path.push_back(temp);
+                if(temp->prev != nullptr){
+                    temp = temp->prev;
                 } else {
-                    current = nullptr;
+                    temp = nullptr;
                 }
 
             }
@@ -83,12 +84,12 @@ vector<tile_t *> Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal,
             break;
         }
 
-        checkNeighbours(current, map);
+        checkNeighbours(&current, map);
 //        printqueue(open);
         count++;
-//                if(count >= 5){
-//                    break;
-//                }
+//        if(count >= 5){
+//            break;
+//        }
 
     }
     cout << "Time passed: " <<(clock() - st)/(CLOCKS_PER_SEC/1000) << endl;
@@ -96,7 +97,8 @@ vector<tile_t *> Model::aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal,
 }
 
 
-void Model::checkNeighbours(shared_ptr<tile_t> t, vector<shared_ptr<tile_t>> & map){
+void Model::checkNeighbours(shared_ptr<tile_t> * temp, vector<shared_ptr<tile_t>> & map){
+    shared_ptr<tile_t> t = *temp;
     for(int i = -1; i < 2; i++){
         for(int j = -1; j < 2; j++){
             int x = t->t->getXPos() + i;
@@ -104,9 +106,9 @@ void Model::checkNeighbours(shared_ptr<tile_t> t, vector<shared_ptr<tile_t>> & m
             double newg;
 
             if(i == 0 || j == 0){
-                newg = t->g + SQRT;
-            } else {
                 newg = t->g + 1;
+            } else {
+                newg = t->g + SQRT;
             }
 
             if(x + i >= 0  && x + j < cols && y + j >= 0 && y + j < rows && ((i != 0) || (j != 0))){
@@ -168,7 +170,7 @@ double Model::heuristic(shared_ptr<tile_t> a, shared_ptr<tile_t> b){
         max = dx;
     }
 
-    return dist;
+    return dist/10;
 }
 
 void Model::printqueue(vector<shared_ptr<tile_t>> list){

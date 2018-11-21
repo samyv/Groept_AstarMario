@@ -24,7 +24,7 @@ public:
     ~MainWindow();
 
     World * world;
-    double displaySize = 0.9;
+    double displaySize = 1.5;
      QGraphicsScene * scene;
 private:
     Ui::MainWindow *ui;

@@ -43,7 +43,7 @@ private:
     vector<tile_t *> path;
     void printqueue(vector<shared_ptr<tile_t>> list);
     double heuristic(shared_ptr<tile_t> a, shared_ptr<tile_t> b);
-    void checkNeighbours(shared_ptr<tile_t> t, vector<shared_ptr<tile_t>> & map);
+    void checkNeighbours(shared_ptr<tile_t> * t, vector<shared_ptr<tile_t>> & map);
     int cols;
     int rows;
     shared_ptr<tile_t> goal;

@@ -13,6 +13,7 @@ public:
     vector<unique_ptr<Enemy>> enemies;
 //    vector<unique_ptr<Tile>> healthpacks;
     unique_ptr<Protagonist> protagonist;
+    vector<unique_ptr<Tile>> greyTiles;
 
     void generateWorld();
     int enemiesCount = 5;

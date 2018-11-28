@@ -17,9 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(scene);
 
     world = new World();
-    vector<std::unique_ptr<Tile>> tiles = world->createWorld(":/maze1.png");
-
-    QImage image = QImage(":/maze1.png");
+    vector<std::unique_ptr<Tile>> tiles;
+    try{
+        tiles = world->createWorld(":/maze3.png");
+    } catch(QString e){
+        cout << e.toStdString() << endl;
+    };
+    QImage image = QImage(":/maze3.png");
     QImage back = image.scaled(int(image.width() * displaySize), int(image.height() * displaySize), Qt::KeepAspectRatio);
     QPixmap pix = QPixmap::fromImage(back);
 
@@ -47,21 +51,24 @@ MainWindow::MainWindow(QWidget *parent) :
         }
         //        shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->getXPos()*displaySize,tile->getYPos()*displaySize, displaySize,displaySize,nullptr);
         //        rects.push_back(rect);
-//                scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
+        //                scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
     }
-    vector<shared_ptr<tile_t>> map;
+    vector<tile_t *> map;
 
     Model * m = new Model();
     map = m->makeMap(tiles, world->getRows(), world->getCols());
     cout << "success " << map.size() << endl;
-    vector<tile_t *> path = m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
+    vector<tile_t *> path = m->aStar(map.at(49 + 36*world->getCols()), map.at(1183 + 1185*world->getCols()), map); // maze1: 6,6 ; 1,492 worldmap4: 0, 45;  999, 937  maze3 : 49,36 ; 1183, 1185
     int count = 0;
     brush.setColor(QColor(255,0,0));
     pen.setColor(QColor(255,0,0));
+    cout << "path " << path.size() << endl;
     for(auto & tile: path){
         //shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->t->getXPos()*displaySize,tile->t->getYPos()*displaySize, displaySize,displaySize,nullptr);
         //rects.push_back(rect);
+        //if(tile->open == true){
         scene->addRect(tile->t->getXPos()*displaySize, tile->t->getYPos()*displaySize, displaySize, displaySize,pen,brush);
+        //}
         //cout << tile->t->getXPos()*displaySize << " " << tile->t->getYPos()*displaySize << endl;
         count++;
     }

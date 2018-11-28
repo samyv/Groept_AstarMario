@@ -54,9 +54,7 @@ DEPENDPATH += $$PWD/.
 RESOURCES += \
     image.qrc
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/./ -lworld
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/./ -lworld
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/. -lworld
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/. -lworld
 else:unix: LIBS += -L$$PWD/./ -lworld
 
-INCLUDEPATH += $$PWD/.
-DEPENDPATH += $$PWD/.

@@ -5,6 +5,7 @@
 #include <limits>
 #include <iostream>
 #include <vector>
+#include <queue>
 #include "world.h"
 #include "world_global.h"
 
@@ -31,25 +32,33 @@ typedef struct tile{
     bool closed;
 } tile_t;
 
+struct comp //: public std::binary_function<tile_t *, tile_t *, bool>
+{
+    bool operator()(tile_t * a, tile_t * b){
+        return a->f > b->f;
+    }
+};
+
 class Model
 {
 public:
     Model();
     ~Model();
-    vector<shared_ptr<tile_t>> makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols);
-    vector<tile_t *> aStar(shared_ptr<tile_t> start, shared_ptr<tile_t> goal,  vector<shared_ptr<tile_t>> & map);
+    vector<tile_t *> makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols);
+    vector<tile_t *> aStar(tile_t * start, tile_t * goal,  vector<tile_t *> & map);
 private:
-    vector<shared_ptr<tile_t>> open;
+    priority_queue<tile_t *, vector<tile_t *>, comp> open;
+    //vector<tile_t *> open;
     vector<tile_t *> path;
-    void printqueue(vector<shared_ptr<tile_t>> list);
-    double heuristic(shared_ptr<tile_t> a, shared_ptr<tile_t> b);
-    void checkNeighbours(shared_ptr<tile_t> * t, vector<shared_ptr<tile_t>> & map);
+    void printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list);
+    //void printqueue(vector<tile_t *> list);
+    double heuristic(tile_t * a, tile_t * b);
+    void checkNeighbours(tile_t ** t, vector<tile_t *> & map);
     int cols;
     int rows;
-    shared_ptr<tile_t> goal;
-    static bool comp(shared_ptr<tile_t> a, shared_ptr<tile_t> b);
+    tile_t * goal;
+    //static bool comp(const tile_t * a, const tile_t * b);
 };
-
 
 
 #endif // MODEL_H

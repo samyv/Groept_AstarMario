@@ -47,6 +47,7 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     start->open = true;
     //make_heap(open.begin(), open.end(), comp);
     tile_t * current = start;
+    tile_t * prev = nullptr;
     open.push(start);
     //open.push_back(start);
     //goal->f = 5;
@@ -56,9 +57,17 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     //printqueue(open);
     clock_t st = clock();
     int count = 0;
+    try {
+
+
     while(!open.empty()){
         //run algorithm
         current = open.top();
+        if(current == prev){
+            cout << "jaja tis dees" << endl;
+        }
+        prev = current;
+
         //current = open.front();
         //pop_heap(open.begin(), open.end(), comp);
         //open.pop_back();
@@ -92,10 +101,13 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
         checkNeighbours(&current, map);
         //printqueue(open);
         count++;
-        //if(count >= 5){
-        //break;
+        //if(count >= 50){
+           // break;
         //}
 
+    }
+    } catch (const std::bad_alloc) {
+        cout << open.size() << endl;
     }
 
     if(open.empty()){
@@ -136,6 +148,7 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
                     if(!tile->open){
                         if(tile->t->getValue() == 0.0f || tile->t->getValue() == float(INFINITY)){
                             tile->closed = true;
+                            continue;
                         } else {
                             newpath = true;
                         }
@@ -145,16 +158,20 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
 
                     if(newpath){
 
-                        //if(!tile->open){
+
+                        tile->f = newg + tile->h;
+                        tile->g = newg;
+                        tile->prev = t;
+
+                        if(!tile->open){
                         //open.push_back(tile);
 
                         tile->h = heuristic(tile, goal);
                         tile->open = true;
-                        //}
                         tile->f = newg + tile->h;
-                        tile->g = newg;
-                        tile->prev = t;
                         open.push(tile);
+                        }
+
                         //push_heap(open.begin(), open.end(), comp);
                     }
                 }
@@ -169,19 +186,13 @@ double Model::heuristic(tile_t * a, tile_t * b){
     double dx = abs(a->t->getXPos() - b->t->getXPos());
     double dy = abs(a->t->getYPos() - b->t->getYPos());
     double dist;
-    double min;
-    double max;
     if(dx < dy){
-        min = dx;
-        max = dy;
         dist = ((dy-dx) + (SQRT * dx));
     } else {
         dist = ((dx-dy) + (SQRT * dy));
-        min = dy;
-        max = dx;
     }
 
-    return dist/10;
+    return dist/1.01;
 }
 
 void Model::printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list){

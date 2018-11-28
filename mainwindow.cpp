@@ -17,13 +17,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->setScene(scene);
 
     world = new World();
+    QString str = ":/maze3.png";
     vector<std::unique_ptr<Tile>> tiles;
     try{
-        tiles = world->createWorld(":/maze3.png");
+        tiles = world->createWorld("D:/media/pathfinding/maze3.png");
     } catch(QString e){
         cout << e.toStdString() << endl;
     };
-    QImage image = QImage(":/maze3.png");
+    QImage image = QImage("D:/media/pathfinding/maze3.png");
     QImage back = image.scaled(int(image.width() * displaySize), int(image.height() * displaySize), Qt::KeepAspectRatio);
     QPixmap pix = QPixmap::fromImage(back);
 
@@ -63,11 +64,14 @@ MainWindow::MainWindow(QWidget *parent) :
     brush.setColor(QColor(255,0,0));
     pen.setColor(QColor(255,0,0));
     cout << "path " << path.size() << endl;
-    for(auto & tile: path){
+    for(auto tile: path){
         //shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->t->getXPos()*displaySize,tile->t->getYPos()*displaySize, displaySize,displaySize,nullptr);
         //rects.push_back(rect);
-        //if(tile->open == true){
-        scene->addRect(tile->t->getXPos()*displaySize, tile->t->getYPos()*displaySize, displaySize, displaySize,pen,brush);
+
+        //if(tile->closed == true){
+           // brush.setColor(QColor(0,255,0));
+            //pen.setColor(QColor(0,255,0));
+            scene->addRect(tile->t->getXPos()*displaySize, tile->t->getYPos()*displaySize, displaySize, displaySize,pen,brush);
         //}
         //cout << tile->t->getXPos()*displaySize << " " << tile->t->getYPos()*displaySize << endl;
         count++;

@@ -12,7 +12,7 @@ public:
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
 //    vector<unique_ptr<Tile>> healthpacks;
-    unique_ptr<Protagonist> protagonist;
+    static unique_ptr<Protagonist> protagonist;
     vector<unique_ptr<Tile>> greyTiles;
 
     void generateWorld();

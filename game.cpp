@@ -8,7 +8,7 @@ game::game()
 {
     tiles = world->createWorld(":/worldmap4.png");
     generateWorld();
-    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
+//    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
 }
 
 void game::generateWorld(){
@@ -24,6 +24,9 @@ void game::generateWorld(){
         unique_ptr<Enemy> e = unique_ptr<Enemy>(new Enemy(tile->getXPos(),tile->getYPos(),defaultStrength));
         enemies.push_back(move(e));
     }
+
 }
+
+
 
 

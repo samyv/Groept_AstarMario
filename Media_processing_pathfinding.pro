@@ -26,7 +26,6 @@ CONFIG += c++14
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
     model.cpp \
     game.cpp \
     view.cpp \
@@ -35,7 +34,6 @@ SOURCES += \
     DisplayManner.cpp
 
 HEADERS += \
-        mainwindow.h \
     model.h \
     game.h \
     view.h \
@@ -60,3 +58,5 @@ else:unix: LIBS += -L$$PWD/./ -lworld
 
 INCLUDEPATH += $$PWD/.
 DEPENDPATH += $$PWD/.
+
+DISTFILES +=

@@ -4,5 +4,6 @@
         <file>maze3.png</file>
         <file>maze2.png</file>
         <file>worldmap4.png</file>
+        <file>mario.png</file>
     </qresource>
 </RCC>

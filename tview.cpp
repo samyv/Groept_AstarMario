@@ -9,22 +9,6 @@ Tview::Tview(vector<unique_ptr<Tile>> greyTiles, vector<unique_ptr<Enemy>> enemi
     int yStart = yPosition - terminalMapSize;
     int xEnd = xPosition + terminalMapSize;
     int yEnd = yPosition + terminalMapSize;
-
-    //making sure map follows protagonist and when reaching limits of the worldmap that you can see the protagonist move
-    if(xStart < 1){
-        xStart = 0;
-    } else if (xEnd > columns){
-        xStart = columns - 2*terminalMapSize;
-        xEnd = columns;
-    }
-
-    if(yStart < 1){
-        yStart = 0;
-    } else if (yEnd > rows){
-        yStart = rows - 2*terminalMapSize;
-        yEnd = rows;
-    }
-
     int vectorSize = int(pow(2*terminalMapSize, 2));
     //characters has all special characters set for displayed tiles
     vector<string> characters(vectorSize, "");
@@ -48,6 +32,23 @@ Tview::Tview(vector<unique_ptr<Tile>> greyTiles, vector<unique_ptr<Enemy>> enemi
             int index = (2*terminalMapSize*(y-yStart) + x-xStart);
             characters.at(index) = "O";
         }
+        int yEnd = yPosition + terminalMapSize;
+
+        //making sure map follows protagonist and when reaching limits of the worldmap that you can see the protagonist move
+        if(xStart < 1){
+            xStart = 0;
+        } else if (xEnd > columns){
+            xStart = columns - 2*terminalMapSize;
+            xEnd = columns;
+        }
+
+        if(yStart < 1){
+            yStart = 0;
+        } else if (yEnd > rows){
+            yStart = rows - 2*terminalMapSize;
+            yEnd = rows;
+        }
+
     }
 
     //drawing the terminal view per column, per row

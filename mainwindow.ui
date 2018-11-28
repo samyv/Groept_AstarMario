@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Gview</class>
+ <widget class="QMainWindow" name="Gview">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>718</width>
-    <height>405</height>
+    <width>993</width>
+    <height>601</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -57,7 +57,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>718</width>
+     <width>993</width>
      <height>22</height>
     </rect>
    </property>

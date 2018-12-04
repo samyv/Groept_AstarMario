@@ -13,10 +13,10 @@ Game::Game()
 ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     Gview gview;
     //gview.show();
-    protagonist = unique_ptr<Protagonist>(new Protagonist);
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)),&gview,SLOT(updateProtagonist()));
 
-    protagonist->posChanged(3,5);
+    protagonist->setPos(3,5);
+    cout << protagonist->getXPos() << endl;
 
 
 }

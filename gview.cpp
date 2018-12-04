@@ -115,7 +115,8 @@ void Gview::setupScene(){
 void Gview::updateProtagonist(){
 //    cout << protagonist->getXPos() << endl;
    auto x = getProtagonist();
-    cout << x->getXPos() << endl;
+   cout << x->getXPos() << ", " << x->getYPos() << ", " << x->getHealth() << endl;
+   // cout << x->getXPos() << endl;
 
 }
 Gview::~Gview()

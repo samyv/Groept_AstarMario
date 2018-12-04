@@ -20,10 +20,10 @@ public:
     int healthpackCount = 3;
     float defaultStrength = 0.5f;
 };
-static unique_ptr<Protagonist> protagonist;
-static Protagonist * getProtagonist();
+static unique_ptr<Protagonist> protagonist = unique_ptr<Protagonist>(new Protagonist);
 
-Protagonist * getProtagonist(){
+static Protagonist * getProtagonist(){
+    auto test = protagonist.get();
     return protagonist.get();
 }
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);

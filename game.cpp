@@ -3,21 +3,20 @@
 #include "tview.h"
 #include "gview.h"
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
-Game::Game()
+Game::Game(Gview * gview)
 {
     world = new World();
     tiles = world->createWorld(":/maze1.png");
     //generateWorld();
 ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
-    Gview gview;
+    //Gview gview;
     //gview.show();
-    protagonist = unique_ptr<Protagonist>(new Protagonist);
+    protagonist = world->getProtagonist();
+    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
 
-    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)),&gview,SLOT(updateProtagonist(int, int)));
-
-    protagonist->setPos(3,5);
     cout << protagonist->getXPos() << endl;
 
 

@@ -5,12 +5,23 @@
 #include <QDesktopWidget>
 #include <QGraphicsScene>
 #include "game.h"
+#include <QPushButton>
+
 using namespace std;
 
 Gview::Gview(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Gview)
 {
+    this->setUpdatesEnabled(true);
+
+    QPushButton * test = ui->centralWidget->findChild<QPushButton*>("pushButton");
+
+    connect(test, SIGNAL(test->clicked()), this, SLOT(updateview()));
+
+    //QPushButton * p = new QPushButton("okay", this);
+
+    //QObject::connect(this)
 
     //setup the scene for grahpicalview
     setupScene();
@@ -46,16 +57,18 @@ void Gview::drawMarioInit(){
     QImage mario = QImage(":/mario.png");
     mario = mario.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap protapix = QPixmap::fromImage(mario);
+    mariopix = new QGraphicsPixmapItem(protapix);
 //    QPainter *paint = new QPainter(protapix)
     QTransform transform;
     transform.translate(20,0);
-    QPixmap * newMario = new QPixmap(protapix.transformed(transform));
-    scene->addPixmap(*newMario);
+    //QPixmap * newMario = new QPixmap(protapix.transformed(transform));
+    //scene->addPixmap(*newMario);
 
 //    qreal ancho = game::protagonist->getXPos()+50;
 //    qreal alto = game::protagonist->getYPos()+50;
-
-    scene->addPixmap(protapix);
+    //mariopix->setPos(300,500);
+    mariopix->setFlag(QGraphicsItem::ItemIsMovable);
+    scene->addItem(mariopix);
 }
 void Gview::makeModel(){
      vector<shared_ptr<tile_t>> map;
@@ -114,13 +127,28 @@ void Gview::setupScene(){
 
 void Gview::updateProtagonist(int x, int y){
     cout << x << " " << y << endl;
+    //mariopix->setScale(50);
+    mariopix->setPos(x,y);
+
+
+    scene->update();
+    this->update();
+
 //    cout << protagonist->getXPos() << endl;
    //auto x = getProtagonist();
    //cout << x->getXPos() << ", " << x->getYPos() << ", " << x->getHealth() << endl;
    // cout << x->getXPos() << endl;
 
 }
+
+void Gview::updateview(){
+    for(int i = 0; i < world->getCols(); i++){
+        mariopix->setPos(100,i);
+        //Sleep(500);
+    }
+}
 Gview::~Gview()
 {
     delete ui;
 }
+

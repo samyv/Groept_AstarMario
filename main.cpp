@@ -8,10 +8,11 @@
 int main(int argc, char *argv[])
   {
   QApplication a(argc, argv);
-  Game game;
+
   Gview gview;
+  Game game(&gview);
   gview.show();
-cout << "here" << endl;
+  cout << "here" << endl;
 
 
 

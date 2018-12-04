@@ -42,8 +42,10 @@ public:
     void drawMarioInit();
 public slots:
      void updateProtagonist(int x, int y);
+     void updateview();
 private:
     Ui::Gview *ui;
+    QGraphicsPixmapItem * mariopix;
 };
 
 #endif // Gview_H

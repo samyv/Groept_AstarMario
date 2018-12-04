@@ -2,14 +2,15 @@
 #define GAME_H
 #include <world_global.h>
 #include <world.h>
+#include "gview.h"
 
 using namespace std;
 class Game
 {
 public:
-    Game();
+    Game(Gview * gview);
+    Gview view;
     World * world;
-
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
 //    vector<unique_ptr<Tile>> healthpacks;

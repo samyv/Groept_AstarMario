@@ -21,25 +21,42 @@ Gview::Gview(QWidget *parent) :
     //create a Qimage for the background
     drawBackground();
 
-    updateProtagonist();
+    drawMarioInit();
 
     //draw rects for each tile (not used for now)
-    drawWorld();
+//    drawWorld();
 
     //draw a* pathfindi ng
 //    makeModel();
 }
+
  vector<std::unique_ptr<Tile>> Gview::createWorld(){
     world = new World();
-    return world->createWorld(":/maze1.png");
+    return world->createWorld(":/worldmap4.png");
 }
+
 void Gview::drawBackground(){
-     QImage image = QImage(":/maze1.png");
+     QImage image = QImage(":/worldmap4.png");
      image = image.scaled(int(image.width() * displaySize), int(image.height() * displaySize), Qt::KeepAspectRatio);
      QPixmap pix = QPixmap::fromImage(image);
      scene->addPixmap(pix);
  }
 
+void Gview::drawMarioInit(){
+    QImage mario = QImage(":/mario.png");
+    mario = mario.scaled(int(displaySize*24),int(displaySize*24));
+    QPixmap protapix = QPixmap::fromImage(mario);
+//    QPainter *paint = new QPainter(protapix)
+    QTransform transform;
+    transform.translate(20,0);
+    QPixmap * newMario = new QPixmap(protapix.transformed(transform));
+    scene->addPixmap(*newMario);
+
+//    qreal ancho = game::protagonist->getXPos()+50;
+//    qreal alto = game::protagonist->getYPos()+50;
+
+    scene->addPixmap(protapix);
+}
 void Gview::makeModel(){
      vector<shared_ptr<tile_t>> map;
 
@@ -92,24 +109,14 @@ void Gview::setupScene(){
     ui->setupUi(this);
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
-    ui->graphicsView->setRenderHint(QPainter::Antialiasing);
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 
 void Gview::updateProtagonist(){
-    QImage mario = QImage(":/mario.png");
-    mario = mario.scaled(int(displaySize*16),int(displaySize*16));
-    QPixmap protapix = QPixmap::fromImage(mario);
-//    QPainter *paint = new QPainter(protapix)
-    QTransform transform;
-    transform.translate(20,0);
-    QPixmap * newMario = new QPixmap(protapix.transformed(transform));
-    scene->addPixmap(*newMario);
+//    cout << protagonist->getXPos() << endl;
+   auto x = getProtagonist();
+    cout << x->getXPos() << endl;
 
-//    qreal ancho = game::protagonist->getXPos()+50;
-//    qreal alto = game::protagonist->getYPos()+50;
-
-    scene->addPixmap(protapix);
 }
 Gview::~Gview()
 {

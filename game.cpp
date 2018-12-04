@@ -1,20 +1,30 @@
 #include "game.h"
 #include "math.h"
 #include "tview.h"
+#include "gview.h"
 #include <iostream>
 
 using namespace std;
-game::game()
+Game::Game()
 {
-    tiles = world->createWorld(":/worldmap4.png");
-    generateWorld();
-//    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
+    world = new World();
+    tiles = world->createWorld(":/maze1.png");
+    //generateWorld();
+////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
+    Gview gview;
+    //gview.show();
+    protagonist = unique_ptr<Protagonist>(new Protagonist);
+    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)),&gview,SLOT(updateProtagonist()));
+
+    protagonist->posChanged(3,5);
+
+
 }
 
-void game::generateWorld(){
+void Game::generateWorld(){
     //generate enemies
     for(unsigned long i =0; i <tiles.size();i++){
-        if(tiles.at(i)->getValue() != INFINITY && tiles.at(i)->getValue() < 1.0f){
+        if(tiles.at(i)->getValue() != INFINITY || tiles.at(i)->getValue() < 1.0f){
             greyTiles.push_back(move(tiles.at(i)));
         }
     }
@@ -26,6 +36,8 @@ void game::generateWorld(){
     }
 
 }
+
+
 
 
 

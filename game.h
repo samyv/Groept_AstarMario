@@ -4,21 +4,27 @@
 #include <world.h>
 
 using namespace std;
-class game
+class Game
 {
 public:
-    game();
+    Game();
     World * world;
+
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
 //    vector<unique_ptr<Tile>> healthpacks;
-    static unique_ptr<Protagonist> protagonist;
-    vector<unique_ptr<Tile>> greyTiles;
 
+    vector<unique_ptr<Tile>> greyTiles;
     void generateWorld();
     int enemiesCount = 5;
     int healthpackCount = 3;
     float defaultStrength = 0.5f;
 };
+static unique_ptr<Protagonist> protagonist;
+static Protagonist * getProtagonist();
 
+Protagonist * getProtagonist(){
+    return protagonist.get();
+}
+//unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);
 #endif // GAME_H

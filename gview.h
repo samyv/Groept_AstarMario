@@ -13,6 +13,7 @@
 
 #include "model.h"
 #include <iostream>
+#include <QObject>
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QDesktopWidget>
@@ -37,8 +38,10 @@ public:
     double displaySize = 1.5;
     QGraphicsScene * scene;
     void makeModel();
-    void updateProtagonist();
     void drawBackground();
+    void drawMarioInit();
+public slots:
+     void updateProtagonist();
 private:
     Ui::Gview *ui;
 };

@@ -41,7 +41,7 @@ public:
     void drawBackground();
     void drawMarioInit();
 public slots:
-     void updateProtagonist();
+     void updateProtagonist(int x, int y);
 private:
     Ui::Gview *ui;
 };

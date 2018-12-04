@@ -112,10 +112,11 @@ void Gview::setupScene(){
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 
-void Gview::updateProtagonist(){
+void Gview::updateProtagonist(int x, int y){
+    cout << x << " " << y << endl;
 //    cout << protagonist->getXPos() << endl;
-   auto x = getProtagonist();
-   cout << x->getXPos() << ", " << x->getYPos() << ", " << x->getHealth() << endl;
+   //auto x = getProtagonist();
+   //cout << x->getXPos() << ", " << x->getYPos() << ", " << x->getHealth() << endl;
    // cout << x->getXPos() << endl;
 
 }

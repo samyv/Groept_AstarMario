@@ -192,7 +192,7 @@ double Model::heuristic(tile_t * a, tile_t * b){
         dist = ((dx-dy) + (SQRT * dy));
     }
 
-    return dist/1.01;
+    return dist/0.9;
 }
 
 void Model::printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list){

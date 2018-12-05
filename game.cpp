@@ -10,24 +10,15 @@ Game::Game(Gview * gview)
 {
     world = new World();
     tiles = world->createWorld(":/maze1.png");
+    makeModel();
     gview->show();
     //generateWorld();
-////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
-    //Gview gview;
-    //gview.show();
+    ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     protagonist = world->getProtagonist();
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
-
-
-    for(int i = 0; i < world->getCols()* 100; i ++){
-        if(i % 100 == 0){
-            protagonist->setPos(100, i/100);
-        }
-
-    }
-    cout << protagonist->getXPos() << endl;
-
-
+    QTimer * timer = new QTimer(gview);
+    QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
+    timer->start(20);
 }
 
 void Game::generateWorld(){
@@ -43,8 +34,40 @@ void Game::generateWorld(){
         unique_ptr<Enemy> e = unique_ptr<Enemy>(new Enemy(tile->getXPos(),tile->getYPos(),defaultStrength));
         enemies.push_back(move(e));
     }
-
 }
+
+void Game::makeModel(){
+
+    Model * m = new Model();
+    map = m->makeMap(tiles, world->getRows(), world->getCols());
+    cout << "success " << map.size() << endl;
+    path = m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
+    //    int count = 0;
+    //    QBrush brush(Qt::SolidPattern);
+    //    QPen pen(Qt::NoPen);
+    //    brush.setColor(QColor(255,0,0));
+    //    pen.setColor(QColor(255,0,0));
+    //    for(auto & tile: path){
+    //        //shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->t->getXPos()*displaySize,tile->t->getYPos()*displaySize, displaySize,displaySize,nullptr);
+    //        //rects.push_back(rect);
+    //        scene->addRect(tile->t->getXPos()*displaySize, tile->t->getYPos()*displaySize, displaySize, displaySize,pen,brush);
+    //        //cout << tile->t->getXPos()*displaySize << " " << tile->t->getYPos()*displaySize << endl;
+    //        count++;
+    //    }
+    //    cout << count<< endl;
+}
+int i = 0;
+void Game::step(){
+    if(!path.empty()){
+        tile_t * nextTile = path.back();
+
+        protagonist->setPos(nextTile->t->getXPos(),nextTile->t->getYPos());
+        path.pop_back();
+    }
+}
+
+
+
 
 
 

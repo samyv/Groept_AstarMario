@@ -39,11 +39,11 @@ Gview::Gview(QWidget *parent) :
 
 vector<std::unique_ptr<Tile>> Gview::createWorld(){
     world = new World();
-    return world->createWorld(":/worldmap4.png");
+    return world->createWorld(":/maze1.png");
 }
 
 void Gview::drawBackground(){
-    QImage image = QImage(":/worldmap4.png");
+    QImage image = QImage(":/maze1.png");
     image = image.scaled(int(image.width() * displaySize), int(image.height() * displaySize), Qt::KeepAspectRatio);
     QPixmap pix = QPixmap::fromImage(image);
     scene->addPixmap(pix);
@@ -64,28 +64,8 @@ void Gview::drawMarioInit(){
     //    qreal alto = game::protagonist->getYPos()+50;
     //mariopix->setPos(300,500);
     //mariopix->setFlag(QGraphicsItem::ItemIsMovable);
+    mariopix->setOffset(-18,-36);
     scene->addItem(mariopix);
-}
-void Gview::makeModel(){
-    vector<shared_ptr<tile_t>> map;
-
-    Model * m = new Model();
-    map = m->makeMap(tiles, world->getRows(), world->getCols());
-    cout << "success " << map.size() << endl;
-    vector<tile_t *> path = m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
-    int count = 0;
-    QBrush brush(Qt::SolidPattern);
-    QPen pen(Qt::NoPen);
-    brush.setColor(QColor(255,0,0));
-    pen.setColor(QColor(255,0,0));
-    for(auto & tile: path){
-        //shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->t->getXPos()*displaySize,tile->t->getYPos()*displaySize, displaySize,displaySize,nullptr);
-        //rects.push_back(rect);
-        scene->addRect(tile->t->getXPos()*displaySize, tile->t->getYPos()*displaySize, displaySize, displaySize,pen,brush);
-        //cout << tile->t->getXPos()*displaySize << " " << tile->t->getYPos()*displaySize << endl;
-        count++;
-    }
-    cout << count<< endl;
 }
 
 void Gview::drawWorld(){
@@ -122,12 +102,18 @@ void Gview::setupScene(){
 }
 
 void Gview::updateProtagonist(int x, int y){
-    cout << x << " " << y << endl;
-    //mariopix->setScale(50);
-    mariopix->setPos(x,y);
+    mariopix->setPos(x*displaySize,y*displaySize);
+    int scale = x - prevX;
+    if(scale != 0){
+        mariopix->setTransform(QTransform::fromScale(scale,1));
+    }
 
-
-
+    prevX = x;
+    QBrush brush(Qt::SolidPattern);
+           QPen pen(Qt::NoPen);
+           brush.setColor(QColor(255,0,0));
+           pen.setColor(QColor(255,0,0));
+           scene->addRect(x*displaySize, y*displaySize, displaySize, displaySize,pen,brush);
 
     //    cout << protagonist->getXPos() << endl;
     //auto x = getProtagonist();
@@ -148,7 +134,5 @@ void Gview::step(){
 
 void Gview::on_pushButton_clicked()
 {
-    QTimer * timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(step()));
-    timer->start(10);
+
 }

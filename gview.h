@@ -41,6 +41,7 @@ public:
     void makeModel();
     void drawBackground();
     void drawMarioInit();
+    int prevX = 0;
 
 public slots:
      void updateProtagonist(int x, int y);

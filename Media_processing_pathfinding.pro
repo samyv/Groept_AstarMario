@@ -21,6 +21,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+QMAKE_CXXFLAGS += -O3 -mpreferred-stack-boundary=2 -finline-small-functions -momit-leaf-frame-pointer -ffast-math
+
 
 CONFIG += c++14
 
@@ -52,11 +54,7 @@ DEPENDPATH += $$PWD/.
 RESOURCES += \
     image.qrc
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/./ -lworld
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/./ -lworld
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/. -lworld
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/. -lworld
 else:unix: LIBS += -L$$PWD/./ -lworld
 
-INCLUDEPATH += $$PWD/.
-DEPENDPATH += $$PWD/.
-
-DISTFILES +=

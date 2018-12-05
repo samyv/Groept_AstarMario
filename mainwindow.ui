@@ -34,19 +34,19 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QScrollBar" name="verticalScrollBar">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QGraphicsView" name="graphicsView">
       <property name="mouseTracking">
        <bool>true</bool>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Start</string>
       </property>
      </widget>
     </item>
@@ -58,7 +58,7 @@
      <x>0</x>
      <y>0</y>
      <width>993</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>

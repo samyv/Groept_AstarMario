@@ -10,6 +10,7 @@ Game::Game(Gview * gview)
 {
     world = new World();
     tiles = world->createWorld(":/maze1.png");
+    gview->show();
     //generateWorld();
 ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     //Gview gview;
@@ -17,6 +18,13 @@ Game::Game(Gview * gview)
     protagonist = world->getProtagonist();
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
 
+
+    for(int i = 0; i < world->getCols()* 100; i ++){
+        if(i % 100 == 0){
+            protagonist->setPos(100, i/100);
+        }
+
+    }
     cout << protagonist->getXPos() << endl;
 
 

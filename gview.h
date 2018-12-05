@@ -31,6 +31,7 @@ public:
     explicit Gview(QWidget *parent=nullptr);
     ~Gview();
     void setupScene();
+    int i = 0;
     vector<std::unique_ptr<Tile>> tiles;
     vector<std::unique_ptr<Tile>> createWorld();
     void drawWorld();
@@ -40,9 +41,13 @@ public:
     void makeModel();
     void drawBackground();
     void drawMarioInit();
+
 public slots:
      void updateProtagonist(int x, int y);
-     void updateview();
+private slots:
+     void on_pushButton_clicked();
+     void step();
+
 private:
     Ui::Gview *ui;
     QGraphicsPixmapItem * mariopix;

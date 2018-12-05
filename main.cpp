@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 
   Gview gview;
   Game game(&gview);
-  gview.show();
   cout << "here" << endl;
 
 

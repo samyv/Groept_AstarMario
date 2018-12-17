@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/s">
+        <file>backgroundmusic.mp3</file>
+    </qresource>
+</RCC>

@@ -19,11 +19,10 @@ Gview::Gview(QWidget *parent) :
 
     //QObject::connect(this)
 
+    QObject::connect(this,SIGNAL(updateHealthbar(float)), this,SLOT(changeHealthbar(float)));
+
     //setup the scene for grahpicalview
     setupScene();
-
-    //create the world and returns all the tiles
-    tiles = createWorld();
 
     //create a Qimage for the background
     drawBackground();
@@ -37,13 +36,13 @@ Gview::Gview(QWidget *parent) :
     //    makeModel();
 }
 
-vector<std::unique_ptr<Tile>> Gview::createWorld(){
-    world = new World();
-    return world->createWorld(":/maze1.png");
+Gview::~Gview()
+{
+    delete ui;
 }
 
 void Gview::drawBackground(){
-    QImage image = QImage(":/maze1.png");
+    QImage image = QImage(":/worldmap4.png");
     image = image.scaled(int(image.width() * displaySize), int(image.height() * displaySize), Qt::KeepAspectRatio);
     QPixmap pix = QPixmap::fromImage(image);
     scene->addPixmap(pix);
@@ -55,8 +54,6 @@ void Gview::drawMarioInit(){
     QPixmap protapix = QPixmap::fromImage(mario);
     mariopix = new QGraphicsPixmapItem(protapix);
     //    QPainter *paint = new QPainter(protapix)
-    QTransform transform;
-    transform.translate(20,0);
     //QPixmap * newMario = new QPixmap(protapix.transformed(transform));
     //scene->addPixmap(*newMario);
 
@@ -64,7 +61,7 @@ void Gview::drawMarioInit(){
     //    qreal alto = game::protagonist->getYPos()+50;
     //mariopix->setPos(300,500);
     //mariopix->setFlag(QGraphicsItem::ItemIsMovable);
-    mariopix->setOffset(-18,-36);
+    mariopix->setOffset(-mario.width()/2,-mario.height());
     scene->addItem(mariopix);
 }
 
@@ -99,6 +96,7 @@ void Gview::setupScene(){
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+    ui->healthbar->setValue(100);
 }
 
 void Gview::updateProtagonist(int x, int y){
@@ -110,21 +108,41 @@ void Gview::updateProtagonist(int x, int y){
 
     prevX = x;
     QBrush brush(Qt::SolidPattern);
-           QPen pen(Qt::NoPen);
-           brush.setColor(QColor(255,0,0));
-           pen.setColor(QColor(255,0,0));
-           scene->addRect(x*displaySize, y*displaySize, displaySize, displaySize,pen,brush);
-
-    //    cout << protagonist->getXPos() << endl;
-    //auto x = getProtagonist();
-    //cout << x->getXPos() << ", " << x->getYPos() << ", " << x->getHealth() << endl;
-    // cout << x->getXPos() << endl;
-
+    QPen pen(Qt::SolidLine);
+    pen.setWidth(3);
+    brush.setColor(QColor(255,0,0));
+    pen.setColor(QColor(255,0,0));
+    scene->addRect(x*displaySize, y*displaySize, displaySize, displaySize,pen,brush);
+    mariopix->setZValue(1);
+    ui->graphicsView->centerOn(x*displaySize,y*displaySize);
 }
 
-Gview::~Gview()
-{
-    delete ui;
+void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks){
+    QImage goomba = QImage(":/goombaretro.png");
+    goomba = goomba.scaled(int(displaySize*24),int(displaySize*24));
+    QPixmap goombapix = QPixmap::fromImage(goomba);
+    for(unsigned int i = 0; i < enemies.size();i++){
+        QGraphicsPixmapItem * enemypix = new QGraphicsPixmapItem(goombapix);
+        enemiesPixs.push_back(enemypix);
+        Enemy * enemy = enemies.at(i).get();
+        enemypix->setPos(enemy->getXPos()*displaySize,enemy->getYPos()*displaySize);
+        enemypix->setOffset(-goomba.width()/2,-goomba.height()/2);
+        scene->addItem(enemypix);
+    }
+
+    QImage mushroom = QImage(":/mushroom.png");
+    mushroom = mushroom.scaled(int(displaySize*24),int(displaySize*24));
+    QPixmap mushroompix = QPixmap::fromImage(mushroom);
+    for(unsigned int i = 0; i < healthpacks.size();i++){
+        QGraphicsPixmapItem * healthpackpix = new QGraphicsPixmapItem(mushroompix);
+        hpPixs.push_back(healthpackpix);
+        Tile * hp = healthpacks.at(i).get();
+        healthpackpix->setPos(hp->getXPos()*displaySize,hp->getYPos()*displaySize);
+        healthpackpix->setOffset(-mushroom.width()/2,-mushroom.height()/2);
+        scene->addItem(healthpackpix);
+    }
+
+
 }
 
 void Gview::step(){
@@ -134,5 +152,51 @@ void Gview::step(){
 
 void Gview::on_pushButton_clicked()
 {
+    emit buttonClicked(QLatin1String("/home/samy/Qt_Projects/Media_processing_pathfinding/smw_kick.wav"));
+}
+
+void Gview::on_startButton_clicked()
+{
+    emit gameStart();
+}
+
+void Gview::explodeEnemy(float health,Enemy * enemy){
+    emit updateHealthbar(health - enemy->getValue());
+    QImage goomba = QImage(":/goombaretro.png");
+    goomba = goomba.scaled(int(displaySize*24),int(displaySize*12));
+    QPixmap goombapix = QPixmap::fromImage(goomba);
+    for(int i = 0;i<enemiesPixs.size();i++){
+        QGraphicsPixmapItem * local = enemiesPixs.at(i);
+        if(mariopix->collidesWithItem(local)){
+            local->setOffset(-goomba.width()/2,-goomba.height()/2);
+            QTransform transform;
+            transform.translate(0, goomba.height()/2);
+            local->setTransform(transform);
+            local->setPixmap(goombapix);
+        }
+    }
 
 }
+
+void Gview::triggerHealthpack(float health,Tile * hp){
+    emit updateHealthbar(health);
+    QImage mushroom = QImage(":/mushroom.png");
+    mushroom = mushroom.scaled(int(displaySize*24),int(displaySize*12));
+    QPixmap mushroompix = QPixmap::fromImage(mushroom);
+    for(int i = 0;i<hpPixs.size();i++){
+        QGraphicsPixmapItem * local = hpPixs.at(i);
+        if(mariopix->collidesWithItem(local)){
+            local->setOffset(-mushroom.width()/2,-mushroom.height()/2);
+            QTransform transform;
+            transform.translate(0, mushroom.height()/2);
+            local->setTransform(transform);
+            local->setPixmap(mushroompix);
+        }
+    }
+}
+
+void Gview::changeHealthbar(float health){
+    cout << "health: " << health<< endl;
+    ui->healthbar->setValue(health);
+}
+

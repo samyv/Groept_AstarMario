@@ -36,6 +36,8 @@ vector<tile_t *> Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int 
 
 
 vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & map){
+    vector<tile_t *> path;
+    open = priority_queue<tile_t *, vector<tile_t *>, comp>();
     this->goal = goal;
     int x = start->t->getXPos();
     int y = start->t->getYPos();
@@ -51,8 +53,8 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     open.push(start);
     //open.push_back(start);
     //goal->f = 5;
-    cout << "start value " << val << " at " << x << ", " << y << endl;
-    cout << "goal value " << goal->t->getValue() << " at " << goal->t->getXPos() << ", " << goal->t->getYPos() << endl;
+    //cout << "start value " << val << " at " << x << ", " << y << endl;
+    //cout << "goal value " << goal->t->getValue() << " at " << goal->t->getXPos() << ", " << goal->t->getYPos() << endl;
     //open.push(goal);
     //printqueue(open);
     clock_t st = clock();
@@ -113,11 +115,17 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     if(open.empty()){
         cout << "OPEN EMPTY" << endl;
     }
-    cout << "Time passed: " <<(clock() - st)/(CLOCKS_PER_SEC/1000) << endl;
+    //cout << "Time passed: " <<(clock() - st)/(CLOCKS_PER_SEC/1000) << endl;
     return path;
 }
 
-
+void Model::resetMap(vector<tile_t *> map){
+    for(tile_t * t : map){
+        t->open = false;
+        t->closed = false;
+        t->prev = nullptr;
+    }
+}
 void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
     tile_t * t = *temp;
     for(int i = -1; i < 2; i++){
@@ -132,7 +140,7 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
                 newg = t->g + SQRT;
             }
 
-            if(x + i >= 0  && x + j < cols && y + j >= 0 && y + j < rows && ((i != 0) || (j != 0))){
+            if(x + i >= 0  && x + i < cols && y + j >= 0 && y + j < rows && ((i != 0) || (j != 0))){
 
                 int get = x + y*cols;
 

@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 #include <world_global.h>
+#include <QMediaPlayer>
 #include <world.h>
 #include "gview.h"
 
@@ -13,19 +14,39 @@ public:
     World * world;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
-//    vector<unique_ptr<Tile>> healthpacks;
+    vector<Enemy *> enemiesInOrder;
+    vector<Tile *> healtpacksInOrder;
+    vector<Enemy *> enemiesToDefeat;
+    vector<unique_ptr<Tile>> healthpacks;
+    vector<Tile *> healthpacksOver;
+    QMediaPlayer * background;
+    QMediaPlayer * player;
+    int enemiesDefeated = 0;
     Protagonist * getProtagonist();
     vector<unique_ptr<Tile>> greyTiles;
     unique_ptr<Protagonist> protagonist;
     void generateWorld();
     vector<tile_t *> path;
-    int enemiesCount = 5;
-    int healthpackCount = 3;
+    unsigned int enemiesCount = 8;
+    unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
     void makeModel();
+    Model * m;
     vector<tile_t *> map;
+    Tile * start;
+    bool enoughHealth(float curr_health,float strength);
+    unsigned int findClosestEnemy(int start_x,int start_y);
+    unsigned int findClosestHealtpack(int start_x,int start_y);
+    void copyEnemies();
+    double calculateDistance(int x, int y,Tile *);
+signals:
+    void enemyDefeated(float health,Enemy *);
+    void healthpackGained(float health,Tile *);
+    void sendSound(QString);
 public slots:
     void step();
+    void playSound(QString file);
+    void startGame();
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);
 

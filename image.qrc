@@ -5,5 +5,7 @@
         <file>maze2.png</file>
         <file>worldmap4.png</file>
         <file>mario.png</file>
+        <file>goombaretro.png</file>
+        <file>mushroom.png</file>
     </qresource>
 </RCC>

@@ -46,10 +46,10 @@ public:
     ~Model();
     vector<tile_t *> makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols);
     vector<tile_t *> aStar(tile_t * start, tile_t * goal,  vector<tile_t *> & map);
+    void resetMap(vector<tile_t *> map);
 private:
     priority_queue<tile_t *, vector<tile_t *>, comp> open;
     //vector<tile_t *> open;
-    vector<tile_t *> path;
     void printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list);
     //void printqueue(vector<tile_t *> list);
     double heuristic(tile_t * a, tile_t * b);
@@ -57,6 +57,7 @@ private:
     int cols;
     int rows;
     tile_t * goal;
+
     //static bool comp(const tile_t * a, const tile_t * b);
 };
 

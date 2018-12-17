@@ -38,15 +38,35 @@
       <property name="mouseTracking">
        <bool>true</bool>
       </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QProgressBar" name="healthbar">
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="startButton">
       <property name="text">
        <string>Start</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>playSound</string>
       </property>
      </widget>
     </item>
@@ -58,7 +78,7 @@
      <x>0</x>
      <y>0</y>
      <width>993</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

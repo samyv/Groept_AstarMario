@@ -13,6 +13,7 @@ public:
     World * world;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
+    vector<unique_ptr<Tile>> healthPacks;
 //    vector<unique_ptr<Tile>> healthpacks;
     Protagonist * getProtagonist();
     vector<unique_ptr<Tile>> greyTiles;

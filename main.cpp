@@ -1,3 +1,4 @@
+#include "game.h"
 #include "ui_mainwindow.h"
 #include "gview.h"
 #include "game.h"
@@ -12,8 +13,6 @@ int main(int argc, char *argv[])
   Gview gview;
   Game game(&gview);
   cout << "here" << endl;
-
-
 
   return a.exec();
   }

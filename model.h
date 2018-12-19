@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <math.h>
 #include "world.h"
 #include "world_global.h"
 

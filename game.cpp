@@ -77,7 +77,6 @@ vector<int> Game::dotheSalesman(){
         }
         cout << order[enemiesCount] << endl;
         for(int i = 0; i<enemiesToDefeat.size();i++){
-            cout << order[i] << ", " << order[i+1] << endl;
             d += distanceBetweenEnemies[order[i]][order[i+1]];
         }
         if(d<bestD){

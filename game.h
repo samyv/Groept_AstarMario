@@ -15,6 +15,8 @@ public:
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
     vector<Enemy *> enemiesInOrder;
+    vector<int> enemiesInOrderIndexes;
+    vector<int> dotheSalesman();
     vector<Tile *> healtpacksInOrder;
     vector<Enemy *> enemiesToDefeat;
     vector<unique_ptr<Tile>> healthpacks;
@@ -27,7 +29,9 @@ public:
     unique_ptr<Protagonist> protagonist;
     void generateWorld();
     vector<tile_t *> path;
-    unsigned int enemiesCount = 8;
+    vector<vector<double>> distanceBetweenEnemies;
+    vector<vector<double>> calculateDistances();
+    int enemiesCount = 8;
     unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
     void makeModel();

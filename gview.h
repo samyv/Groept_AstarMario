@@ -55,7 +55,7 @@ public slots:
      void triggerHealthpack(float health,Tile * hp);
 private slots:
      void on_pushButton_clicked();
-     void step();
+     //void step();
      void changeHealthbar(float);
 
      void on_startButton_clicked();

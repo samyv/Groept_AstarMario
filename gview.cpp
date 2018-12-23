@@ -145,10 +145,10 @@ void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Ti
 
 }
 
-void Gview::step(){
+/*void Gview::step(){
     scene->update();
     this->update();
-}
+}*/
 
 void Gview::on_pushButton_clicked()
 {

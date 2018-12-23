@@ -1,5 +1,9 @@
 <RCC>
-    <qresource prefix="/s">
+    <qresource prefix="/sound">
         <file>backgroundmusic.mp3</file>
+        <file>game_over.wav</file>
+        <file>smw_1-up.wav</file>
+        <file>smw_castle_clear.wav</file>
+        <file>smw_kick.wav</file>
     </qresource>
 </RCC>

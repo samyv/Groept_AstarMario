@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
+#include <QSound>
 
 using namespace std;
 Game::Game(Gview * gview)
@@ -15,7 +16,7 @@ Game::Game(Gview * gview)
     gview->show();
     //generateWorld();
     background = new QMediaPlayer();
-    background->setMedia(QUrl::fromLocalFile("/home/samy/Qt_Projects/Media_processing_pathfinding/backgroundmusic.mp3"));
+    background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
     background->setVolume(50);
     background->play();
     player = new QMediaPlayer();
@@ -27,19 +28,20 @@ Game::Game(Gview * gview)
     copyEnemies();
     cout << "healthpacks size: " << healthpacks.size() << endl;
     gview->initDisplay(enemies,healthpacks);
-    QTimer * timer = new QTimer(gview);
+    timer = new QTimer(gview);
     QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
     QObject::connect(this,SIGNAL(enemyDefeated(float,Enemy *)), gview,SLOT(explodeEnemy(float,Enemy *)));
     QObject::connect(this,SIGNAL(healthpackGained(float,Tile *)), gview,SLOT(triggerHealthpack(float,Tile *)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(gview,SIGNAL(gameStart()), this,SLOT(startGame()));
-    timer->start(4);
+
     distanceBetweenEnemies = calculateDistances();
     //    enemiesInOrderIndexes = dotheSalesman();
     vector<int> orderEnemies = dotheSalesmanG();
-    for(int i = 0; i<orderEnemies.size();i++){
-        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[orderEnemies[i]][orderEnemies[i+1]];
+    //vector<tile_t *> path;
+    for(int i = 0; i < enemiesCount;i++){
+        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(orderEnemies[uint(i)])][uint(orderEnemies[uint(i+1)])];
         path.insert(path.begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
     }
 }
@@ -207,7 +209,7 @@ vector<int> Game::dotheSalesmanG(){
             }
             fitness[i] = 1/(d+1);
         }
-
+        cout << "distance done" << endl;
         //NORMALIZE FITNESS
         // cout << "NORMALIZE FITNESS" << endl;
         double sum = 0;
@@ -217,9 +219,9 @@ vector<int> Game::dotheSalesmanG(){
         for(unsigned long i = 0; i< fitness.size();i++){
             fitness[i] = fitness[i] / sum;
         }
-
+        cout << "fitness normalized" << endl;
         //MAKE NEXT GENERATION!
-        //cout << "MAKE NEXT GENERATION" << endl;
+        cout << "MAKE NEXT GENERATION" << endl;
         vector<vector<int>> newPopulation(populationSize,vector<int>(enemiesCount+1,0));
         for(unsigned long i = 0; i < populationSize;i++){
             //POOLING ALGORITHM TO PICK TWO ACCORDING TO FITNESS LEVEL
@@ -294,20 +296,20 @@ void Game::step(){
         if((protagonist->getXPos() == enemiesInOrder.front()->getXPos()) && (protagonist->getYPos() == enemiesInOrder.front()->getYPos())){
             cout << "ENEMY COLLISION xpos:" << protagonist->getXPos() << endl;
             cout << "health before set : " << protagonist->getHealth() << endl;
-            // protagonist->setHealth(protagonist->getHealth()-enemiesInOrder.front()->getValue());
+            protagonist->setHealth(protagonist->getHealth()-enemiesInOrder.front()->getValue());
             cout << "health after emit : " << protagonist->getHealth() << endl;
             emit enemyDefeated(protagonist->getHealth(),enemiesInOrder.front());
             cout << "health prota: " << protagonist->getHealth() << endl;
-            emit sendSound("/home/samy/Qt_Projects/Media_processing_pathfinding/smw_kick.wav");
+            emit sendSound("qrc:/sound/smw_kick.wav");
             enemiesInOrder.erase(enemiesInOrder.begin());
-        }        //CHECK IF COLLISION WITH MUSHROOM
+        }      //CHECK IF COLLISION WITH MUSHROOM
         else if((protagonist->getXPos() == healtpacksInOrder.front()->getXPos()) && (protagonist->getYPos() == healtpacksInOrder.front()->getYPos())){
             cout << "HP COLLISION" << endl;
             protagonist->setHealth(100);
             emit healthpackGained(protagonist->getHealth(),healtpacksInOrder.front());
             //protagonist->setHealth(protagonist->getHealth()+healtpacksInOrder.front()->getValue());
             //cout << "health prota: " << protagonist->getHealth() << endl;
-            emit sendSound("/home/samy/Qt_Projects/Media_processing_pathfinding/smw_1-up.wav");
+            emit sendSound("qrc:/sound/smw_1-up.wav");
             if(healtpacksInOrder.size()>0){
                 healtpacksInOrder.erase(healtpacksInOrder.begin());
             }
@@ -315,23 +317,24 @@ void Game::step(){
         //CHECK IF GAME STATE HAS CHANGED
         if(enemiesToDefeat.empty() && enemiesInOrder.empty()){
             background->stop();
-            emit sendSound("/home/samy/Qt_Projects/Media_processing_pathfinding/smw_castle_clear.wav");
+            emit sendSound("qrc:/sound/smw_castle_clear.wav");
         } else if(enemiesInOrder.empty() && !enemiesToDefeat.empty()) {
             background->stop();
-            emit sendSound("/home/samy/Qt_Projects/Media_processing_pathfinding/game_over.wav");
+            emit sendSound("qrc:/sound/game_over.wav");
         }
-        
+
         path.pop_back();
     }
 }
 
 void Game::playSound(QString file){
-    player->setMedia(QUrl::fromLocalFile(file));
+    player->setMedia(QUrl(file));
     player->setVolume(100);
     player->play();
 }
 
 void Game::startGame(){
+    timer->start(4);
     Enemy * closest;
     int x = protagonist->getXPos();
     int y = protagonist->getYPos();

@@ -46,6 +46,7 @@ public:
     unsigned int findClosestHealtpack(int start_x,int start_y);
     void copyEnemies();
     vector<tile_t *>  calculateDistance(int x, int y,Tile *);
+    QTimer * timer;
 signals:
     void enemyDefeated(float health,Enemy *);
     void healthpackGained(float health,Tile *);

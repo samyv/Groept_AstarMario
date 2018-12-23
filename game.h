@@ -17,6 +17,7 @@ public:
     vector<Enemy *> enemiesInOrder;
     vector<int> enemiesInOrderIndexes;
     vector<int> dotheSalesman();
+    vector<int> dotheSalesmanG();
     vector<Tile *> healtpacksInOrder;
     vector<Enemy *> enemiesToDefeat;
     vector<unique_ptr<Tile>> healthpacks;
@@ -29,12 +30,14 @@ public:
     unique_ptr<Protagonist> protagonist;
     void generateWorld();
     vector<tile_t *> path;
-    vector<vector<double>> distanceBetweenEnemies;
-    vector<vector<double>> calculateDistances();
-    int enemiesCount = 8;
+    vector<vector<vector<tile_t *>>> distanceBetweenEnemies;
+    vector<vector<vector<tile_t *>>> calculateDistances();
+    unsigned long enemiesCount = 8;
     unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
+    int generationsAmount = 100;
     void makeModel();
+    void printElement(vector<int> e);
     Model * m;
     vector<tile_t *> map;
     Tile * start;
@@ -42,7 +45,7 @@ public:
     unsigned int findClosestEnemy(int start_x,int start_y);
     unsigned int findClosestHealtpack(int start_x,int start_y);
     void copyEnemies();
-    double calculateDistance(int x, int y,Tile *);
+    vector<tile_t *>  calculateDistance(int x, int y,Tile *);
 signals:
     void enemyDefeated(float health,Enemy *);
     void healthpackGained(float health,Tile *);

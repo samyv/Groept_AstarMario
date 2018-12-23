@@ -96,7 +96,7 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
 
             }
 
-            cout << "GOT TO GOAL IN " << path.size() << " STEPS" << endl;
+            //cout << "GOT TO GOAL IN " << path.size() << " STEPS" << endl;
             break;
         }
 

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
+<<<<<<< HEAD
 <!-- Written by QtCreator 4.7.1, 2018-12-24T12:14:08. -->
+=======
+<!-- Written by QtCreator 4.7.1, 2018-12-24T17:44:18. -->
+>>>>>>> diverge
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>

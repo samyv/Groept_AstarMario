@@ -1,15 +1,10 @@
 #include "model.h"
 #include <time.h>
 #include <queue>
-Model::Model()
-{
+
+Model::Model(){
 
 }
-
-Model::~Model(){
-
-}
-
 
 
 vector<tile_t *> Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols){
@@ -39,10 +34,6 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     vector<tile_t *> path;
     open = priority_queue<tile_t *, vector<tile_t *>, comp>();
     this->goal = goal;
-    int x = start->t->getXPos();
-    int y = start->t->getYPos();
-    float val = start->t->getValue();
-
     /*if(val >= 1.0f){
         return WALL;
     }*/
@@ -148,13 +139,16 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
 
                 tile_t * tile = map.at(uint(get));
 
+                double energy = double(abs(t->t->getValue() - tile->t->getValue()));
+                newg += (energy * energyweight);
+
                 //cout << " "<< tile->t->getXPos() << ", " << tile->t->getYPos() << endl;
 
                 //check if in closedset, openset, if not add it to openset and update scores
                 if(!tile->closed){
                     bool newpath = false;
                     if(!tile->open){
-                        if(tile->t->getValue() == 0.0f || tile->t->getValue() == float(INFINITY)){
+                        if(tile->t->getValue() == 0.0f || tile->t->getValue() == float(Q_INFINITY)){
                             tile->closed = true;
                             continue;
                         } else {
@@ -176,7 +170,7 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
 
                         tile->h = heuristic(tile, goal);
                         tile->open = true;
-                        tile->f = newg + tile->h;
+                        tile->f = stepweight * newg + tile->h * distanceweight;
                         open.push(tile);
                         }
 
@@ -200,7 +194,7 @@ double Model::heuristic(tile_t * a, tile_t * b){
         dist = ((dx-dy) + (SQRT * dy));
     }
 
-    return dist/1.01;
+    return dist;
 }
 
 void Model::printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list){
@@ -231,3 +225,14 @@ void Model::printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list){
 bool Model::comp(const tile_t * a, const tile_t * b){
     return a->f > b->f;
 }*/
+
+void Model::weightchanged(int i, double val){
+    cout << i << ", " << val << endl;
+    if(i == 1){
+        distanceweight = val;
+    } else if(i == 2){
+        stepweight = val;
+    } else if (i == 3){
+        energyweight = val;
+    }
+}

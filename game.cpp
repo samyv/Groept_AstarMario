@@ -10,11 +10,15 @@
 using namespace std;
 Game::Game(Gview * gview)
 {
+    cout <<"load world" <<endl;
     world = new World();
+    cout << "pre foto laden " << endl;
     tiles = world->createWorld(":/worldmap4.png");
+    cout << "laadt foto ni"<<endl;
     makeModel();
     gview->show();
     background = new QMediaPlayer();
+    cout << RAND_MAX << endl;
     background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
     background->setVolume(50);
     background->play();
@@ -33,6 +37,7 @@ Game::Game(Gview * gview)
     QObject::connect(this,SIGNAL(healthpackGained(float,Tile *)), gview,SLOT(triggerHealthpack(float,Tile *)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(gview,SIGNAL(gameStart()), this,SLOT(startGame()));
+    connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
     QObject::connect(this,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), this,SLOT(dotheSalesmanG()));
 
@@ -136,7 +141,13 @@ void Game::dotheSalesmanG(){
             vector<vector<int>> picks(2,vector<int>(enemiesCount+1,0));
             for(int c = 0; c<2;c++){
                 unsigned long index = 0;
-                double r = ((double) rand() / (RAND_MAX)); //GENERATES RANDOM NUMBER BETWEEN 0 AND 1
+                int get = 0;
+                if(get >= RAND_MAX){
+                    get = RAND_MAX - 1;
+                } else if(get <= 0){
+                    get = 1;
+                }
+                double r = (double(get) / (RAND_MAX)); //GENERATES RANDOM NUMBER BETWEEN 0 AND 1
                 while(r>0){
                     r = r - fitness[index];
                     index++;
@@ -366,6 +377,106 @@ vector<tile_t *> Game::calculateDistance(Tile * start,Tile * goal){
     return local_path;
 }
 
+/*vector<int> Game::dotheSalesman(){
+    vector<int> order(enemiesCount + 1, 0);
+    vector<int> bestOrder(enemiesCount + 1, 0);
+    double bestD = INFINITY;
+    bool flag = false;
+    for(int i = 0; i< int(enemiesToDefeat.size() + 1);i++){
+        order.at(i) = i;
+    }
+    while(1){
+        double d = 0;
+        //print to check
+        //        for(int i = 0; i < enemiesCount; i++){
+        //            cout << order[i] << "-->";
+        //        }
+        //        cout << order[enemiesCount] << endl;
+        for(int i = 0; i<enemiesToDefeat.size();i++){
+            //d += distanceBetweenEnemies[order[i]][order[i+1]];
+        }
+        if(d<bestD){
+            bestOrder = order;
+            bestD = d;
+        }
+        //        cout << "sum: " << d << endl;
+        //
+
+
+        int x,y;
+        // 0,5,1,7,6,3,9,8,4,2
+        //FIND THE BIGGEST X SO THAT order[x] < order[x+1]
+        x = -1;
+        for(int i = 1;i<enemiesCount;i++){
+            if(order[i] < order[i + 1]){
+                x = i;
+            }
+        }
+        if(x == -1){
+            cout << "BREAK" << endl;
+            break;
+        }
+
+        for(int i = 1;i<enemiesCount+1;i++){
+            if(order[i] > order[x]){
+                y = i;
+            }
+        }
+
+        //        cout << "x: " << x << endl;
+        //        cout << "y: " << y << endl;
+
+        int swap = order[x];
+        order[x] = order[y];
+        order[y] = swap;
+        //        for(int i = 0; i < enemiesCount; i++){
+        //            cout << order[i] << "-->";
+        //        }
+        //        cout << order[8] << endl;
+        //reverse
+        int reversed[enemiesCount + 1];
+
+        //dont reverse everything before x exept after nukken
+        for(int i = 0; i <= x; i++){
+            reversed[i] = order[i];
+        }
+
+        for(int i = x + 1, j = enemiesCount; i < enemiesCount+1; i++, j--){
+            reversed[j] = order[i];
+        }
+
+        //copy reversed to order
+        for(int i = 0; i < enemiesCount +1; i++){
+            order[i] = reversed[i];
+        }
+    }
+
+    cout << "BEST ORDER: " ;
+    for(int i = 0; i < enemiesCount; i++){
+        cout << bestOrder[i] << "-->";
+    }
+    cout << order[8] << endl;
+    cout << "BEST D:" << bestD << endl;
+
+    return bestOrder;
+}
+void Game::printElement(vector<int> e){
+    for(int i = 0; i < e.size()-1; i++){
+        cout << e[i] << "-->";
+    }
+    cout << e[e.size()-1] << endl;
+}*/
+
+
+Game::~Game(){
+    for(tile_t * t: map){
+        delete t;
+    }
+    delete background;
+    delete player;
+}
+
+
 vector<int> Game::dotheSalesman(){
     vector<int> order(enemiesCount + 1, 0);
     vector<int> bestOrder(enemiesCount + 1, 0);
@@ -455,8 +566,6 @@ void Game::printElement(vector<int> e){
     }
     cout << e[e.size()-1] << endl;
 }
-
-
 
 
 

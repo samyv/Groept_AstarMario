@@ -11,6 +11,7 @@ class Game: public QObject
     Q_OBJECT
 public:
     explicit Game(Gview * gview);
+    ~Game();
     World * world;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;

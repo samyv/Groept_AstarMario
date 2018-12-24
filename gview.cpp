@@ -53,6 +53,8 @@ void Gview::drawMarioInit(){
     QImage mario = QImage(":/mario.png");
     mario = mario.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap protapix = QPixmap::fromImage(mario);
+    mariopix = new QGraphicsPixmapItem(protapix);
+    mariopix->setOffset(-mario.width()/2,-mario.height());
     mariopix->setOffset(-mario.width()/2,-mario.height());
     scene->addItem(mariopix);
 }
@@ -137,11 +139,20 @@ void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Ti
 
 }
 
-/*void Gview::step(){
-    scene->update();
-    this->update();
-}*/
 
+void Gview::on_startGame_clicked()
+{
+    double val = ui->distanceweightval->text().toDouble();
+    emit changeweight(1, val);
+    cout << val <<endl;
+    val = ui->stepweightval->text().toDouble();
+    emit changeweight(2, val);
+    cout << val <<endl;
+    val = ui->energyweightval->text().toDouble();
+    emit changeweight(3, val);
+    cout << val <<endl;
+    emit gameStart();
+}
 
 void Gview::explodeEnemy(float health,Enemy * enemy){
     emit updateHealthbar(health - enemy->getValue());
@@ -201,9 +212,4 @@ void Gview::changeHealthbar(float health){
 void Gview::on_startGenetic_clicked()
 {
     emit geneticTrigger();
-}
-
-void Gview::on_startGame_clicked()
-{
-    emit gameStart();
 }

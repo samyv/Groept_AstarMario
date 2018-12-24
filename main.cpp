@@ -6,13 +6,11 @@
 #include <iostream>
 
 int main(int argc, char *argv[])
-  {
-  QApplication a(argc, argv);
+{
+    QApplication a(argc, argv);
 
-  Gview gview;
-  Game game(&gview);
+    Gview gview;
+    Game game(&gview);
 
-
-
-  return a.exec();
-  }
+    return a.exec();
+}

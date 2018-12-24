@@ -50,6 +50,7 @@ signals:
     void buttonClicked(QString);
     void gameStart();
     void updateHealthbar(float);
+    void changeweight(int, double);
     void geneticTrigger();
 public slots:
      void updateProtagonist(int x, int y);

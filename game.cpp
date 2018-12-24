@@ -10,12 +10,14 @@
 using namespace std;
 Game::Game(Gview * gview)
 {
+
     world = new World();
     tiles = world->createWorld(":/worldmap4.png");
     makeModel();
     gview->show();
     //generateWorld();
     background = new QMediaPlayer();
+    cout << RAND_MAX << endl;
     background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
     background->setVolume(50);
     background->play();
@@ -229,7 +231,13 @@ vector<int> Game::dotheSalesmanG(){
             vector<vector<int>> picks(2,vector<int>(enemiesCount+1,0));
             for(int c = 0; c<2;c++){
                 unsigned long index = 0;
-                double r = ((double) rand() / (RAND_MAX)); //GENERATES RANDOM NUMBER BETWEEN 0 AND 1
+                int get = 0;
+                if(get >= RAND_MAX){
+                    get = RAND_MAX - 1;
+                } else if(get <= 0){
+                    get = 1;
+                }
+                double r = (double(get) / (RAND_MAX)); //GENERATES RANDOM NUMBER BETWEEN 0 AND 1
                 while(r>0){
                     r = r - fitness[index];
                     index++;
@@ -480,7 +488,8 @@ Game::~Game(){
     for(tile_t * t: map){
         delete t;
     }
-
+    delete background;
+    delete player;
 }
 
 

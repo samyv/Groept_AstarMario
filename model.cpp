@@ -140,7 +140,7 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
                 tile_t * tile = map.at(uint(get));
 
                 double energy = double(abs(t->t->getValue() - tile->t->getValue()));
-                newg += energy * energyweight;
+                newg += (energy * energyweight);
 
                 //cout << " "<< tile->t->getXPos() << ", " << tile->t->getYPos() << endl;
 
@@ -227,6 +227,7 @@ bool Model::comp(const tile_t * a, const tile_t * b){
 }*/
 
 void Model::weightchanged(int i, double val){
+    cout << i << ", " << val << endl;
     if(i == 1){
         distanceweight = val;
     } else if(i == 2){

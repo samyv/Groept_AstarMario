@@ -161,6 +161,15 @@ void Gview::on_pushButton_clicked()
 
 void Gview::on_startButton_clicked()
 {
+    double val = ui->distanceweightval->text().toDouble();
+    emit changeweight(1, val);
+    cout << val <<endl;
+    val = ui->stepweightval->text().toDouble();
+    emit changeweight(2, val);
+    cout << val <<endl;
+    val = ui->energyweightval->text().toDouble();
+    emit changeweight(3, val);
+    cout << val <<endl;
     emit gameStart();
 }
 
@@ -202,26 +211,4 @@ void Gview::triggerHealthpack(float health,Tile * hp){
 void Gview::changeHealthbar(float health){
     cout << "health: " << health<< endl;
     ui->healthbar->setValue(health);
-}
-
-
-void Gview::on_distanceweightval_editingFinished()
-{
-    double val = ui->distanceweightval->text().toDouble();
-    cout << val << endl;
-    emit changeweight(1,val);
-}
-
-void Gview::on_stepweightval_editingFinished()
-{
-    double val = ui->stepweightval->text().toDouble();
-    cout << val << endl;
-    emit changeweight(2,val);
-}
-
-void Gview::on_energyweightval_editingFinished()
-{
-    double val = ui->energyweightval->text().toDouble();
-    cout << val << endl;
-    emit changeweight(3,val);
 }

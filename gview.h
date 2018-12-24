@@ -61,12 +61,6 @@ private slots:
 
      void on_startButton_clicked();
 
-     void on_distanceweightval_editingFinished();
-
-     void on_stepweightval_editingFinished();
-
-     void on_energyweightval_editingFinished();
-
 private:
     Ui::Gview *ui;
     QGraphicsPixmapItem * mariopix;

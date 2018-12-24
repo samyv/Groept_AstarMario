@@ -12,10 +12,5 @@ int main(int argc, char *argv[])
     Gview gview;
     Game game(&gview);
 
-
-    try {
-        return a.exec();
-    } catch (std::bad_alloc& ba) {
-        cerr << "BAD ALLOC " << ba.what() << endl;
-    }
+    return a.exec();
 }

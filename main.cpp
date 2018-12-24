@@ -6,13 +6,16 @@
 #include <iostream>
 
 int main(int argc, char *argv[])
-  {
-  QApplication a(argc, argv);
+{
+    QApplication a(argc, argv);
 
-  Gview gview;
-  Game game(&gview);
+    Gview gview;
+    Game game(&gview);
 
 
-
-  return a.exec();
-  }
+    try {
+        return a.exec();
+    } catch (std::bad_alloc& ba) {
+        cerr << "BAD ALLOC " << ba.what() << endl;
+    }
+}

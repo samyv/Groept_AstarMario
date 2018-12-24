@@ -12,7 +12,7 @@ vector<tile_t *> Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int 
     vector<tile_t *> map;
 
     for(unique_ptr<Tile> & tile : tiles){
-        tile_t * t = new(nothrow) tile_t;
+        tile_t * t = new tile_t;
         t->t = tile.get();
         t->f = 0;
         t->g = 0;
@@ -148,7 +148,7 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
                 if(!tile->closed){
                     bool newpath = false;
                     if(!tile->open){
-                        if(tile->t->getValue() == 0.0f || tile->t->getValue() == float(INFINITY)){
+                        if(tile->t->getValue() == 0.0f || tile->t->getValue() == float(Q_INFINITY)){
                             tile->closed = true;
                             continue;
                         } else {

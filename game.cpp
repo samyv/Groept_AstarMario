@@ -476,7 +476,12 @@ vector<tile_t *> Game::calculateDistance(int x, int y,Tile * enemy){
     return local_path;
 }
 
+Game::~Game(){
+    for(tile_t * t: map){
+        delete t;
+    }
 
+}
 
 
 

@@ -49,6 +49,7 @@ signals:
     void buttonClicked(QString);
     void gameStart();
     void updateHealthbar(float);
+    void changeweight(int, double);
 public slots:
      void updateProtagonist(int x, int y);
      void explodeEnemy(float health,Enemy * enemy);
@@ -59,6 +60,12 @@ private slots:
      void changeHealthbar(float);
 
      void on_startButton_clicked();
+
+     void on_distanceweightval_editingFinished();
+
+     void on_stepweightval_editingFinished();
+
+     void on_energyweightval_editingFinished();
 
 private:
     Ui::Gview *ui;

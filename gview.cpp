@@ -6,6 +6,10 @@
 #include <QGraphicsScene>
 #include "game.h"
 #include <QPushButton>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 using namespace std;
 
@@ -200,3 +204,24 @@ void Gview::changeHealthbar(float health){
     ui->healthbar->setValue(health);
 }
 
+
+void Gview::on_distanceweightval_editingFinished()
+{
+    double val = ui->distanceweightval->text().toDouble();
+    cout << val << endl;
+    emit changeweight(1,val);
+}
+
+void Gview::on_stepweightval_editingFinished()
+{
+    double val = ui->stepweightval->text().toDouble();
+    cout << val << endl;
+    emit changeweight(2,val);
+}
+
+void Gview::on_energyweightval_editingFinished()
+{
+    double val = ui->energyweightval->text().toDouble();
+    cout << val << endl;
+    emit changeweight(3,val);
+}

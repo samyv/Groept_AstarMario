@@ -35,6 +35,7 @@ Game::Game(Gview * gview)
     QObject::connect(this,SIGNAL(healthpackGained(float,Tile *)), gview,SLOT(triggerHealthpack(float,Tile *)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(gview,SIGNAL(gameStart()), this,SLOT(startGame()));
+    connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
 
     distanceBetweenEnemies = calculateDistances();
     //    enemiesInOrderIndexes = dotheSalesman();

@@ -53,6 +53,7 @@ void Gview::drawMarioInit(){
     QImage mario = QImage(":/mario.png");
     mario = mario.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap protapix = QPixmap::fromImage(mario);
+    mariopix = new QGraphicsPixmapItem(protapix);
     mariopix->setOffset(-mario.width()/2,-mario.height());
     mariopix->setOffset(-mario.width()/2,-mario.height());
     scene->addItem(mariopix);

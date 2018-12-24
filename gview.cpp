@@ -6,10 +6,7 @@
 #include <QGraphicsScene>
 #include "game.h"
 #include <QPushButton>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <QtAlgorithms>
 
 using namespace std;
 
@@ -56,15 +53,7 @@ void Gview::drawMarioInit(){
     QImage mario = QImage(":/mario.png");
     mario = mario.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap protapix = QPixmap::fromImage(mario);
-    mariopix = new QGraphicsPixmapItem(protapix);
-    //    QPainter *paint = new QPainter(protapix)
-    //QPixmap * newMario = new QPixmap(protapix.transformed(transform));
-    //scene->addPixmap(*newMario);
-
-    //    qreal ancho = game::protagonist->getXPos()+50;
-    //    qreal alto = game::protagonist->getYPos()+50;
-    //mariopix->setPos(300,500);
-    //mariopix->setFlag(QGraphicsItem::ItemIsMovable);
+    mariopix->setOffset(-mario.width()/2,-mario.height());
     mariopix->setOffset(-mario.width()/2,-mario.height());
     scene->addItem(mariopix);
 }
@@ -149,17 +138,7 @@ void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Ti
 
 }
 
-/*void Gview::step(){
-    scene->update();
-    this->update();
-}*/
-
-void Gview::on_pushButton_clicked()
-{
-    emit buttonClicked(QLatin1String("/home/samy/Qt_Projects/Media_processing_pathfinding/smw_kick.wav"));
-}
-
-void Gview::on_startButton_clicked()
+void Gview::on_startGame_clicked()
 {
     double val = ui->distanceweightval->text().toDouble();
     emit changeweight(1, val);
@@ -208,7 +187,28 @@ void Gview::triggerHealthpack(float health,Tile * hp){
     }
 }
 
+void Gview::drawCurrentBest(vector<tile_t*> path){
+    //qDeleteAll(path);
+    QBrush brush(Qt::SolidPattern);
+    QPen pen(Qt::SolidLine);
+    pen.setWidth(3);
+    brush.setColor(QColor(255,0,0));
+    pen.setColor(QColor(255,0,0));
+    for(unsigned long i = 0; i<path.size();i++){
+        Tile * t = path[i]->t;
+        QGraphicsRectItem * rect = scene->addRect(t->getXPos()*displaySize,t->getYPos()*displaySize,displaySize,displaySize,pen,brush);
+        bestPath.push_back(rect);
+    }
+}
+
 void Gview::changeHealthbar(float health){
     cout << "health: " << health<< endl;
     ui->healthbar->setValue(health);
 }
+
+void Gview::on_startGenetic_clicked()
+{
+    emit geneticTrigger();
+}
+
+

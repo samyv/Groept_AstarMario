@@ -45,21 +45,27 @@ public:
     void drawMarioInit();
     int prevX = 0;
     void initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
+    vector<QGraphicsRectItem *> bestPath;
 signals:
     void buttonClicked(QString);
     void gameStart();
     void updateHealthbar(float);
+
     void changeweight(int, double);
+
+    void geneticTrigger();
 public slots:
      void updateProtagonist(int x, int y);
      void explodeEnemy(float health,Enemy * enemy);
      void triggerHealthpack(float health,Tile * hp);
+     void drawCurrentBest(vector<tile_t*> path);
 private slots:
-     void on_pushButton_clicked();
-     //void step();
+
      void changeHealthbar(float);
 
-     void on_startButton_clicked();
+     void on_startGenetic_clicked();
+
+     void on_startGame_clicked();
 
 private:
     Ui::Gview *ui;

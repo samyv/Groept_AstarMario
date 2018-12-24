@@ -49,8 +49,8 @@ FORMS += \
 
 # Default rules for deployment.
 
-INCLUDEPATH += $$PWD/
-DEPENDPATH += $$PWD/
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.
 
 RESOURCES += \
     image.qrc \
@@ -58,5 +58,5 @@ RESOURCES += \
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/. -lworld
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/. -lworld
-else:unix: LIBS += -L$$PWD/ -lworld
+else:unix: LIBS += -L$$PWD/./ -lworld
 

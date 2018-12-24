@@ -17,7 +17,6 @@ public:
     vector<Enemy *> enemiesInOrder;
     vector<int> enemiesInOrderIndexes;
     vector<int> dotheSalesman();
-    vector<int> dotheSalesmanG();
     vector<Tile *> healtpacksInOrder;
     vector<Enemy *> enemiesToDefeat;
     vector<unique_ptr<Tile>> healthpacks;
@@ -42,18 +41,20 @@ public:
     vector<tile_t *> map;
     Tile * start;
     bool enoughHealth(float curr_health,float strength);
-    unsigned int findClosestEnemy(int start_x,int start_y);
-    unsigned int findClosestHealtpack(int start_x,int start_y);
+    unsigned int findClosestEnemy(Tile * t);
+    unsigned int findClosestHealtpack(Tile * t);
     void copyEnemies();
-    vector<tile_t *>  calculateDistance(int x, int y,Tile *);
+    vector<tile_t *>  calculateDistance(Tile *,Tile *);
     QTimer * timer;
 signals:
     void enemyDefeated(float health,Enemy *);
     void healthpackGained(float health,Tile *);
     void sendSound(QString);
+    void newBest(vector<tile_t*> newBest);
 public slots:
     void step();
     void playSound(QString file);
+    void dotheSalesmanG();
     void startGame();
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);

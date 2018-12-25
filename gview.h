@@ -49,7 +49,7 @@ public:
 signals:
     void buttonClicked(QString);
     void gameStart();
-    void updateHealthbar(float);
+
     void changeweight(int, double);
     void geneticTrigger();
 public slots:
@@ -57,6 +57,7 @@ public slots:
      void explodeEnemy(float health,Enemy * enemy);
      void triggerHealthpack(float health,Tile * hp);
      void drawCurrentBest(vector<tile_t*> path);
+     void enemyDead();
 private slots:
 
      void changeHealthbar(float);
@@ -64,6 +65,7 @@ private slots:
      void on_startGenetic_clicked();
 
      void on_startGame_clicked();
+
 
 private:
     Ui::Gview *ui;

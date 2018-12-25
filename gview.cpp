@@ -20,8 +20,6 @@ Gview::Gview(QWidget *parent) :
 
     //QObject::connect(this)
 
-    QObject::connect(this,SIGNAL(updateHealthbar(float)), this,SLOT(changeHealthbar(float)));
-
     //setup the scene for grahpicalview
     setupScene();
 
@@ -155,7 +153,7 @@ void Gview::on_startGame_clicked()
 }
 
 void Gview::explodeEnemy(float health,Enemy * enemy){
-    emit updateHealthbar(health - enemy->getValue());
+    //emit updateHealthbar(health - enemy->getValue());
     QImage goomba = QImage(":/goombaretro.png");
     goomba = goomba.scaled(int(displaySize*24),int(displaySize*12));
     QPixmap goombapix = QPixmap::fromImage(goomba);
@@ -173,7 +171,7 @@ void Gview::explodeEnemy(float health,Enemy * enemy){
 }
 
 void Gview::triggerHealthpack(float health,Tile * hp){
-    emit updateHealthbar(health);
+    //emit updateHealthbar(health);
     QImage mushroom = QImage(":/mushroom.png");
     mushroom = mushroom.scaled(int(displaySize*24),int(displaySize*12));
     QPixmap mushroompix = QPixmap::fromImage(mushroom);
@@ -208,8 +206,24 @@ void Gview::changeHealthbar(float health){
     ui->healthbar->setValue(health);
 }
 
-
 void Gview::on_startGenetic_clicked()
 {
     emit geneticTrigger();
+}
+
+void Gview::enemyDead(){
+    cout << "RIP" << endl;
+    QImage goomba = QImage(":/goombaretro.png");
+    goomba = goomba.scaled(int(displaySize*24),int(displaySize*12));
+    QPixmap goombapix = QPixmap::fromImage(goomba);
+    for(int i = 0;i<enemiesPixs.size();i++){
+        QGraphicsPixmapItem * local = enemiesPixs.at(i);
+        if(mariopix->collidesWithItem(local)){
+            local->setOffset(-goomba.width()/2,-goomba.height()/2);
+            QTransform transform;
+            transform.translate(0, goomba.height()/2);
+            local->setTransform(transform);
+            local->setPixmap(goombapix);
+        }
+    }
 }

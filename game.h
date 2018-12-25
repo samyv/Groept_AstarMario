@@ -52,6 +52,7 @@ signals:
     void healthpackGained(float health,Tile *);
     void sendSound(QString);
     void newBest(vector<tile_t*> newBest);
+    void updateHealthbar(float);
 public slots:
     void step();
     void playSound(QString file);

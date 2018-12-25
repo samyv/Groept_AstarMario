@@ -27,6 +27,9 @@ Game::Game(Gview * gview)
     protagonist = world->getProtagonist();
     start = protagonist.get();
     enemies = world->getEnemies(enemiesCount);
+    for(unique_ptr<Enemy> & a: enemies){
+        connect(a.get(), SIGNAL(dead()), gview, SLOT(enemyDead()));
+    }
     healthpacks = world->getHealthPacks(healthpackCount);
     copyEnemies();
     gview->initDisplay(enemies,healthpacks);
@@ -40,6 +43,7 @@ Game::Game(Gview * gview)
     connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
     QObject::connect(this,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), this,SLOT(dotheSalesmanG()));
+    QObject::connect(this,SIGNAL(updateHealthbar(float)), gview,SLOT(changeHealthbar(float)));
 
 }
 
@@ -76,7 +80,9 @@ void Game::dotheSalesmanG(){
     vector<int> bestOrder(enemiesCount + 1, 0);
     double bestD = double(INFINITY);
 
-    //GENERATE A NEW STARTING POPULATION!
+    //GENERATE A NEW POPULATION!
+    //cout << "GENERATE A NEW POPULATION!" << endl;
+
     for(unsigned long j = 0; j < populationSize;j++){
         vector<int> order(enemiesCount + 1, 0);
         //CREATE A NEW ORDER 0123456...
@@ -124,7 +130,8 @@ void Game::dotheSalesmanG(){
             }
             fitness[i] = 1/(d+1);
         }
-        //        cout << "distance done" << endl;
+        //cout << "distance done" << endl;
+
         //NORMALIZE FITNESS
         // cout << "NORMALIZE FITNESS" << endl;
         double sum = 0;
@@ -134,7 +141,11 @@ void Game::dotheSalesmanG(){
         for(unsigned long i = 0; i< fitness.size();i++){
             fitness[i] = fitness[i] / sum;
         }
+
+        //cout << "fitness normalized" << endl;
         //MAKE NEXT GENERATION!
+        //cout << "MAKE NEXT GENERATION" << endl;
+
         vector<vector<int>> newPopulation(populationSize,vector<int>(enemiesCount+1,0));
         for(unsigned long i = 0; i < populationSize;i++){
             //POOLING ALGORITHM TO PICK TWO ACCORDING TO FITNESS LEVEL
@@ -217,19 +228,24 @@ void Game::step(){
         protagonist->setPos(nextTile->t->getXPos(),nextTile->t->getYPos());
         //CHECK IF COLLISION WITH ENEMY
         if((protagonist->getXPos() == enemiesInOrder.front()->getXPos()) && (protagonist->getYPos() == enemiesInOrder.front()->getYPos())){
-            cout << "ENEMY COLLISION xpos:" << protagonist->getXPos() << endl;
+            /*cout << "ENEMY COLLISION xpos:" << protagonist->getXPos() << endl;
             cout << "health before set : " << protagonist->getHealth() << endl;
             protagonist->setHealth(protagonist->getHealth()-enemiesInOrder.front()->getValue());
             cout << "health after emit : " << protagonist->getHealth() << endl;
             emit enemyDefeated(protagonist->getHealth(),enemiesInOrder.front());
             cout << "health prota: " << protagonist->getHealth() << endl;
-            emit sendSound("qrc:/sound/smw_kick.wav");
+            emit sendSound("qrc:/sound/smw_kick.wav");*/
+            emit updateHealthbar(protagonist->getHealth() - enemiesInOrder.front()->getValue());
+            enemiesInOrder.front()->setDefeated(true);
+
+            emit sendSound("qrc:/sound/smw_kick.wav"); // why signal? wrm ni gwn functie?
             enemiesInOrder.erase(enemiesInOrder.begin());
         }      //CHECK IF COLLISION WITH MUSHROOM
         else if((protagonist->getXPos() == healtpacksInOrder.front()->getXPos()) && (protagonist->getYPos() == healtpacksInOrder.front()->getYPos())){
             cout << "HP COLLISION" << endl;
             protagonist->setHealth(100);
             emit healthpackGained(protagonist->getHealth(),healtpacksInOrder.front());
+            emit updateHealthbar(protagonist->getHealth() + healtpacksInOrder.front()->getValue());
             //protagonist->setHealth(protagonist->getHealth()+healtpacksInOrder.front()->getValue());
             //cout << "health prota: " << protagonist->getHealth() << endl;
             emit sendSound("qrc:/sound/smw_1-up.wav");

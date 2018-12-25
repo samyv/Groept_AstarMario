@@ -45,28 +45,29 @@ public:
     void drawMarioInit();
     int prevX = 0;
     void initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
-    vector<QGraphicsRectItem *> bestPath;
+    vector<unique_ptr<QGraphicsRectItem>> bestPath;
 signals:
     void buttonClicked(QString);
     void gameStart();
-
+    void poisonExplosion(qreal,qreal);
     void changeweight(int, double);
     void geneticTrigger();
+    void geneticStop();
 public slots:
-     void updateProtagonist(int x, int y);
-     void explodeEnemy(float health,Enemy * enemy);
-     void triggerHealthpack(float health,Tile * hp);
-     void drawCurrentBest(vector<tile_t*> path);
-     void enemyDead();
+    void updateProtagonist(int x, int y);
+    void explodeEnemy(float health,Enemy * enemy);
+    void triggerHealthpack(Tile * hp);
+    void drawCurrentBest(vector<tile_t*> path);
+    void enemyDead();
+    void drawPoisoned(qreal,qreal);
+    void penemyDead();
 private slots:
 
-     void changeHealthbar(float);
+    void changeHealthbar(int);
 
-     void on_startGenetic_clicked();
+    void on_startGame_clicked();
 
-     void on_startGame_clicked();
-
-
+    void on_startGenetic_toggled(bool checked);
 private:
     Ui::Gview *ui;
     QGraphicsPixmapItem * mariopix;

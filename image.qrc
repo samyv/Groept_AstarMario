@@ -7,5 +7,6 @@
         <file>mario.png</file>
         <file>goombaretro.png</file>
         <file>mushroom.png</file>
+        <file>PEnemy.png</file>
     </qresource>
 </RCC>

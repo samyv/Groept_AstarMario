@@ -9,16 +9,12 @@
 
 using namespace std;
 Game::Game(Gview * gview)
-{
-    cout <<"load world" <<endl;
+{ 
     world = new World();
-    cout << "pre foto laden " << endl;
     tiles = world->createWorld(":/worldmap4.png");
-    cout << "laadt foto ni"<<endl;
     makeModel();
     gview->show();
     background = new QMediaPlayer();
-    cout << RAND_MAX << endl;
     background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
     background->setVolume(50);
     background->play();
@@ -27,26 +23,75 @@ Game::Game(Gview * gview)
     protagonist = world->getProtagonist();
     start = protagonist.get();
     enemies = world->getEnemies(enemiesCount);
-    for(unique_ptr<Enemy> & a: enemies){
-        connect(a.get(), SIGNAL(dead()), gview, SLOT(enemyDead()));
-    }
     healthpacks = world->getHealthPacks(healthpackCount);
     copyEnemies();
     gview->initDisplay(enemies,healthpacks);
+
+    //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
     timer = new QTimer(gview);
     QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
+
+    //CONNECTIONS WHEN PROTAGONIST DATA CHANGES
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
-    QObject::connect(this,SIGNAL(enemyDefeated(float,Enemy *)), gview,SLOT(explodeEnemy(float,Enemy *)));
-    QObject::connect(this,SIGNAL(healthpackGained(float,Tile *)), gview,SLOT(triggerHealthpack(float,Tile *)));
+    QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), gview,SLOT(changeHealthbar(int)));
+
+    //CONNECTIONS WHEN SPECIAL TILES DATA CHANGES
+    for(unique_ptr<Enemy> & a: enemies){
+        if(typeid (*a) == typeid (Enemy)){
+            connect(a.get(), SIGNAL(dead()), gview, SLOT(enemyDead()));
+            cout << typeid (a).name() << endl;
+
+        } else if(typeid (*a) == typeid (PEnemy)){
+            connect(a.get(), SIGNAL(dead()), gview, SLOT(penemyDead()));
+            cout << typeid (a).name() << endl;
+        }
+
+    }
+    connect(gview, SIGNAL(poisonExplosion(qreal,qreal)), this, SLOT(setNeighboursPoison(qreal,qreal)));
+    connect(this, SIGNAL(poisonedTile(qreal,qreal)), gview, SLOT(drawPoisoned(qreal,qreal)));
+
+    QObject::connect(this,SIGNAL(healthpackGained(Tile *)), gview,SLOT(triggerHealthpack(Tile *)));
+
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
-    QObject::connect(gview,SIGNAL(gameStart()), this,SLOT(startGame()));
+    //    QObject::connect(gview,SIGNAL(gameStart()), this,SLOT(startGame()));
     connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
     QObject::connect(this,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), this,SLOT(dotheSalesmanG()));
-    QObject::connect(this,SIGNAL(updateHealthbar(float)), gview,SLOT(changeHealthbar(float)));
-
 }
 
+void Game::step(){
+    if(!path.empty()){
+        Tile * nextTile = path.back()->t;
+        protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
+        //CHECK COLLISIONS WITH ENEMIES
+        for(auto &enemy : enemies){
+            if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
+                protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
+                enemy->setDefeated(true);
+                //Erase–remove idiom
+                enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+                emit sendSound("qrc:/sound/smw_kick.wav");
+                break;
+            }
+        }
+
+        //CHECK COLLISIONS WITH HEALTHPACKS
+        for(auto &hp : healthpacks){
+            if((protagonist->getXPos() == hp->getXPos()) && (protagonist->getYPos() == hp->getYPos())){
+                protagonist->setHealth(protagonist->getHealth()+hp->getValue());
+                emit healthpackGained(hp.get());
+                emit sendSound("qrc:/sound/smw_1-up.wav");
+                break;
+            }
+        }
+        if(enemies.empty()){
+            cout << "you won" << endl;
+            background->stop();
+            emit sendSound("qrc:/sound/smw_castle_clear.wav");
+        }
+        path.pop_back();
+    }
+}
 vector<vector<vector<tile_t *>>> Game::calculateDistances(){
     vector<vector<vector<tile_t *>>> localArray(enemiesCount + 1, vector<vector<tile_t *>>(enemiesCount + 1, vector<tile_t *>(0,nullptr)));
     for(unsigned long i = 0; i<enemiesCount + 1;i++){
@@ -73,16 +118,16 @@ vector<vector<vector<tile_t *>>> Game::calculateDistances(){
 void Game::dotheSalesmanG(){
     unsigned long populationSize = 80;
     vector<vector<int>> population(populationSize,vector<int>(enemiesCount+1,0));
-    vector<double> fitness(populationSize,0);
+    vector<int> bestOrder(enemiesCount + 1, 0);
     float mutationRate = 0.05;
+    double bestD = double(INFINITY);
+    vector<double> fitness(populationSize,0);
+
     srand (time(NULL));
     distanceBetweenEnemies = calculateDistances();
-    vector<int> bestOrder(enemiesCount + 1, 0);
-    double bestD = double(INFINITY);
 
+    cout << "lets start salesman G!"<<endl;
     //GENERATE A NEW POPULATION!
-    //cout << "GENERATE A NEW POPULATION!" << endl;
-
     for(unsigned long j = 0; j < populationSize;j++){
         vector<int> order(enemiesCount + 1, 0);
         //CREATE A NEW ORDER 0123456...
@@ -102,38 +147,32 @@ void Game::dotheSalesmanG(){
         population[j] = order;
     }
 
-
+    //MAKE A NEW GENARION BASED ON PREVIOUS ONE
     for(int g = 0; g<generationsAmount;g++){
-        cout << "GENERATE POPULATION: " <<g+1 << endl;
         //CALCULATE TOTAL DISTANCE FOR EVERY MEMBER
-        //cout << "CALCULATE TOTAL DISTANCE FOR EVERY MEMBER" << endl;
         for(unsigned long i = 0; i< populationSize;i++){
             vector<int> member = population[i];
-            //printElement(member);
             //CALC DISTANCE FOR EVERY MEMBER OF THE POPULATION
             double d = 0;
             for(int i = 0; i<enemiesToDefeat.size();i++){
                 d += distanceBetweenEnemies[member[i]][member[i+1]].size();
             }
-
+            //CHECK IF WE HAVE A NEW BEST ONE
             if(d < bestD){
                 bestD = d;
                 bestOrder = member;
-                cout << "BEST ONE!" << endl;
                 vector<tile_t *> bestOrderPath;
                 for(int i = 0; i < enemiesCount;i++){
                     vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
                     bestOrderPath.insert(bestOrderPath.begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
                 }
+                //DRAW THE CURRENT BEST ONE
                 emit newBest(bestOrderPath);
-                printElement(bestOrder);
             }
             fitness[i] = 1/(d+1);
         }
-        //cout << "distance done" << endl;
 
-        //NORMALIZE FITNESS
-        // cout << "NORMALIZE FITNESS" << endl;
+        //NORMALIZE FITNESSES
         double sum = 0;
         for(unsigned long i = 0; i< fitness.size();i++){
             sum += fitness[i];
@@ -142,17 +181,14 @@ void Game::dotheSalesmanG(){
             fitness[i] = fitness[i] / sum;
         }
 
-        //cout << "fitness normalized" << endl;
         //MAKE NEXT GENERATION!
-        //cout << "MAKE NEXT GENERATION" << endl;
-
         vector<vector<int>> newPopulation(populationSize,vector<int>(enemiesCount+1,0));
         for(unsigned long i = 0; i < populationSize;i++){
             //POOLING ALGORITHM TO PICK TWO ACCORDING TO FITNESS LEVEL
             vector<vector<int>> picks(2,vector<int>(enemiesCount+1,0));
             for(int c = 0; c<2;c++){
                 unsigned long index = 0;
-                int get = 0;
+                int get = rand();
                 if(get >= RAND_MAX){
                     get = RAND_MAX - 1;
                 } else if(get <= 0){
@@ -165,24 +201,21 @@ void Game::dotheSalesmanG(){
                 }
                 index--;
                 picks[c] = population[index];
-                //printElement(picks[c]);
             }
 
 
             //CROSSOVERRR
-            //cout << "CROSSOVER" << endl;
-            //DEFINE RANDOM RANGE
+            //DEFINE RANDOM RANGE IN FIRST PICK
             int startA = 1 + (rand() % (picks[0].size()-2));
             int endA = startA + rand() % (picks[0].size()-startA-1);
             int range = endA - startA+1; // +1 because we also need to count first element
-
-            //cout << startA << "->" << endA << endl;
 
             //copy first dna part
             vector<int> crossOver(range,0);
             for(int n = 0; n <range;n++){
                 crossOver.at(n) = picks[0][startA+n];
             }
+            //INSERT 2nd DNA PART
             for(int c = 1;c<picks[1].size();c++){
                 int enemy = picks[1][c];
                 vector<int>::iterator it;
@@ -191,24 +224,36 @@ void Game::dotheSalesmanG(){
                     crossOver.push_back(enemy);
             }
 
+            //INSERT FIRST POSITION: THE PROTAGONIST OF COURSE
             vector<int>::iterator it;
             it = crossOver.begin();
             it = crossOver.insert(it,0);
 
             //MUTATIOOON
+
             for(unsigned long m = 0; m < crossOver.size();m++){
+
                 if(((double) rand() / (RAND_MAX)) < mutationRate){
+
                     unsigned long indexA = 1+ rand() % (crossOver.size()-1);
                     unsigned long indexB = 1+ rand() % (crossOver.size()-1);
                     unsigned long swap = crossOver[indexA];
                     crossOver[indexA] = crossOver[indexB];
                     crossOver[indexB] = swap;
+                    //XOR
+                    //crossOver[indexA] = crossOver[indexA] ^ crossOver[indexB];
+                    //crossOver[indexB] = crossOver[indexB] ^ crossOver[indexA];
+                    //crossOver[indexA] = crossOver[indexA] ^ crossOver[indexB];
+
                 }
             }
             newPopulation[i] = crossOver;
+
         }
         population = newPopulation;
     }
+
+
     printElement(bestOrder);
     for(int i = 0; i < enemiesCount;i++){
         vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
@@ -222,49 +267,6 @@ void Game::makeModel(){
     map = m->makeMap(tiles, world->getRows(), world->getCols());
 }
 
-void Game::step(){
-    if(!path.empty()){
-        tile_t * nextTile = path.back();
-        protagonist->setPos(nextTile->t->getXPos(),nextTile->t->getYPos());
-        //CHECK IF COLLISION WITH ENEMY
-        if((protagonist->getXPos() == enemiesInOrder.front()->getXPos()) && (protagonist->getYPos() == enemiesInOrder.front()->getYPos())){
-            /*cout << "ENEMY COLLISION xpos:" << protagonist->getXPos() << endl;
-            cout << "health before set : " << protagonist->getHealth() << endl;
-            protagonist->setHealth(protagonist->getHealth()-enemiesInOrder.front()->getValue());
-            cout << "health after emit : " << protagonist->getHealth() << endl;
-            emit enemyDefeated(protagonist->getHealth(),enemiesInOrder.front());
-            cout << "health prota: " << protagonist->getHealth() << endl;
-            emit sendSound("qrc:/sound/smw_kick.wav");*/
-            emit updateHealthbar(protagonist->getHealth() - enemiesInOrder.front()->getValue());
-            enemiesInOrder.front()->setDefeated(true);
-
-            emit sendSound("qrc:/sound/smw_kick.wav"); // why signal? wrm ni gwn functie?
-            enemiesInOrder.erase(enemiesInOrder.begin());
-        }      //CHECK IF COLLISION WITH MUSHROOM
-        else if((protagonist->getXPos() == healtpacksInOrder.front()->getXPos()) && (protagonist->getYPos() == healtpacksInOrder.front()->getYPos())){
-            cout << "HP COLLISION" << endl;
-            protagonist->setHealth(100);
-            emit healthpackGained(protagonist->getHealth(),healtpacksInOrder.front());
-            emit updateHealthbar(protagonist->getHealth() + healtpacksInOrder.front()->getValue());
-            //protagonist->setHealth(protagonist->getHealth()+healtpacksInOrder.front()->getValue());
-            //cout << "health prota: " << protagonist->getHealth() << endl;
-            emit sendSound("qrc:/sound/smw_1-up.wav");
-            if(healtpacksInOrder.size()>0){
-                healtpacksInOrder.erase(healtpacksInOrder.begin());
-            }
-        }
-        //CHECK IF GAME STATE HAS CHANGED
-        if(enemiesToDefeat.empty() && enemiesInOrder.empty()){
-            background->stop();
-            emit sendSound("qrc:/sound/smw_castle_clear.wav");
-        } else if(enemiesInOrder.empty() && !enemiesToDefeat.empty()) {
-            background->stop();
-            emit sendSound("qrc:/sound/game_over.wav");
-        }
-
-        path.pop_back();
-    }
-}
 
 void Game::playSound(QString file){
     player->setMedia(QUrl(file));
@@ -337,13 +339,12 @@ void Game::startGame(){
             //FIND PATH BETWEEN STARTPOS EN GOAL
             vector<tile_t *> local_path = calculateDistance(start,closest);
             //SET GLOBAL PATH = LOCAL PATH (NO FUCKING CLUE WHY THIS WORKS..)
-            //            path.insert(path.begin(),local_path.begin(),local_path.end());
+            //                        path.insert(path.begin(),local_path.begin(),local_path.end());
 
             //WHEN PATH IS FOUND WE SET THE NEW STARTPOSITION = LAST GOAL
             start = closest;
             break;
         }
-        cout << "calc health: " << calc_health << endl;
     }
 
 }
@@ -364,6 +365,7 @@ unsigned int Game::findClosestEnemy(Tile * t){
     }
     return index;
 }
+
 unsigned int Game::findClosestHealtpack(Tile * t){
     unsigned int index = 0;
     double minD = double(INFINITY);
@@ -393,97 +395,6 @@ vector<tile_t *> Game::calculateDistance(Tile * start,Tile * goal){
     return local_path;
 }
 
-/*vector<int> Game::dotheSalesman(){
-    vector<int> order(enemiesCount + 1, 0);
-    vector<int> bestOrder(enemiesCount + 1, 0);
-    double bestD = INFINITY;
-    bool flag = false;
-    for(int i = 0; i< int(enemiesToDefeat.size() + 1);i++){
-        order.at(i) = i;
-    }
-    while(1){
-        double d = 0;
-        //print to check
-        //        for(int i = 0; i < enemiesCount; i++){
-        //            cout << order[i] << "-->";
-        //        }
-        //        cout << order[enemiesCount] << endl;
-        for(int i = 0; i<enemiesToDefeat.size();i++){
-            //d += distanceBetweenEnemies[order[i]][order[i+1]];
-        }
-        if(d<bestD){
-            bestOrder = order;
-            bestD = d;
-        }
-        //        cout << "sum: " << d << endl;
-        //
-
-
-        int x,y;
-        // 0,5,1,7,6,3,9,8,4,2
-        //FIND THE BIGGEST X SO THAT order[x] < order[x+1]
-        x = -1;
-        for(int i = 1;i<enemiesCount;i++){
-            if(order[i] < order[i + 1]){
-                x = i;
-            }
-        }
-        if(x == -1){
-            cout << "BREAK" << endl;
-            break;
-        }
-
-        for(int i = 1;i<enemiesCount+1;i++){
-            if(order[i] > order[x]){
-                y = i;
-            }
-        }
-
-        //        cout << "x: " << x << endl;
-        //        cout << "y: " << y << endl;
-
-        int swap = order[x];
-        order[x] = order[y];
-        order[y] = swap;
-        //        for(int i = 0; i < enemiesCount; i++){
-        //            cout << order[i] << "-->";
-        //        }
-        //        cout << order[8] << endl;
-        //reverse
-        int reversed[enemiesCount + 1];
-
-        //dont reverse everything before x exept after nukken
-        for(int i = 0; i <= x; i++){
-            reversed[i] = order[i];
-        }
-
-        for(int i = x + 1, j = enemiesCount; i < enemiesCount+1; i++, j--){
-            reversed[j] = order[i];
-        }
-
-        //copy reversed to order
-        for(int i = 0; i < enemiesCount +1; i++){
-            order[i] = reversed[i];
-        }
-    }
-
-    cout << "BEST ORDER: " ;
-    for(int i = 0; i < enemiesCount; i++){
-        cout << bestOrder[i] << "-->";
-    }
-    cout << order[8] << endl;
-    cout << "BEST D:" << bestD << endl;
-
-    return bestOrder;
-}
-void Game::printElement(vector<int> e){
-    for(int i = 0; i < e.size()-1; i++){
-        cout << e[i] << "-->";
-    }
-    cout << e[e.size()-1] << endl;
-}*/
-
-
 Game::~Game(){
     for(tile_t * t: map){
         delete t;
@@ -492,32 +403,23 @@ Game::~Game(){
     delete player;
 }
 
-
-vector<int> Game::dotheSalesman(){
+void Game::dotheSalesman(){
     vector<int> order(enemiesCount + 1, 0);
     vector<int> bestOrder(enemiesCount + 1, 0);
-    double bestD = INFINITY;
-    bool flag = false;
+    double bestD = double(INFINITY);
+    distanceBetweenEnemies = calculateDistances();
     for(int i = 0; i< int(enemiesToDefeat.size() + 1);i++){
         order.at(i) = i;
     }
     while(1){
         double d = 0;
-        //print to check
-        //        for(int i = 0; i < enemiesCount; i++){
-        //            cout << order[i] << "-->";
-        //        }
-        //        cout << order[enemiesCount] << endl;
         for(int i = 0; i<enemiesToDefeat.size();i++){
-            //d += distanceBetweenEnemies[order[i]][order[i+1]];
+            d += distanceBetweenEnemies[order[i]][order[i+1]].size();
         }
         if(d<bestD){
             bestOrder = order;
             bestD = d;
         }
-        //        cout << "sum: " << d << endl;
-        //
-
 
         int x,y;
         // 0,5,1,7,6,3,9,8,4,2
@@ -529,7 +431,6 @@ vector<int> Game::dotheSalesman(){
             }
         }
         if(x == -1){
-            cout << "BREAK" << endl;
             break;
         }
 
@@ -549,7 +450,7 @@ vector<int> Game::dotheSalesman(){
         //            cout << order[i] << "-->";
         //        }
         //        cout << order[8] << endl;
-        //reverse
+        //reversevector<int>
         int reversed[enemiesCount + 1];
 
         //dont reverse everything before x exept after nukken
@@ -566,15 +467,11 @@ vector<int> Game::dotheSalesman(){
             order[i] = reversed[i];
         }
     }
-
-    cout << "BEST ORDER: " ;
-    for(int i = 0; i < enemiesCount; i++){
-        cout << bestOrder[i] << "-->";
+    for(int i = 0; i < enemiesCount;i++){
+        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+        path.insert(path.begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
     }
-    cout << order[8] << endl;
-    cout << "BEST D:" << bestD << endl;
-
-    return bestOrder;
+    timer->start(4);
 }
 void Game::printElement(vector<int> e){
     for(int i = 0; i < e.size()-1; i++){
@@ -585,3 +482,15 @@ void Game::printElement(vector<int> e){
 
 
 
+void Game::setNeighboursPoison(qreal x, qreal y){
+//    Tile * base;
+//    cout << "x: " << x << "y: " << y<< endl;
+//    for(auto &t : tiles){
+//        if(t->getXPos() == x && t->getYPos()== y){
+
+//            base = t.get();
+//            break;
+//        }
+//    }
+//    cout << base->getXPos() << " " << base->getYPos() << endl;
+}

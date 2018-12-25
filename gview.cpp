@@ -16,9 +16,6 @@ Gview::Gview(QWidget *parent) :
 {
     this->setUpdatesEnabled(true);
 
-    //QPushButton * p = new QPushButton("okay", this);
-
-    //QObject::connect(this)
 
     //setup the scene for grahpicalview
     setupScene();
@@ -33,6 +30,7 @@ Gview::Gview(QWidget *parent) :
 
     //draw a* pathfindi ng
     //    makeModel();
+
 }
 
 Gview::~Gview()
@@ -113,12 +111,21 @@ void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Ti
     QImage goomba = QImage(":/goombaretro.png");
     goomba = goomba.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap goombapix = QPixmap::fromImage(goomba);
-    for(unsigned int i = 0; i < enemies.size();i++){
-        QGraphicsPixmapItem * enemypix = new QGraphicsPixmapItem(goombapix);
-        enemiesPixs.push_back(enemypix);
-        Enemy * enemy = enemies.at(i).get();
+
+    QImage Pe = QImage(":/PEnemy.png");
+    Pe = Pe.scaled(int(displaySize*24),int(displaySize*24));
+    QPixmap PePix = QPixmap::fromImage(Pe);
+
+    QGraphicsPixmapItem * enemypix;
+    for(auto &enemy : enemies){
+        if(typeid (*enemy) == typeid (Enemy)){
+            enemypix = new QGraphicsPixmapItem(goombapix);
+        } else if(typeid (*enemy) == typeid (PEnemy)){
+            enemypix = new QGraphicsPixmapItem(PePix);
+        }
         enemypix->setPos(enemy->getXPos()*displaySize,enemy->getYPos()*displaySize);
         enemypix->setOffset(-goomba.width()/2,-goomba.height()/2);
+        enemiesPixs.push_back(enemypix);
         scene->addItem(enemypix);
     }
 
@@ -170,60 +177,111 @@ void Gview::explodeEnemy(float health,Enemy * enemy){
 
 }
 
-void Gview::triggerHealthpack(float health,Tile * hp){
-    //emit updateHealthbar(health);
-    QImage mushroom = QImage(":/mushroom.png");
-    mushroom = mushroom.scaled(int(displaySize*24),int(displaySize*12));
-    QPixmap mushroompix = QPixmap::fromImage(mushroom);
-    for(int i = 0;i<hpPixs.size();i++){
-        QGraphicsPixmapItem * local = hpPixs.at(i);
-        if(mariopix->collidesWithItem(local)){
-            local->setOffset(-mushroom.width()/2,-mushroom.height()/2);
+void Gview::triggerHealthpack(Tile * hp){
+    for(QGraphicsPixmapItem * pix : hpPixs){
+        if((hp->getXPos() == pix->x()) && (hp->getYPos() == pix->y())){
+            QImage mushroom = QImage(":/mushroom.png");
+            mushroom = mushroom.scaled(int(displaySize*24),int(displaySize*12));
+            QPixmap mushroompix = QPixmap::fromImage(mushroom);
+            pix->setOffset(-mushroom.width()/2,-mushroom.height()/2);
             QTransform transform;
             transform.translate(0, mushroom.height()/2);
-            local->setTransform(transform);
-            local->setPixmap(mushroompix);
+            pix->setTransform(transform);
+            pix->setPixmap(mushroompix);
+            break;
         }
     }
 }
 
 void Gview::drawCurrentBest(vector<tile_t*> path){
-    //qDeleteAll(path);
+    for(auto &rect : bestPath){
+        scene->removeItem(rect.get());
+    }
     QBrush brush(Qt::SolidPattern);
     QPen pen(Qt::SolidLine);
     pen.setWidth(3);
     brush.setColor(QColor(255,0,0));
     pen.setColor(QColor(255,0,0));
+
     for(unsigned long i = 0; i<path.size();i++){
         Tile * t = path[i]->t;
-        QGraphicsRectItem * rect = scene->addRect(t->getXPos()*displaySize,t->getYPos()*displaySize,displaySize,displaySize,pen,brush);
-        bestPath.push_back(rect);
+        QGraphicsRectItem * rect;
+        rect = scene->addRect(t->getXPos()*displaySize,t->getYPos()*displaySize,displaySize,displaySize,pen,brush);
+        unique_ptr<QGraphicsRectItem> rect_ptr(rect);
+        // bestPath.push_back(rect_ptr);
     }
 }
 
-void Gview::changeHealthbar(float health){
-    cout << "health: " << health<< endl;
+void Gview::changeHealthbar(int health){
     ui->healthbar->setValue(health);
 }
 
-void Gview::on_startGenetic_clicked()
-{
-    emit geneticTrigger();
-}
+
 
 void Gview::enemyDead(){
-    cout << "RIP" << endl;
+    QPixmap enemyPix;
     QImage goomba = QImage(":/goombaretro.png");
     goomba = goomba.scaled(int(displaySize*24),int(displaySize*12));
-    QPixmap goombapix = QPixmap::fromImage(goomba);
+
+    QImage pE = QImage(":/PEnemy.png");
+    pE = pE.scaled(int(displaySize*24),int(displaySize*12));
     for(int i = 0;i<enemiesPixs.size();i++){
         QGraphicsPixmapItem * local = enemiesPixs.at(i);
         if(mariopix->collidesWithItem(local)){
+            enemyPix = QPixmap::fromImage(goomba);
             local->setOffset(-goomba.width()/2,-goomba.height()/2);
             QTransform transform;
             transform.translate(0, goomba.height()/2);
             local->setTransform(transform);
-            local->setPixmap(goombapix);
+            local->setPixmap(enemyPix);
         }
     }
+}
+
+void Gview::penemyDead(){
+    QPixmap enemyPix;
+    QImage pE = QImage(":/PEnemy.png");
+    pE = pE.scaled(int(displaySize*24),int(displaySize*12));
+    for(uint i = 0;i<enemiesPixs.size();i++){
+        QGraphicsPixmapItem * local = enemiesPixs.at(i);
+        if(mariopix->collidesWithItem(local)){
+            QBrush brush(Qt::SolidPattern);
+            QPen pen(Qt::SolidLine);
+            pen.setWidth(3);
+            QColor green = QColor(0,255,0);
+            green.setAlpha(100);
+            brush.setColor(green);
+            pen.setColor(green);
+            scene->addEllipse(local->x()*displaySize,local->y()*displaySize,displaySize*200,displaySize*200,pen,brush);
+            cout << "penemy" << endl;
+            emit poisonExplosion(local->x(),local->y());
+            enemyPix = QPixmap::fromImage(pE);
+            local->setOffset(-pE.width()/2,-pE.height()/2);
+            QTransform transform;
+            transform.translate(0, pE.height()/2);
+            local->setTransform(transform);
+            local->setPixmap(enemyPix);
+
+        }
+    }
+}
+
+void Gview::on_startGenetic_toggled(bool checked)
+{
+    if(checked){
+        ui->startGenetic->setText("STOPG");
+        emit geneticTrigger();
+    } else{
+        ui->startGenetic->setText("STARTG");
+        emit geneticStop();
+    }
+}
+
+void Gview::drawPoisoned(qreal x,qreal y){
+    QBrush brush(Qt::SolidPattern);
+    QPen pen(Qt::SolidLine);
+    pen.setWidth(3);
+    brush.setColor(QColor(0,255,0));
+    pen.setColor(QColor(0,255,0));
+    scene->addRect(x*displaySize,y*displaySize,displaySize,displaySize,pen,brush);
 }

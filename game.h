@@ -17,7 +17,7 @@ public:
     vector<unique_ptr<Enemy>> enemies;
     vector<Enemy *> enemiesInOrder;
     vector<int> enemiesInOrderIndexes;
-    vector<int> dotheSalesman();
+    void makeSomePoison();
     vector<Tile *> healtpacksInOrder;
     vector<Enemy *> enemiesToDefeat;
     vector<unique_ptr<Tile>> healthpacks;
@@ -29,10 +29,12 @@ public:
     vector<unique_ptr<Tile>> greyTiles;
     unique_ptr<Protagonist> protagonist;
     void generateWorld();
+    bool geneticCont = false;
     vector<tile_t *> path;
     vector<vector<vector<tile_t *>>> distanceBetweenEnemies;
     vector<vector<vector<tile_t *>>> calculateDistances();
-    unsigned long enemiesCount = 8;
+    unsigned long enemiesCount = 6;
+    float poisonPercentage = 0.3;
     unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
     int generationsAmount = 100;
@@ -49,15 +51,19 @@ public:
     QTimer * timer;
 signals:
     void enemyDefeated(float health,Enemy *);
-    void healthpackGained(float health,Tile *);
+    void healthpackGained(Tile *);
     void sendSound(QString);
     void newBest(vector<tile_t*> newBest);
     void updateHealthbar(float);
+    void checkCollision();
+    void poisonedTile(qreal,qreal);
 public slots:
     void step();
     void playSound(QString file);
     void dotheSalesmanG();
     void startGame();
+    void dotheSalesman();
+    void setNeighboursPoison(qreal,qreal);
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);
 

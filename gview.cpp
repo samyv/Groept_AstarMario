@@ -92,6 +92,7 @@ void Gview::setupScene(){
     ui->graphicsView->setScene(scene);
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     ui->healthbar->setValue(100);
+    ui->energybar->setValue(100);
 }
 
 void Gview::updateProtagonist(int x, int y){
@@ -164,6 +165,7 @@ void Gview::on_startGame_clicked()
     emit changeweight(3, val);
     cout << val <<endl;
     emit gameStart();
+    emit sendSound("qrc:/sound/sm64_mario_here_we_go.wav");
 }
 
 void Gview::explodeEnemy(float health,Enemy * enemy){
@@ -223,7 +225,9 @@ void Gview::changeHealthbar(int health){
     ui->healthbar->setValue(health);
 }
 
-
+void Gview::changeEnergybar(double energy){
+    ui->energybar->setValue(int(energy));
+}
 
 void Gview::enemyDead(){
     QPixmap enemyPix;
@@ -289,10 +293,6 @@ void Gview::collisonDetect()
     }
 }
 
-void Gview::cameracenter(int x, int y)
-{
-    ui->graphicsView->centerOn(x*displaySize,y*displaySize);
-}
 
 void Gview::on_startGenetic_toggled(bool checked)
 {
@@ -303,6 +303,7 @@ void Gview::on_startGenetic_toggled(bool checked)
         ui->startGenetic->setText("STARTG");
         emit geneticStop();
     }
+
 }
 
 ProtagonistUser *Gview::getMariopix() const

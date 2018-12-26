@@ -62,8 +62,7 @@ signals:
     void geneticStop();
     void enemyDeadUser(int,int);
     void hpUser(int,int);
-
-
+    void sendSound(QString);
 public slots:
     void updateProtagonist(int x, int y);
     void explodeEnemy(float health,Enemy * enemy);
@@ -73,7 +72,7 @@ public slots:
     void drawPoisoned(qreal,qreal);
     void penemyDead();
     void collisonDetect();
-    void cameracenter(int,int);
+    void changeEnergybar(double energy);
 private slots:
 
     void changeHealthbar(int);

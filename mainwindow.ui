@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>993</width>
-    <height>601</height>
+    <width>1028</width>
+    <height>621</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -28,13 +28,13 @@
      <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>0</number>
+     <number>10</number>
     </property>
     <property name="topMargin">
      <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>10</number>
     </property>
     <property name="bottomMargin">
      <number>0</number>
@@ -57,10 +57,13 @@
        </size>
       </property>
       <property name="cursor" stdset="0">
-       <cursorShape>SizeVerCursor</cursorShape>
+       <cursorShape>ArrowCursor</cursorShape>
       </property>
       <property name="mouseTracking">
        <bool>true</bool>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
       </property>
       <property name="contextMenuPolicy">
        <enum>Qt::DefaultContextMenu</enum>
@@ -173,11 +176,45 @@
      </widget>
     </item>
     <item>
-     <widget class="QProgressBar" name="healthbar">
-      <property name="value">
-       <number>24</number>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
+       <number>10</number>
       </property>
-     </widget>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>10</number>
+      </property>
+      <item row="2" column="1">
+       <widget class="QProgressBar" name="healthbar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Health:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QProgressBar" name="energybar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Energy:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -186,10 +223,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>993</width>
-     <height>22</height>
+     <width>1028</width>
+     <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuhello">
+    <property name="title">
+     <string>hello</string>
+    </property>
+    <addaction name="actionSamy_is_gay"/>
+   </widget>
+   <addaction name="menuhello"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -200,6 +244,11 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionSamy_is_gay">
+   <property name="text">
+    <string>Samy is gay</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

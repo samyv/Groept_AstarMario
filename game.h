@@ -46,10 +46,10 @@ signals:
     void enemyDefeated(float health,Enemy *);
     void healthpackGained(Tile *);
     void sendSound(QString);
-    void changeMario(int,int);
     void updateHealthbar(float);
     void checkCollision();
     void poisonedTile(qreal,qreal);
+    void energychanged(double energy);
 public slots:
     void step();
     void userEnemyDefeated(int,int);

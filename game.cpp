@@ -20,8 +20,6 @@ Game::Game(Gview * gview)
     background->play();
     player = new QMediaPlayer();
     QObject::connect(gview->getMariopix(),SIGNAL(marioMoved(int,int)),this,SLOT(checkTile(int,int)));
-    QObject::connect(this,SIGNAL(changeMario(int,int)),gview,SLOT(updateProtagonist(int,int)));
-
     ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     protagonist = world->getProtagonist();
     enemies = world->getEnemies(enemiesCount);
@@ -60,23 +58,25 @@ Game::Game(Gview * gview)
     connect(this, SIGNAL(poisonedTile(qreal,qreal)), gview, SLOT(drawPoisoned(qreal,qreal)));
 
     QObject::connect(this,SIGNAL(healthpackGained(Tile *)), gview,SLOT(triggerHealthpack(Tile *)));
-
+    QObject::connect(gview,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
-    QObject::connect(gview,SIGNAL(gameStart()), m,SLOT(startGame()));
+    QObject::connect(gview,SIGNAL(gameStart()), m,SLOT(dotheSalesman()));
     connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
     QObject::connect(m,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), m,SLOT(dotheSalesmanG()));
     QObject::connect(this,SIGNAL(checkCollision()), gview,SLOT(collisonDetect()));
     QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
     QObject::connect(gview,SIGNAL(hpUser(int,int)),this,SLOT(hpTrigger(int,int)));
-
+    connect(this, SIGNAL(energychanged(double)), gview, SLOT(changeEnergybar(double)));
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
 
 void Game::step(){
     if(!path.empty()){
         Tile * nextTile = path.back()->t;
+        protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
         protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
+
         //CHECK COLLISIONS WITH ENEMIES
         for(auto &enemy : enemies){
             if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
@@ -84,6 +84,7 @@ void Game::step(){
                 enemy->setDefeated(true);
                 //Erase–remove idiom
                 enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+                protagonist->setEnergy(100);
                 emit sendSound("qrc:/sound/smw_kick.wav");
                 break;
             }
@@ -104,7 +105,8 @@ void Game::step(){
             emit sendSound("qrc:/sound/smw_castle_clear.wav");
         }
         path.pop_back();
-    } else{
+        emit energychanged(double(protagonist->getEnergy()));
+    } else {
         //cout << "PATH EMPTY" << endl;
     }
 }

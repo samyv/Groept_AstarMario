@@ -4,6 +4,7 @@
         <file>game_over.wav</file>
         <file>smw_1-up.wav</file>
         <file>smw_castle_clear.wav</file>
-        <file>smw_kick.wav</file>
+	<file>smw_kick.wav</file>
+        <file>sm64_mario_here_we_go.wav</file>
     </qresource>
 </RCC>

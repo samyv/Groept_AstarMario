@@ -96,9 +96,7 @@ void Gview::setupScene(){
 }
 
 void Gview::updateProtagonist(int x, int y){
-    cout << "updateProtagonist: " << x<<":"<<y<<endl;
     mariopix->setPos(x*displaySize,y*displaySize);
-    cout << "getPOS: " << mariopix->x()<<":"<<mariopix->y()<<endl;
     int scale = (x - prevX >0)?1:-1;
     if(scale != 0){
         mariopix->setTransform(QTransform::fromScale(scale,1));
@@ -168,22 +166,45 @@ void Gview::on_startGame_clicked()
     emit sendSound("qrc:/sound/sm64_mario_here_we_go.wav");
 }
 
-void Gview::explodeEnemy(float health,Enemy * enemy){
-    //emit updateHealthbar(health - enemy->getValue());
-    QImage goomba = QImage(":/goombaretro.png");
-    goomba = goomba.scaled(int(displaySize*24),int(displaySize*12));
-    QPixmap goombapix = QPixmap::fromImage(goomba);
-    for(int i = 0;i<enemiesPixs.size();i++){
-        QGraphicsPixmapItem * local = enemiesPixs.at(i);
-        if(mariopix->collidesWithItem(local)){
-            local->setOffset(-goomba.width()/2,-goomba.height()/2);
-            QTransform transform;
-            transform.translate(0, goomba.height()/2);
-            local->setTransform(transform);
-            local->setPixmap(goombapix);
+void Gview::explodeEnemy(int poisonlevel){
+    cout << "explosion" << endl;
+    QLabel *gif_anim = new QLabel();
+    QMovie *movie = new QMovie(":/explosion.gif", QByteArray(), this);
+    new QGraphicsProxyWidget();
+    gif_anim->setAttribute( Qt::WA_NoSystemBackground);
+    gif_anim->setMovie(movie);
+    PEnemy* e =dynamic_cast<PEnemy*>(sender());
+    cout << typeid (e).name() << endl;
+    movie->start();
+    QGraphicsProxyWidget * w =scene->addWidget(gif_anim);
+    emit sendSound("qrc:/sound/smw_thunder.wav");
+    w->setWidget(gif_anim);
+    w->setScale(0.3f);
+    w->setPos(e->getXPos()*displaySize - 0.3f*w->size().width()/2,e->getYPos()*displaySize - 0.3f*w->size().height());
+    eff = new QGraphicsOpacityEffect();
+    w->setGraphicsEffect(eff);
+    QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
+    a->setDuration(3000);
+    a->setStartValue(500);
+    a->setEndValue(0);
+    a->setEasingCurve(QEasingCurve::OutBack);
+    a->start(QPropertyAnimation::DeleteWhenStopped);
+    connect(movie, &QMovie::frameChanged, this,
+        [movie]()
+        {
+            if(movie->currentFrameNumber() == (movie->frameCount()-1))
+            {
+                movie->stop();
+                //Explicity emit finished signal so that label **
+                //can show the image instead of a frozen gif
+                //Also, double check that movie stopped before emiting
+                if (movie->state() == QMovie::NotRunning)
+                {
+                    emit movie->finished();
+                }
+            }
         }
-    }
-
+    );
 }
 
 void Gview::triggerHealthpack(Tile * hp){

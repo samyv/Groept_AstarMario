@@ -36,7 +36,7 @@ public:
     unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
     int generationsAmount = 100;
-    unsigned long enemiesCount = 6;
+    unsigned long enemiesCount = 15;
     void makeModel();
     Model * m;
     void copyEnemies();

@@ -8,5 +8,6 @@
         <file>goombaretro.png</file>
         <file>mushroom.png</file>
         <file>PEnemy.png</file>
+        <file>explosion.gif</file>
     </qresource>
 </RCC>

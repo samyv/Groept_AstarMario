@@ -41,7 +41,7 @@ public:
     World * world;
     double displaySize = 0.8;
     QGraphicsScene * scene;
-
+    QGraphicsOpacityEffect *eff;
 
 
     void makeModel();
@@ -65,7 +65,7 @@ signals:
     void sendSound(QString);
 public slots:
     void updateProtagonist(int x, int y);
-    void explodeEnemy(float health,Enemy * enemy);
+    void explodeEnemy(int poisonlevel);
     void triggerHealthpack(Tile * hp);
     void drawCurrentBest(vector<tile_t*> path);
     void enemyDead();

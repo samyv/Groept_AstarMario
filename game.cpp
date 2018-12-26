@@ -46,11 +46,9 @@ Game::Game(Gview * gview)
     for(unique_ptr<Enemy> & a: enemies){
         if(typeid (*a) == typeid (Enemy)){
             connect(a.get(), SIGNAL(dead()), gview, SLOT(enemyDead()));
-            cout << typeid (*a).name() << endl;
-
         } else if(typeid (*a) == typeid (PEnemy)){
             connect(a.get(), SIGNAL(dead()), gview, SLOT(penemyDead()));
-            cout << typeid (*a).name() << endl;
+            connect(a.get(), SIGNAL(poisonLevelUpdated(int)), gview, SLOT(explodeEnemy(int)));
         }
 
     }
@@ -81,11 +79,16 @@ void Game::step(){
         for(auto &enemy : enemies){
             if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
                 protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
-                enemy->setDefeated(true);
+                if(typeid (*enemy) == typeid (Enemy)){
+                    enemy->setDefeated(true);
+
+                } else if(typeid (*enemy) == typeid (PEnemy)){
+                    dynamic_cast<PEnemy*>(enemy.get())->poison();
+                }
                 //Erase–remove idiom
                 enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
                 protagonist->setEnergy(100);
-                emit sendSound("qrc:/sound/smw_kick.wav");
+//                emit sendSound("qrc:/sound/smw_kick.wav");
                 break;
             }
         }

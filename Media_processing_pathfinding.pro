@@ -34,7 +34,8 @@ SOURCES += \
     view.cpp \
     gview.cpp \
     tview.cpp \
-    DisplayManner.cpp
+    DisplayManner.cpp \
+    customview.cpp
 
 HEADERS += \
     model.h \
@@ -42,7 +43,8 @@ HEADERS += \
     view.h \
     gview.h \
     tview.h \
-    DisplayManner.h
+    DisplayManner.h \
+    customview.h
 
 FORMS += \
         mainwindow.ui

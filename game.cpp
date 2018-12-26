@@ -13,7 +13,7 @@ Game::Game(Gview * gview)
     world = new World();
     tiles = world->createWorld(":/worldmap4.png");
 
-    gview->showFullScreen();
+    gview->show();
     background = new QMediaPlayer();
     background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
     background->setVolume(50);

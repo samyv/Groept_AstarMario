@@ -40,7 +40,7 @@ public:
     World * world;
     double displaySize = 0.8;
     QGraphicsScene * scene;
-    int _numScheduledScalings = 0;
+
 
 
     void makeModel();
@@ -49,7 +49,7 @@ public:
     int prevX = 0;
     void initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
     vector<unique_ptr<QGraphicsRectItem>> bestPath;
-    void wheelEvent ( QWheelEvent * event );
+
 signals:
     void buttonClicked(QString);
     void gameStart();
@@ -63,8 +63,6 @@ public slots:
     void triggerHealthpack(Tile * hp);
     void drawCurrentBest(vector<tile_t*> path);
     void enemyDead();
-    void scalingTime(qreal x);
-    void animFinished();
     void drawPoisoned(qreal,qreal);
     void penemyDead();
 private slots:

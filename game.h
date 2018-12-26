@@ -13,6 +13,7 @@ public:
     explicit Game(Gview * gview);
     ~Game();
     World * world;
+    bool ai = false;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
     vector<Enemy *> enemiesInOrder;
@@ -48,6 +49,7 @@ signals:
     void poisonedTile(qreal,qreal);
 public slots:
     void step();
+    void stepUser();
     void playSound(QString file);
     void setNeighboursPoison(qreal,qreal);
     void startTime();

@@ -207,22 +207,6 @@ void Model::printqueue(priority_queue<tile_t *, vector<tile_t *>, comp> list){
     cout << "DONE PRINTING" << endl << endl;
 }
 
-/*void Model::printqueue(vector<tile_t *> list){
-    cout << endl << "PRINTING HEAP" << endl;
-
-    for(uint i = 0; i < list.size(); i++){
-        int x = list.at(i)->t->getXPos();
-        int y = list.at(i)->t->getYPos();
-        double f = list.at(i)->f;
-        cout << x << " , "<< y << ", F: " << f << endl;
-    }
-    cout << "DONE PRINTING" << endl << endl;
-}
-
-bool Model::comp(const tile_t * a, const tile_t * b){
-    return a->f > b->f;
-}*/
-
 void Model::weightchanged(int i, double val){
     cout << i << ", " << val << endl;
     if(i == 1){

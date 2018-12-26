@@ -13,7 +13,7 @@ Game::Game(Gview * gview)
     world = new World();
     tiles = world->createWorld(":/worldmap4.png");
 
-    gview->show();
+    gview->showFullScreen();
     background = new QMediaPlayer();
     background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
     background->setVolume(50);
@@ -28,7 +28,12 @@ Game::Game(Gview * gview)
     makeModel();
     //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
     timer = new QTimer(gview);
-    QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
+    if(ai){
+        QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
+
+    } else {
+        QObject::connect(timer,SIGNAL(timeout()),this,SLOT(stepUser()));
+    }
 
     //CONNECTIONS WHEN PROTAGONIST DATA CHANGES
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
@@ -38,11 +43,11 @@ Game::Game(Gview * gview)
     for(unique_ptr<Enemy> & a: enemies){
         if(typeid (*a) == typeid (Enemy)){
             connect(a.get(), SIGNAL(dead()), gview, SLOT(enemyDead()));
-            cout << typeid (a).name() << endl;
+            cout << typeid (*a).name() << endl;
 
         } else if(typeid (*a) == typeid (PEnemy)){
             connect(a.get(), SIGNAL(dead()), gview, SLOT(penemyDead()));
-            cout << typeid (a).name() << endl;
+            cout << typeid (*a).name() << endl;
         }
 
     }
@@ -54,7 +59,7 @@ Game::Game(Gview * gview)
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(gview,SIGNAL(gameStart()), m,SLOT(dotheSalesman()));
     connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
-    QObject::connect(this,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
+    QObject::connect(m,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), m,SLOT(dotheSalesmanG()));
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
@@ -95,6 +100,10 @@ void Game::step(){
     }
 }
 
+
+void Game::stepUser(){
+
+}
 
 
 

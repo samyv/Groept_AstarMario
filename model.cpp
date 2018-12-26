@@ -27,7 +27,7 @@ void Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols){
 }
 
 
-vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & map){
+path_t * Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & map){
     vector<tile_t *> path;
     open = priority_queue<tile_t *, vector<tile_t *>, comp>();
     this->goal = goal;
@@ -103,12 +103,18 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     if(open.empty()){
         cout << "OPEN EMPTY" << endl;
     }
-    //cout << "Time passed: " <<(clock() - st)/(CLOCKS_PER_SEC/1000) << endl;
-    return path;
+    //cout << "Time passed: " <<(clock() - st)/(CLOCKS_PER_SEC/1000) << endl;µ
+    path_t * p = new path_t();
+    p->path = path;
+    p->cost = path.front()->f;
+    return p;
 }
 
 void Model::resetMap(vector<tile_t *> map){
     for(tile_t * t : map){
+        t->f = 0;
+        t->g = 0;
+        t->h = 0;
         t->open = false;
         t->closed = false;
         t->prev = nullptr;
@@ -261,7 +267,7 @@ void Model::dotheSalesmanG(){
             //CALC DISTANCE FOR EVERY MEMBER OF THE POPULATION
             double d = 0;
             for(int i = 0; i<enemiesToDefeat.size();i++){
-                d += distanceBetweenEnemies[member[i]][member[i+1]].size();
+                d += distanceBetweenEnemies[member[i]][member[i+1]]->cost;
             }
             //CHECK IF WE HAVE A NEW BEST ONE
             if(d < bestD){
@@ -269,8 +275,8 @@ void Model::dotheSalesmanG(){
                 bestOrder = member;
                 vector<tile_t *> bestOrderPath;
                 for(int i = 0; i < enemiesCount;i++){
-                    vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
-                    bestOrderPath.insert(bestOrderPath.begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
+                    path_t * pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+                    bestOrderPath.insert(bestOrderPath.begin(),pathBetweenEnemies->path.begin(),pathBetweenEnemies->path.end());
                 }
                 //DRAW THE CURRENT BEST ONE
                 emit newBest(bestOrderPath);
@@ -361,30 +367,60 @@ void Model::dotheSalesmanG(){
 
 
     printElement(bestOrder);
+
+    //
     for(int i = 0; i < enemiesCount;i++){
-        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
-        path->insert(path->begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
+        path_t * pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+        path->insert(path->begin(),pathBetweenEnemies->path.begin(),pathBetweenEnemies->path.end());
     }
     emit salesmanDone();
 }
 
-vector<vector<vector<tile_t *>>> Model::calculateDistances(){
-    vector<vector<vector<tile_t *>>> localArray(enemiesCount + 1, vector<vector<tile_t *>>(enemiesCount + 1, vector<tile_t *>(0,nullptr)));
-    for(unsigned long i = 0; i<enemiesCount + 1;i++){
-        for(unsigned long j = 0; j<enemiesCount + 1;j++){
+vector<vector<path_t *>> Model::calculateDistances(){
+    vector<vector<path_t *>> localArray(enemiesCount + healthpacksOver.size() + 1, vector<path_t *>(enemiesCount + healthpacksOver.size() + 1, nullptr));
+    for(unsigned long i = 0; i<enemiesCount + healthpacksOver.size() + 1;i++){
+        for(unsigned long j = 0; j<enemiesCount + healthpacksOver.size() + 1;j++){
+            //cout << i << ", " << j << endl;
             if(j == i){
-                localArray.at(i).at(j) = vector<tile_t *>(0,nullptr);
+                localArray.at(i).at(j) = nullptr;
             } else if(i==0 && j != 0){
-                vector<tile_t *> pathBetweenEnemies = calculateDistance(protagonist,enemiesToDefeat.at(j-1));
+                path_t * pathBetweenEnemies = new path_t;
+                if(j <  enemiesCount + 1){
+                    pathBetweenEnemies = calculateDistance(protagonist,enemiesToDefeat.at(j-1));
+                } else {
+                    pathBetweenEnemies = calculateDistance(protagonist,healthpacksOver.at(j-1 - enemiesCount));
+                }
                 localArray.at(i).at(j) = pathBetweenEnemies;
-                vector<tile_t *> pathBetweenEnemiesRevert(pathBetweenEnemies.rbegin(),pathBetweenEnemies.rend());
+                path_t * pathBetweenEnemiesRevert = new path_t;
+                *pathBetweenEnemiesRevert = *pathBetweenEnemies;
+                reverse(pathBetweenEnemiesRevert->path.begin(), pathBetweenEnemiesRevert->path.end());
+                //pathBetweenEnemiesRevert->path(pathBetweenEnemiesRevert->path.rbegin(),pathBetweenEnemies->path.rend());
                 localArray.at(j).at(i) = pathBetweenEnemiesRevert;
-            } else if(i != 0 && j != 0 && j > i){
-                vector<tile_t *> pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i-1)->getXPos() + enemiesToDefeat.at(i-1)->getYPos()*cols),map.at(enemiesToDefeat.at(j-1)->getXPos()+enemiesToDefeat.at(j-1)->getYPos()*cols),map);
                 resetMap(map);
+            } else if(i != 0 && j != 0 && j > i && i < enemiesCount + 1){
+                path_t * pathBetweenEnemies = new path_t;
+                if(j < enemiesCount + 1){
+                    pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i-1)->getXPos() + enemiesToDefeat.at(i-1)->getYPos()*cols),map.at(enemiesToDefeat.at(j-1)->getXPos()+enemiesToDefeat.at(j-1)->getYPos()*cols),map);
+                } else {
+                    pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i - 1)->getXPos() + enemiesToDefeat.at(i - 1)->getYPos()*cols),map.at(healthpacksOver.at(j - 1 - enemiesCount)->getXPos()+healthpacksOver.at(j - 1 - enemiesCount)->getYPos()*cols),map);
+                }
+
                 localArray.at(i).at(j) = pathBetweenEnemies;
-                vector<tile_t *> pathBetweenEnemiesRevert(pathBetweenEnemies.rbegin(),pathBetweenEnemies.rend());
+                path_t * pathBetweenEnemiesRevert = new path_t;
+                *pathBetweenEnemiesRevert = *pathBetweenEnemies;
+                reverse(pathBetweenEnemiesRevert->path.begin(), pathBetweenEnemiesRevert->path.end());
                 localArray.at(j).at(i) = pathBetweenEnemiesRevert;
+                resetMap(map);
+            } else if (i != 0 && j != 0 && j > i && i > enemiesCount){
+                path_t * pathBetweenEnemies = new path_t;
+                pathBetweenEnemies = aStar(map.at(healthpacksOver.at(i - 1 - enemiesCount)->getXPos() + healthpacksOver.at(i - 1 - enemiesCount)->getYPos()*cols),map.at(healthpacksOver.at(j - 1 - enemiesCount)->getXPos()+healthpacksOver.at(j - 1 - enemiesCount)->getYPos()*cols),map);
+
+                localArray.at(i).at(j) = pathBetweenEnemies;
+                path_t * pathBetweenEnemiesRevert = new path_t;
+                *pathBetweenEnemiesRevert = *pathBetweenEnemies;
+                reverse(pathBetweenEnemiesRevert->path.begin(), pathBetweenEnemiesRevert->path.end());
+                localArray.at(j).at(i) = pathBetweenEnemiesRevert;
+                resetMap(map);
             }
         }
     }
@@ -402,7 +438,7 @@ void Model::dotheSalesman(){
     while(1){
         double d = 0;
         for(int i = 0; i<enemiesToDefeat.size();i++){
-            d += distanceBetweenEnemies[order[i]][order[i+1]].size();
+            d += distanceBetweenEnemies[order[i]][order[i+1]]->cost;
         }
         if(d<bestD){
             bestOrder = order;
@@ -456,8 +492,8 @@ void Model::dotheSalesman(){
         }
     }
     for(int i = 0; i < enemiesCount;i++){
-        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
-        path->insert(path->begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
+        path_t * pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+        path->insert(path->begin(),pathBetweenEnemies->path.begin(),pathBetweenEnemies->path.end());
     }
     emit salesmanDone();
 }
@@ -468,9 +504,8 @@ void Model::printElement(vector<int> e){
     cout << e[e.size()-1] << endl;
 }
 
-vector<tile_t *> Model::calculateDistance(Tile * start,Tile * goal){
-    vector<tile_t *> local_path = aStar(map.at(start->getXPos() + start->getYPos()*cols),map.at(goal->getXPos()+goal->getYPos()*cols),map);
-    resetMap(map);
+path_t * Model::calculateDistance(Tile * start,Tile * goal){
+    path_t * local_path = aStar(map.at(start->getXPos() + start->getYPos()*cols),map.at(goal->getXPos()+goal->getYPos()*cols),map);
     return local_path;
 }
 
@@ -500,9 +535,9 @@ void Model::startGame(){
 
 
             //FIND PATH BETWEEN STARTPOS EN GOAL
-            vector<tile_t *> local_path = calculateDistance(start,protagonist);
+            path_t * local_path = calculateDistance(start,protagonist);
             //SET GLOBAL PATH = LOCAL PATH (NO FUCKING CLUE WHY THIS WORKS..)
-            path->insert(path->begin(),local_path.begin(),local_path.end());
+            path->insert(path->begin(),local_path->path.begin(),local_path->path.end());
 
             //WHEN PATH IS FOUND WE SET THE NEW STARTPOSITION = LAST GOAL
             start = closest;
@@ -524,8 +559,8 @@ void Model::startGame(){
             calc_health = 100;
 
             //FIND PATH BETWEEN STARTPOS EN GOAL
-            vector<tile_t *> local_path_hp = calculateDistance(start,closest_hp);
-            path->insert(path->begin(),local_path_hp.begin(),local_path_hp.end());
+            path_t * local_path_hp = calculateDistance(start,closest_hp);
+            path->insert(path->begin(),local_path_hp->path.begin(),local_path_hp->path.end());
 
             //SET NEW STARTPOSITION = LAST GOAL
             start = closest_hp;
@@ -540,9 +575,9 @@ void Model::startGame(){
 
 
             //FIND PATH BETWEEN STARTPOS EN GOAL
-            vector<tile_t *> local_path = calculateDistance(start,closest);
+            path_t * local_path = calculateDistance(start,closest);
             //SET GLOBAL PATH = LOCAL PATH (NO FUCKING CLUE WHY THIS WORKS..)
-            path->insert(path->begin(),local_path.begin(),local_path.end());
+            path->insert(path->begin(),local_path->path.begin(),local_path->path.end());
 
             //WHEN PATH IS FOUND WE SET THE NEW STARTPOSITION = LAST GOAL
             start = closest;
@@ -559,7 +594,7 @@ unsigned int Model::findClosestEnemy(Tile * t){
     unsigned int index = 0;
     double minD = double(INFINITY);
     for(unsigned int i = 0; i<enemiesToDefeat.size();i++){
-        double d = calculateDistance(t,enemiesToDefeat.at(i)).size();
+        double d = calculateDistance(t,enemiesToDefeat.at(i))->cost;
         if (d<minD){
             minD = d;
             index = i;
@@ -572,7 +607,7 @@ unsigned int Model::findClosestHealtpack(Tile * t){
     unsigned int index = 0;
     double minD = double(INFINITY);
     for(unsigned int i = 0; i<healthpacksOver.size();i++){
-        double d = calculateDistance(t,healthpacksOver.at(i)).size();
+        double d = calculateDistance(t,healthpacksOver.at(i))->cost;
         if (d<minD){
             minD = d;
             index = i;

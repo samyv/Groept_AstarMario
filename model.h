@@ -32,6 +32,11 @@ typedef struct tile{
     bool closed;
 } tile_t;
 
+typedef struct {
+    vector<tile_t *> path;
+    double cost;
+} path_t;
+
 struct comp //: public std::binary_function<tile_t *, tile_t *, bool>
 {
     bool operator()(tile_t * a, tile_t * b){
@@ -50,17 +55,17 @@ public:
     vector<tile_t *> * path;
     void makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols);
     vector<tile_t *> map;
-    vector<tile_t *> aStar(tile_t * start, tile_t * goal,  vector<tile_t *> & map);
+    path_t * aStar(tile_t * start, tile_t * goal,  vector<tile_t *> & map);
     void resetMap(vector<tile_t *> map);
     double distanceweight = 1;
     double stepweight = 1;
     double energyweight = 1;
-    vector<vector<vector<tile_t *>>> distanceBetweenEnemies;
-    vector<vector<vector<tile_t *>>> calculateDistances();
+    vector<vector<path_t *>> distanceBetweenEnemies;
+    vector<vector<path_t *>> calculateDistances();
     unsigned long enemiesCount = 6;
     int generationsAmount = 100;
     void printElement(vector<int> e);
-    vector<tile_t *>  calculateDistance(Tile *,Tile *);
+    path_t * calculateDistance(Tile *,Tile *);
     bool enoughHealth(float curr_health,float strength);
     unsigned int findClosestEnemy(Tile * t);
     unsigned int findClosestHealtpack(Tile * t);

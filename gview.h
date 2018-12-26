@@ -17,6 +17,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QDesktopWidget>
+#include "protagonistuser.h"
 
 
 namespace Ui {
@@ -57,6 +58,7 @@ signals:
     void changeweight(int, double);
     void geneticTrigger();
     void geneticStop();
+    void enemyDeadUser(int,int);
 public slots:
     void updateProtagonist(int x, int y);
     void explodeEnemy(float health,Enemy * enemy);
@@ -65,6 +67,7 @@ public slots:
     void enemyDead();
     void drawPoisoned(qreal,qreal);
     void penemyDead();
+    void collisonDetect();
 private slots:
 
     void changeHealthbar(int);
@@ -74,7 +77,7 @@ private slots:
     void on_startGenetic_toggled(bool checked);
 private:
     Ui::Gview *ui;
-    QGraphicsPixmapItem * mariopix;
+    ProtagonistUser * mariopix;
 };
 
 #endif // Gview_H

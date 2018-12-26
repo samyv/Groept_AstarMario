@@ -25,6 +25,7 @@ public:
     QMediaPlayer * background;
     QMediaPlayer * player;
     int enemiesDefeated = 0;
+
     Protagonist * getProtagonist();
     vector<unique_ptr<Tile>> greyTiles;
     unique_ptr<Protagonist> protagonist;
@@ -40,15 +41,18 @@ public:
     Model * m;
     void copyEnemies();
     QTimer * timer;
+    void eventFilter(QKeyEvent *e);
 signals:
     void enemyDefeated(float health,Enemy *);
     void healthpackGained(Tile *);
     void sendSound(QString);
+
     void updateHealthbar(float);
     void checkCollision();
     void poisonedTile(qreal,qreal);
 public slots:
     void step();
+    void userEnemyDefeated(int,int);
     void stepUser();
     void playSound(QString file);
     void setNeighboursPoison(qreal,qreal);

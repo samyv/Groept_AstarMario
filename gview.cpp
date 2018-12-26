@@ -7,7 +7,6 @@
 #include "game.h"
 #include <QPushButton>
 #include <QtAlgorithms>
-
 using namespace std;
 
 Gview::Gview(QWidget *parent) :
@@ -53,7 +52,9 @@ void Gview::drawMarioInit(){
     QImage mario = QImage(":/mario.png");
     mario = mario.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap protapix = QPixmap::fromImage(mario);
-    mariopix = new QGraphicsPixmapItem(protapix);
+    mariopix = new ProtagonistUser(protapix);
+    mariopix->setFlag(QGraphicsItem::ItemIsFocusable);
+    mariopix->setFocus();
     mariopix->setOffset(-mario.width()/2,-mario.height());
     mariopix->setOffset(-mario.width()/2,-mario.height());
     scene->addItem(mariopix);
@@ -246,9 +247,8 @@ void Gview::penemyDead(){
     QPixmap enemyPix;
     QImage pE = QImage(":/PEnemy.png");
     pE = pE.scaled(int(displaySize*24),int(displaySize*12));
-    for(uint i = 0;i<enemiesPixs.size();i++){
-        QGraphicsPixmapItem * local = enemiesPixs.at(i);
-        if(mariopix->collidesWithItem(local)){
+    for(auto &epix : enemiesPixs){
+        if(epix->collidesWithItem(mariopix,Qt::ItemSelectionMode::IntersectsItemShape)){
             QBrush brush(Qt::SolidPattern);
             QPen pen(Qt::SolidLine);
             pen.setWidth(3);
@@ -256,16 +256,26 @@ void Gview::penemyDead(){
             green.setAlpha(100);
             brush.setColor(green);
             pen.setColor(green);
-            scene->addEllipse(local->x()*displaySize,local->y()*displaySize,displaySize*200,displaySize*200,pen,brush);
+            scene->addEllipse(epix->pos().x(),epix->pos().y(),displaySize*200,displaySize*200,pen,brush);
             cout << "penemy" << endl;
-            emit poisonExplosion(local->x(),local->y());
+            emit poisonExplosion(epix->x(),epix->y());
             enemyPix = QPixmap::fromImage(pE);
-            local->setOffset(-pE.width()/2,-pE.height()/2);
+            epix->setOffset(-pE.width()/2,-pE.height()/2);
             QTransform transform;
             transform.translate(0, pE.height()/2);
-            local->setTransform(transform);
-            local->setPixmap(enemyPix);
+            epix->setTransform(transform);
+            epix->setPixmap(enemyPix);
+        }
+    }
+}
 
+void Gview::collisonDetect()
+{
+    for(auto &epix : enemiesPixs){
+        if(epix->collidesWithItem(mariopix,Qt::ItemSelectionMode::IntersectsItemShape)){
+            int x = epix->pos().x()/displaySize;
+            int y = epix->pos().y()/displaySize;
+            emit enemyDeadUser(x,y);
         }
     }
 }
@@ -289,5 +299,4 @@ void Gview::drawPoisoned(qreal x,qreal y){
     pen.setColor(QColor(0,255,0));
     scene->addRect(x*displaySize,y*displaySize,displaySize,displaySize,pen,brush);
 }
-
 

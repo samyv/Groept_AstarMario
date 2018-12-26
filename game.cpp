@@ -32,7 +32,9 @@ Game::Game(Gview * gview)
         QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
 
     } else {
+        cout << "user is playing " << endl;
         QObject::connect(timer,SIGNAL(timeout()),this,SLOT(stepUser()));
+        timer->start(4);
     }
 
     //CONNECTIONS WHEN PROTAGONIST DATA CHANGES
@@ -61,6 +63,9 @@ Game::Game(Gview * gview)
     connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
     QObject::connect(m,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), m,SLOT(dotheSalesmanG()));
+    QObject::connect(this,SIGNAL(checkCollision()), gview,SLOT(collisonDetect()));
+    QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
+
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
 
@@ -100,9 +105,24 @@ void Game::step(){
     }
 }
 
+void Game::userEnemyDefeated(int x, int y)
+{
+    for(auto &enemy : enemies){
+        if((x == enemy->getXPos()) && (y == enemy->getYPos())){
+            protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
+            enemy->setDefeated(true);
+            //Erase–remove idiom
+            enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+            emit sendSound("qrc:/sound/smw_kick.wav");
+            break;
+        }
+    }
+
+}
+
 
 void Game::stepUser(){
-
+    emit checkCollision();
 }
 
 
@@ -160,4 +180,13 @@ void Game::setNeighboursPoison(qreal x, qreal y){
 
 void Game::startTime(){
     timer->start(4);
+}
+
+
+void Game::eventFilter(QKeyEvent *e)
+{
+     cout << "NIET gay" << endl;
+    if(e->key() == Qt::ControlModifier){
+        cout << "gay" << endl;
+    }
 }

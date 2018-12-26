@@ -2,14 +2,13 @@
 #include <time.h>
 #include <queue>
 
-Model::Model(){
+Model::Model(vector<Enemy *> & enemiesToDefeat, vector<Tile *> & healthpacksOver, unsigned long e, int g, Protagonist * pro, vector<tile_t *> * p): enemiesToDefeat{enemiesToDefeat}, healthpacksOver{healthpacksOver},
+    enemiesCount{e}, generationsAmount{g}, protagonist{pro}, path{p}
+{
 
 }
 
-
-vector<tile_t *> Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols){
-
-    vector<tile_t *> map;
+void Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols){
 
     for(unique_ptr<Tile> & tile : tiles){
         tile_t * t = new tile_t;
@@ -25,8 +24,6 @@ vector<tile_t *> Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int 
 
     this->rows = rows;
     this->cols = cols;
-
-    return map;
 }
 
 
@@ -235,4 +232,367 @@ void Model::weightchanged(int i, double val){
     } else if (i == 3){
         energyweight = val;
     }
+}
+
+
+// SALESMAN
+
+
+void Model::dotheSalesmanG(){
+    unsigned long populationSize = 80;
+    vector<vector<int>> population(populationSize,vector<int>(enemiesCount+1,0));
+    vector<int> bestOrder(enemiesCount + 1, 0);
+    float mutationRate = 0.05;
+    double bestD = double(INFINITY);
+    vector<double> fitness(populationSize,0);
+
+    srand (time(NULL));
+    distanceBetweenEnemies = calculateDistances();
+    cout << "lets start salesman G!"<<endl;
+    //GENERATE A NEW POPULATION!
+    for(unsigned long j = 0; j < populationSize;j++){
+        vector<int> order(enemiesCount + 1, 0);
+        //CREATE A NEW ORDER 0123456...
+        for(unsigned long i = 0; i< (enemiesToDefeat.size() + 1);i++){
+            order.at(i) = i;
+        }
+        //MAKE IT RANDOM
+        for(unsigned long i = 0;i<10;i++){
+            unsigned long indexA = 1+ rand() % (order.size()-1);
+            //            cout << "indexA: " << indexA ;
+            unsigned long indexB = 1+ rand() % (order.size()-1);
+            //            cout << " and indexB: " << indexB << endl;
+            unsigned long swap = order[indexA];
+            order[indexA] = order[indexB];
+            order[indexB] = swap;
+        }
+        population[j] = order;
+    }
+
+    //MAKE A NEW GENARION BASED ON PREVIOUS ONE
+    for(int g = 0; g<generationsAmount;g++){
+        //CALCULATE TOTAL DISTANCE FOR EVERY MEMBER
+        for(unsigned long i = 0; i< populationSize;i++){
+            vector<int> member = population[i];
+            //CALC DISTANCE FOR EVERY MEMBER OF THE POPULATION
+            double d = 0;
+            for(int i = 0; i<enemiesToDefeat.size();i++){
+                d += distanceBetweenEnemies[member[i]][member[i+1]].size();
+            }
+            //CHECK IF WE HAVE A NEW BEST ONE
+            if(d < bestD){
+                bestD = d;
+                bestOrder = member;
+                vector<tile_t *> bestOrderPath;
+                for(int i = 0; i < enemiesCount;i++){
+                    vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+                    bestOrderPath.insert(bestOrderPath.begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
+                }
+                //DRAW THE CURRENT BEST ONE
+                emit newBest(bestOrderPath);
+            }
+            fitness[i] = 1/(d+1);
+        }
+
+        //NORMALIZE FITNESSES
+        double sum = 0;
+        for(unsigned long i = 0; i< fitness.size();i++){
+            sum += fitness[i];
+        }
+        for(unsigned long i = 0; i< fitness.size();i++){
+            fitness[i] = fitness[i] / sum;
+        }
+
+        //MAKE NEXT GENERATION!
+        vector<vector<int>> newPopulation(populationSize,vector<int>(enemiesCount+1,0));
+        for(unsigned long i = 0; i < populationSize;i++){
+            //POOLING ALGORITHM TO PICK TWO ACCORDING TO FITNESS LEVEL
+            vector<vector<int>> picks(2,vector<int>(enemiesCount+1,0));
+            for(int c = 0; c<2;c++){
+                unsigned long index = 0;
+                int get = rand();
+                if(get >= RAND_MAX){
+                    get = RAND_MAX - 1;
+                } else if(get <= 0){
+                    get = 1;
+                }
+                double r = (double(get) / (RAND_MAX)); //GENERATES RANDOM NUMBER BETWEEN 0 AND 1
+                while(r>0){
+                    r = r - fitness[index];
+                    index++;
+                }
+                index--;
+                picks[c] = population[index];
+            }
+
+
+            //CROSSOVERRR
+            //DEFINE RANDOM RANGE IN FIRST PICK
+            int startA = 1 + (rand() % (picks[0].size()-2));
+            int endA = startA + rand() % (picks[0].size()-startA-1);
+            int range = endA - startA+1; // +1 because we also need to count first element
+
+            //copy first dna part
+            vector<int> crossOver(range,0);
+            for(int n = 0; n <range;n++){
+                crossOver.at(n) = picks[0][startA+n];
+            }
+            //INSERT 2nd DNA PART
+            for(int c = 1;c<picks[1].size();c++){
+                int enemy = picks[1][c];
+                vector<int>::iterator it;
+                it = find(crossOver.begin(),crossOver.end(),enemy);
+                if (it == crossOver.end()) //FOUND NOT IN VECTOR c1
+                    crossOver.push_back(enemy);
+            }
+
+            //INSERT FIRST POSITION: THE PROTAGONIST OF COURSE
+            vector<int>::iterator it;
+            it = crossOver.begin();
+            it = crossOver.insert(it,0);
+
+            //MUTATIOOON
+
+            for(unsigned long m = 0; m < crossOver.size();m++){
+
+                if(((double) rand() / (RAND_MAX)) < mutationRate){
+
+                    unsigned long indexA = 1+ rand() % (crossOver.size()-1);
+                    unsigned long indexB = 1+ rand() % (crossOver.size()-1);
+                    unsigned long swap = crossOver[indexA];
+                    crossOver[indexA] = crossOver[indexB];
+                    crossOver[indexB] = swap;
+                    //XOR
+                    //crossOver[indexA] = crossOver[indexA] ^ crossOver[indexB];
+                    //crossOver[indexB] = crossOver[indexB] ^ crossOver[indexA];
+                    //crossOver[indexA] = crossOver[indexA] ^ crossOver[indexB];
+
+                }
+            }
+            newPopulation[i] = crossOver;
+
+        }
+        population = newPopulation;
+    }
+
+
+    printElement(bestOrder);
+    for(int i = 0; i < enemiesCount;i++){
+        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+        path->insert(path->begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
+    }
+    emit salesmanDone();
+}
+
+vector<vector<vector<tile_t *>>> Model::calculateDistances(){
+    vector<vector<vector<tile_t *>>> localArray(enemiesCount + 1, vector<vector<tile_t *>>(enemiesCount + 1, vector<tile_t *>(0,nullptr)));
+    for(unsigned long i = 0; i<enemiesCount + 1;i++){
+        for(unsigned long j = 0; j<enemiesCount + 1;j++){
+            if(j == i){
+                localArray.at(i).at(j) = vector<tile_t *>(0,nullptr);
+            } else if(i==0 && j != 0){
+                vector<tile_t *> pathBetweenEnemies = calculateDistance(protagonist,enemiesToDefeat.at(j-1));
+                localArray.at(i).at(j) = pathBetweenEnemies;
+                vector<tile_t *> pathBetweenEnemiesRevert(pathBetweenEnemies.rbegin(),pathBetweenEnemies.rend());
+                localArray.at(j).at(i) = pathBetweenEnemiesRevert;
+            } else if(i != 0 && j != 0 && j > i){
+                vector<tile_t *> pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i-1)->getXPos() + enemiesToDefeat.at(i-1)->getYPos()*cols),map.at(enemiesToDefeat.at(j-1)->getXPos()+enemiesToDefeat.at(j-1)->getYPos()*cols),map);
+                resetMap(map);
+                localArray.at(i).at(j) = pathBetweenEnemies;
+                vector<tile_t *> pathBetweenEnemiesRevert(pathBetweenEnemies.rbegin(),pathBetweenEnemies.rend());
+                localArray.at(j).at(i) = pathBetweenEnemiesRevert;
+            }
+        }
+    }
+    return localArray;
+}
+
+void Model::dotheSalesman(){
+    vector<int> order(enemiesCount + 1, 0);
+    vector<int> bestOrder(enemiesCount + 1, 0);
+    double bestD = double(INFINITY);
+    distanceBetweenEnemies = calculateDistances();
+    for(int i = 0; i< int(enemiesToDefeat.size() + 1);i++){
+        order.at(i) = i;
+    }
+    while(1){
+        double d = 0;
+        for(int i = 0; i<enemiesToDefeat.size();i++){
+            d += distanceBetweenEnemies[order[i]][order[i+1]].size();
+        }
+        if(d<bestD){
+            bestOrder = order;
+            bestD = d;
+        }
+
+        int x,y;
+        // 0,5,1,7,6,3,9,8,4,2
+        //FIND THE BIGGEST X SO THAT order[x] < order[x+1]
+        x = -1;
+        for(int i = 1;i<enemiesCount;i++){
+            if(order[i] < order[i + 1]){
+                x = i;
+            }
+        }
+        if(x == -1){
+            break;
+        }
+
+        for(int i = 1;i<enemiesCount+1;i++){
+            if(order[i] > order[x]){
+                y = i;
+            }
+        }
+
+        //        cout << "x: " << x << endl;
+        //        cout << "y: " << y << endl;
+
+        int swap = order[x];
+        order[x] = order[y];
+        order[y] = swap;
+        //        for(int i = 0; i < enemiesCount; i++){
+        //            cout << order[i] << "-->";
+        //        }
+        //        cout << order[8] << endl;
+        //reversevector<int>
+        int reversed[enemiesCount + 1];
+
+        //dont reverse everything before x exept after nukken
+        for(int i = 0; i <= x; i++){
+            reversed[i] = order[i];
+        }
+
+        for(int i = x + 1, j = enemiesCount; i < enemiesCount+1; i++, j--){
+            reversed[j] = order[i];
+        }
+
+        //copy reversed to order
+        for(int i = 0; i < enemiesCount +1; i++){
+            order[i] = reversed[i];
+        }
+    }
+    for(int i = 0; i < enemiesCount;i++){
+        vector<tile_t*> pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+        path->insert(path->begin(),pathBetweenEnemies.begin(),pathBetweenEnemies.end());
+    }
+    emit salesmanDone();
+}
+void Model::printElement(vector<int> e){
+    for(int i = 0; i < e.size()-1; i++){
+        cout << e[i] << "-->";
+    }
+    cout << e[e.size()-1] << endl;
+}
+
+vector<tile_t *> Model::calculateDistance(Tile * start,Tile * goal){
+    vector<tile_t *> local_path = aStar(map.at(start->getXPos() + start->getYPos()*cols),map.at(goal->getXPos()+goal->getYPos()*cols),map);
+    resetMap(map);
+    return local_path;
+}
+
+void Model::startGame(){
+    Enemy * closest;
+    float calc_health = 100.0f;
+    Tile * start = protagonist;
+    //STILL ENEMIES LEFT/**
+    vector<Enemy *> enemiesInOrder;
+    vector<Tile *> healtpacksInOrder;
+    emit salesmanDone();
+    while(!enemiesToDefeat.empty()){
+        //FIND THE CLOSEST ENEMY
+        unsigned int indexToDelete = findClosestEnemy(protagonist);
+        closest = enemiesToDefeat.at(indexToDelete);
+        //CAN WE DEAFEAT THE ENEMY WITHOUT DYING?
+        if(enoughHealth(calc_health,closest->getValue())){
+            //---------YES => calculate remaining health----------------
+            calc_health -= closest->getValue();
+
+            //PUSH closest enemy in the list to defeat
+            enemiesInOrder.push_back(closest);
+
+            //erase from list
+            enemiesToDefeat.erase(remove(enemiesToDefeat.begin(), enemiesToDefeat.end(),enemiesToDefeat.at(indexToDelete)), enemiesToDefeat.end());
+
+
+
+            //FIND PATH BETWEEN STARTPOS EN GOAL
+            vector<tile_t *> local_path = calculateDistance(start,protagonist);
+            //SET GLOBAL PATH = LOCAL PATH (NO FUCKING CLUE WHY THIS WORKS..)
+            path->insert(path->begin(),local_path.begin(),local_path.end());
+
+            //WHEN PATH IS FOUND WE SET THE NEW STARTPOSITION = LAST GOAL
+            start = closest;
+
+            //WE CLEAR LOCAL PATH
+            //            vector<tile_t *>().swap(local_path);
+
+            //---------NO => Search healthpack----------------\\
+            //CHECK IF THERE ARE HEALTHPACKS LEFT
+        } else if (!healthpacksOver.empty()) {
+            //YES => find CLOSEST HEALTHPACK
+            unsigned int closest_index = findClosestHealtpack(protagonist);
+            Tile * closest_hp = healthpacksOver.at(closest_index);
+            healtpacksInOrder.push_back(closest_hp);
+
+            //erase from list
+            healthpacksOver.erase(remove(healthpacksOver.begin(), healthpacksOver.end(),healthpacksOver.at(closest_index)), healthpacksOver.end());
+
+            calc_health = 100;
+
+            //FIND PATH BETWEEN STARTPOS EN GOAL
+            vector<tile_t *> local_path_hp = calculateDistance(start,closest_hp);
+            path->insert(path->begin(),local_path_hp.begin(),local_path_hp.end());
+
+            //SET NEW STARTPOSITION = LAST GOAL
+            start = closest_hp;
+        } else if(healthpacksOver.empty() && calc_health > 0){
+            calc_health -= closest->getValue();
+
+            //PUSH closest enemy in the list to defeat
+            enemiesInOrder.push_back(closest);
+
+            //erase from list
+            enemiesToDefeat.erase(remove(enemiesToDefeat.begin(), enemiesToDefeat.end(),enemiesToDefeat.at(indexToDelete)), enemiesToDefeat.end());
+
+
+            //FIND PATH BETWEEN STARTPOS EN GOAL
+            vector<tile_t *> local_path = calculateDistance(start,closest);
+            //SET GLOBAL PATH = LOCAL PATH (NO FUCKING CLUE WHY THIS WORKS..)
+            //                        path.insert(path.begin(),local_path.begin(),local_path.end());
+
+            //WHEN PATH IS FOUND WE SET THE NEW STARTPOSITION = LAST GOAL
+            start = closest;
+            break;
+        }
+    }
+}
+
+bool Model::enoughHealth(float curr_health,float strength){
+    return (curr_health - strength > 0);
+}
+
+unsigned int Model::findClosestEnemy(Tile * t){
+    unsigned int index = 0;
+    double minD = double(INFINITY);
+    for(unsigned int i = 0; i<enemiesToDefeat.size();i++){
+        double d = calculateDistance(t,enemiesToDefeat.at(i)).size();
+        if (d<minD){
+            minD = d;
+            index = i;
+        }
+    }
+    return index;
+}
+
+unsigned int Model::findClosestHealtpack(Tile * t){
+    unsigned int index = 0;
+    double minD = double(INFINITY);
+    for(unsigned int i = 0; i<healthpacksOver.size();i++){
+        double d = calculateDistance(t,healthpacksOver.at(i)).size();
+        if (d<minD){
+            minD = d;
+            index = i;
+        }
+    }
+    return index;
 }

@@ -19,6 +19,9 @@ Game::Game(Gview * gview)
     background->setVolume(50);
     background->play();
     player = new QMediaPlayer();
+    QObject::connect(gview->getMariopix(),SIGNAL(marioMoved(int,int)),this,SLOT(checkTile(int,int)));
+    QObject::connect(this,SIGNAL(changeMario(int,int)),gview,SLOT(updateProtagonist(int,int)));
+
     ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     protagonist = world->getProtagonist();
     enemies = world->getEnemies(enemiesCount);
@@ -34,7 +37,7 @@ Game::Game(Gview * gview)
     } else {
         cout << "user is playing " << endl;
         QObject::connect(timer,SIGNAL(timeout()),this,SLOT(stepUser()));
-        timer->start(4);
+        timer->start(0);
     }
 
     //CONNECTIONS WHEN PROTAGONIST DATA CHANGES
@@ -59,12 +62,13 @@ Game::Game(Gview * gview)
     QObject::connect(this,SIGNAL(healthpackGained(Tile *)), gview,SLOT(triggerHealthpack(Tile *)));
 
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
-    QObject::connect(gview,SIGNAL(gameStart()), m,SLOT(dotheSalesman()));
+    QObject::connect(gview,SIGNAL(gameStart()), m,SLOT(startGame()));
     connect(gview, SIGNAL(changeweight(int,double)), m, SLOT(weightchanged(int,double)));
     QObject::connect(m,SIGNAL(newBest(vector<tile_t*>)), gview,SLOT(drawCurrentBest(vector<tile_t*>)));
     QObject::connect(gview,SIGNAL(geneticTrigger()), m,SLOT(dotheSalesmanG()));
     QObject::connect(this,SIGNAL(checkCollision()), gview,SLOT(collisonDetect()));
     QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
+    QObject::connect(gview,SIGNAL(hpUser(int,int)),this,SLOT(hpTrigger(int,int)));
 
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
@@ -100,7 +104,7 @@ void Game::step(){
             emit sendSound("qrc:/sound/smw_castle_clear.wav");
         }
         path.pop_back();
-    } else {
+    } else{
         //cout << "PATH EMPTY" << endl;
     }
 }
@@ -117,8 +121,22 @@ void Game::userEnemyDefeated(int x, int y)
             break;
         }
     }
-
 }
+
+void Game::hpTrigger(int x, int y)
+{
+    for(auto &hp : healthpacks){
+        if((x == hp->getXPos()) && (y == hp->getYPos())){
+            protagonist->setHealth(protagonist->getHealth()+hp->getValue());
+            emit healthpackGained(hp.get());
+            //Erase–remove idiom
+            healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
+            emit sendSound("qrc:/sound/smw_1-up.wav");
+            break;
+        }
+    }
+}
+
 
 
 void Game::stepUser(){
@@ -166,26 +184,37 @@ Game::~Game(){
 
 
 void Game::setNeighboursPoison(qreal x, qreal y){
-//    Tile * base;
-//    cout << "x: " << x << "y: " << y<< endl;
-//    for(auto &t : tiles){
-//        if(t->getXPos() == x && t->getYPos()== y){
+    //    Tile * base;
+    //    cout << "x: " << x << "y: " << y<< endl;
+    //    for(auto &t : tiles){
+    //        if(t->getXPos() == x && t->getYPos()== y){
 
-//            base = t.get();
-//            break;
-//        }
-//    }
-//    cout << base->getXPos() << " " << base->getYPos() << endl;
+    //            base = t.get();
+    //            break;
+    //        }
+    //    }
+    //    cout << base->getXPos() << " " << base->getYPos() << endl;
 }
 
 void Game::startTime(){
     timer->start(4);
 }
 
+void Game::checkTile(int x, int y)
+{
+    Tile * t = tiles.at(uint(protagonist->getXPos()+x+(protagonist->getYPos()+y)*world->getCols())).get();
+    cout << t->getValue() << endl;
+    if(t->getValue() != INFINITY & t->getValue() != 0.0f){
+        cout << "set x: "<<x<<" y: "<<y<< endl;
+        protagonist->setPos(protagonist->getXPos()+x,protagonist->getYPos()+y);
+    }
+}
+
+
 
 void Game::eventFilter(QKeyEvent *e)
 {
-     cout << "NIET gay" << endl;
+    cout << "NIET gay" << endl;
     if(e->key() == Qt::ControlModifier){
         cout << "gay" << endl;
     }

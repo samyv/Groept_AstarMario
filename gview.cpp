@@ -95,8 +95,10 @@ void Gview::setupScene(){
 }
 
 void Gview::updateProtagonist(int x, int y){
+    cout << "updateProtagonist: " << x<<":"<<y<<endl;
     mariopix->setPos(x*displaySize,y*displaySize);
-    int scale = x - prevX;
+    cout << "getPOS: " << mariopix->x()<<":"<<mariopix->y()<<endl;
+    int scale = (x - prevX >0)?1:-1;
     if(scale != 0){
         mariopix->setTransform(QTransform::fromScale(scale,1));
     }
@@ -256,7 +258,7 @@ void Gview::penemyDead(){
             green.setAlpha(100);
             brush.setColor(green);
             pen.setColor(green);
-            scene->addEllipse(epix->pos().x(),epix->pos().y(),displaySize*200,displaySize*200,pen,brush);
+            scene->addEllipse(epix->pos().x()-displaySize*200/2,epix->pos().y()-displaySize*200/2,displaySize*200,displaySize*200,pen,brush);
             cout << "penemy" << endl;
             emit poisonExplosion(epix->x(),epix->y());
             enemyPix = QPixmap::fromImage(pE);
@@ -278,6 +280,18 @@ void Gview::collisonDetect()
             emit enemyDeadUser(x,y);
         }
     }
+    for(auto &hpix : hpPixs){
+        if(hpix->collidesWithItem(mariopix,Qt::ItemSelectionMode::IntersectsItemShape)){
+            int x = hpix->pos().x()/displaySize;
+            int y = hpix->pos().y()/displaySize;
+            emit hpUser(x,y);
+        }
+    }
+}
+
+void Gview::cameracenter(int x, int y)
+{
+    ui->graphicsView->centerOn(x*displaySize,y*displaySize);
 }
 
 void Gview::on_startGenetic_toggled(bool checked)
@@ -289,6 +303,11 @@ void Gview::on_startGenetic_toggled(bool checked)
         ui->startGenetic->setText("STARTG");
         emit geneticStop();
     }
+}
+
+ProtagonistUser *Gview::getMariopix() const
+{
+    return mariopix;
 }
 
 void Gview::drawPoisoned(qreal x,qreal y){

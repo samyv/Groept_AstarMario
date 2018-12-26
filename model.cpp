@@ -50,52 +50,52 @@ vector<tile_t *> Model::aStar(tile_t * start, tile_t * goal, vector<tile_t *> & 
     try {
 
 
-    while(!open.empty()){
-        //run algorithm
-        current = open.top();
-        if(current == prev){
-            cout << "jaja tis dees" << endl;
-        }
-        prev = current;
+        while(!open.empty()){
+            //run algorithm
+            current = open.top();
+            if(current == prev){
+                cout << "jaja tis dees" << endl;
+            }
+            prev = current;
 
-        //current = open.front();
-        //pop_heap(open.begin(), open.end(), comp);
-        //open.pop_back();
-        open.pop();
+            //current = open.front();
+            //pop_heap(open.begin(), open.end(), comp);
+            //open.pop_back();
+            open.pop();
 
-        //cout << "Current: " << current->t->getXPos() << ", " << current->t->getYPos() << " F: " << current->f << endl;
-        /*if(current->t->getXPos() == 1181 && current->t->getYPos() == 1185){
+            //cout << "Current: " << current->t->getXPos() << ", " << current->t->getYPos() << " F: " << current->f << endl;
+            /*if(current->t->getXPos() == 1181 && current->t->getYPos() == 1185){
             cout << "Goal at current??" << endl;
         }*/
-        current->closed = true;
+            current->closed = true;
 
-        if(current == goal){
-            //get path and initiate draw
+            if(current == goal){
+                //get path and initiate draw
 
-            path.push_back(current);
-            tile_t * temp = current->prev;
-            while(temp != nullptr){
-                path.push_back(temp);
-                if(temp->prev != nullptr){
-                    temp = temp->prev;
-                } else {
-                    temp = nullptr;
+                path.push_back(current);
+                tile_t * temp = current->prev;
+                while(temp != nullptr){
+                    path.push_back(temp);
+                    if(temp->prev != nullptr){
+                        temp = temp->prev;
+                    } else {
+                        temp = nullptr;
+                    }
+
                 }
 
+                //cout << "GOT TO GOAL IN " << path.size() << " STEPS" << endl;
+                break;
             }
 
-            //cout << "GOT TO GOAL IN " << path.size() << " STEPS" << endl;
-            break;
+            checkNeighbours(&current, map);
+            //printqueue(open);
+            count++;
+            //if(count >= 50){
+            // break;
+            //}
+
         }
-
-        checkNeighbours(&current, map);
-        //printqueue(open);
-        count++;
-        //if(count >= 50){
-           // break;
-        //}
-
-    }
     } catch (const std::bad_alloc) {
         cout << open.size() << endl;
     }
@@ -163,12 +163,12 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
                         tile->prev = t;
 
                         if(!tile->open){
-                        //open.push_back(tile);
+                            //open.push_back(tile);
 
-                        tile->h = heuristic(tile, goal);
-                        tile->open = true;
-                        tile->f = stepweight * newg + tile->h * distanceweight;
-                        open.push(tile);
+                            tile->h = heuristic(tile, goal);
+                            tile->open = true;
+                            tile->f = stepweight * newg + tile->h * distanceweight;
+                            open.push(tile);
                         }
 
                         //push_heap(open.begin(), open.end(), comp);
@@ -542,7 +542,7 @@ void Model::startGame(){
             //FIND PATH BETWEEN STARTPOS EN GOAL
             vector<tile_t *> local_path = calculateDistance(start,closest);
             //SET GLOBAL PATH = LOCAL PATH (NO FUCKING CLUE WHY THIS WORKS..)
-            //                        path.insert(path.begin(),local_path.begin(),local_path.end());
+            path->insert(path->begin(),local_path.begin(),local_path.end());
 
             //WHEN PATH IS FOUND WE SET THE NEW STARTPOSITION = LAST GOAL
             start = closest;

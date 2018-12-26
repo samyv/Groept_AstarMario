@@ -3,10 +3,13 @@
 
 #include <QGraphicsItem>
 
-class ProtagonistUser : public QGraphicsPixmapItem{
+class ProtagonistUser : public QObject,public QGraphicsPixmapItem{
+     Q_OBJECT
 public:
-    ProtagonistUser(QPixmap qp);
-    int stepsize = 5;
+    explicit ProtagonistUser(QPixmap qp);
+    int stepsize = 10;
+signals:
+    void marioMoved(int,int);
 protected:
     void keyPressEvent(QKeyEvent * ev);
 };

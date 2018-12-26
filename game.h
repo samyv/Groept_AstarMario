@@ -13,7 +13,7 @@ public:
     explicit Game(Gview * gview);
     ~Game();
     World * world;
-    bool ai = false;
+    bool ai = true;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
     vector<Enemy *> enemiesInOrder;
@@ -46,7 +46,7 @@ signals:
     void enemyDefeated(float health,Enemy *);
     void healthpackGained(Tile *);
     void sendSound(QString);
-
+    void changeMario(int,int);
     void updateHealthbar(float);
     void checkCollision();
     void poisonedTile(qreal,qreal);
@@ -57,6 +57,8 @@ public slots:
     void playSound(QString file);
     void setNeighboursPoison(qreal,qreal);
     void startTime();
+    void checkTile(int,int);
+    void hpTrigger(int,int);
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);
 

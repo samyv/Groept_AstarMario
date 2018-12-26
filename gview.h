@@ -51,6 +51,8 @@ public:
     void initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
     vector<unique_ptr<QGraphicsRectItem>> bestPath;
 
+    ProtagonistUser *getMariopix() const;
+
 signals:
     void buttonClicked(QString);
     void gameStart();
@@ -59,6 +61,9 @@ signals:
     void geneticTrigger();
     void geneticStop();
     void enemyDeadUser(int,int);
+    void hpUser(int,int);
+
+
 public slots:
     void updateProtagonist(int x, int y);
     void explodeEnemy(float health,Enemy * enemy);
@@ -68,6 +73,7 @@ public slots:
     void drawPoisoned(qreal,qreal);
     void penemyDead();
     void collisonDetect();
+    void cameracenter(int,int);
 private slots:
 
     void changeHealthbar(int);

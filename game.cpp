@@ -9,18 +9,19 @@ using namespace std;
 Game::Game(Gview * gview)
 {
     world = new World();
-    tiles = world->createWorld(":/maze1.png");
+    tiles = world->createWorld(":/worldmap4.png");
     makeModel();
     Tview * tview = new Tview(move(tiles), move(healthPacks), move(enemies), world->getCols(), world->getRows());
-    gview->show();
+    //gview->show();
     //generateWorld();
     ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     protagonist = world->getProtagonist();
-    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
+    tview->updateProtagonist(protagonist->getXPos(), protagonist->getYPos());
+    /*QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
     QTimer * timer = new QTimer(gview);
     QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
-    timer->start(20);
+    timer->start(20); */
 }
 
 
@@ -43,7 +44,8 @@ void Game::makeModel(){
     //        count++;
     //    }
     //    cout << count<< endl;
-    enemies = world->getEnemies(1);
+    enemies = world->getEnemies(500);
+
     healthPacks = world->getHealthPacks(2);
 }
 int i = 0;

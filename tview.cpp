@@ -17,7 +17,11 @@ Tview::Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPack
         int x = enemies.at(i)->getXPos();
         int y = enemies.at(i)->getYPos();
         int index = (columns*y + x);
-        characters.at(index) = "E";
+        if(typeid(*enemies.at(i)) == typeid(Enemy)){
+            characters.at(index) = "E";
+        }else{
+            characters.at(index) = "B"; //those are pEnemies, "B" because of the fact they can explode (bom)
+        }
     }
 
     for(unsigned long i =0; i <healthPacks.size();i++){
@@ -45,13 +49,19 @@ Tview::Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPack
 }
 
 void Tview::updateProtagonist(int x, int y){
-    int xStart = x - terminalMapSize;
-    int yStart = y - terminalMapSize;
-    int xEnd = x + terminalMapSize;
-    int yEnd = y + terminalMapSize;
+    centerX = x;
+    centerY = y;
+    drawCharacters();
+}
+
+void Tview::drawCharacters(){
+    int xStart = centerX - terminalMapSize;
+    int yStart = centerY - terminalMapSize;
+    int xEnd = centerX + terminalMapSize;
+    int yEnd = centerY + terminalMapSize;
 
 
-    protagonistIndex = (worldColumns*y + x);
+    protagonistIndex = (worldColumns*centerY + centerX);
     if(!characters.at(protagonistIndex).empty()){
         characters.at(protagonistIndex) = "";
     }
@@ -104,6 +114,10 @@ void Tview::updateProtagonist(int x, int y){
                 cout << "\x1b[44m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
             } else if(charac == "E"){
                 cout << "\x1b[41m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
+            } else if(charac == "B"){
+                cout << "\x1b[45m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
+            } else if(charac == "!"){
+                cout << "\x1b[48;5;91m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
             } else if(charac == "H"){
                 cout << "\x1b[42m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
             } else if(charac.length()>2){
@@ -117,9 +131,49 @@ void Tview::updateProtagonist(int x, int y){
         }
         cout <<""<< endl;
     }
+    //healthbar and energybar
+    for(int j =0; j < 2*terminalMapSize;j++){
+        double healthSize = 2*terminalMapSize*healthPercentage*0.01;
+        if(j<= healthSize){
+            if(healthPercentage<=50 && healthPercentage>30){
+                cout << "\x1b[48;5;178m" << "     "<<"\x1b[0m";
+            } else if(healthPercentage<=30){
+                cout << "\x1b[41m" << "     "<<"\x1b[0m";
+            } else {
+                cout << "\x1b[42m" << "     "<<"\x1b[0m";
+            }
+        } else {
+            cout << "\x1b[40m" << "     "<<"\x1b[0m";
+        }
+    }
+    cout <<""<< endl;
+    for(int j =0; j < 2*terminalMapSize;j++){
+        double energySize = 2*terminalMapSize*energyPercentage*0.01;
+        if(j<= energySize){
+            cout << "\x1b[44m" << "     "<<"\x1b[0m";
+        } else {
+            cout << "\x1b[40m" << "     "<<"\x1b[0m";
+        }
+    }
+    cout <<""<< endl;
 }
 
-void Tview::updateEnemy(unique_ptr<Enemy> enemy){
-    int enemyIndex = protagonistIndex = (worldColumns*(enemy->getYPos()) + enemy->getXPos());
-    characters.at(enemyIndex) = "";
+void Tview::updatePoisonTiles(vector<unique_ptr<Tile>> poisonTiles){
+    for(unsigned long i =0; i <poisonTiles.size();i++){
+        int x = poisonTiles.at(i)->getXPos();
+        int y = poisonTiles.at(i)->getYPos();
+        int index = (worldColumns*y + x);
+        characters.at(index) = "!"; //set character for poisoned tiles
+    }
+    drawCharacters();
+}
+
+void Tview::updateHealth(int healthPercentage){
+    this->healthPercentage = healthPercentage;
+    drawCharacters();
+}
+
+void Tview::changeEnergyBar(int energyPercentage){
+    this->energyPercentage = energyPercentage;
+    drawCharacters();
 }

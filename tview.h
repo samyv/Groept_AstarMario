@@ -14,14 +14,21 @@ class Tview : public QObject
    Q_OBJECT
 public:
     Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPacks, vector<unique_ptr<Enemy>> enemies, int columns, int rows);
-    int terminalMapSize = 15;
+    int terminalMapSize = 50;
 
-    void updateEnemy(unique_ptr<Enemy> enemy);
+    void updatePoisonTiles(vector<unique_ptr<Tile>> poisonTiles);
     vector<string> characters;
     int worldColumns;
     int worldRows;
     int protagonistIndex;
-    public slots : void updateProtagonist(int x, int y);
+    int healthPercentage = 20;
+    int energyPercentage = 80;
+    int centerX;
+    int centerY;
+    /*public slots : */ void updateProtagonist(int x, int y);
+    void drawCharacters();
+    void updateHealth(int healthPercentage);
+    void changeEnergyBar(int energyPercentage);
 };
 
 #endif // TVIEW_H

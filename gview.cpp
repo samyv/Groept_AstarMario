@@ -173,7 +173,26 @@ void Gview::on_startGame_clicked()
     val = ui->energyweightval->text().toDouble();
     emit changeweight(3, val);
     cout << val <<endl;
-    emit gameStart();
+
+    if(ui->viewbox->currentIndex() == 0){
+        //Gview
+    } else {
+        //Tview
+    }
+
+    if(ui->controlBox->currentIndex() == 0){
+        //ai
+    } else {
+        //user
+    }
+
+    if(ui->salesmanbox->currentIndex() == 0){
+        cout << ui->salesmanbox->currentIndex() << endl;
+        emit gameStart();
+    } else {
+        emit geneticTrigger();
+    }
+
     emit sendSound("qrc:/sound/sm64_mario_here_we_go.wav");
 }
 

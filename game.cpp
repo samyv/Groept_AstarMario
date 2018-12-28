@@ -10,7 +10,7 @@
 
 using namespace std;
 Game::Game(Gview * gview)
-{ 
+{
 
     world = new World();
     tiles = world->createWorld(":/worldmap4.png");
@@ -40,7 +40,7 @@ Game::Game(Gview * gview)
     QObject::connect(bowser,SIGNAL(livesChanged()),m,SLOT(findBowserPos()));
     QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),this,SLOT(setBowser(Tile *)));
     QObject::connect(bowser,SIGNAL(posChanged(int,int)),gview,SLOT(displayBowser(int,int)));
-  //  QObject::connect(bowser,SIGNAL(posChanged(int,int)),tview,SLOT(displayBowser(int,int)));
+    //  QObject::connect(bowser,SIGNAL(posChanged(int,int)),tview,SLOT(displayBowser(int,int)));
     QObject::connect(bowser,SIGNAL(posChanged(int,int)),m,SLOT(findBowser(int,int)));
 
     //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
@@ -59,7 +59,7 @@ Game::Game(Gview * gview)
     //QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
     QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), gview,SLOT(changeHealthbar(int)));
 
-   // QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), tview,SLOT(changeHealthbar(int)));
+    // QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), tview,SLOT(changeHealthbar(int)));
     QObject::connect(m,SIGNAL(startGameTimer()),this,SLOT(gametimer()));
 
     //CONNECTIONS WHEN SPECIAL TILES DATA CHANGES
@@ -98,72 +98,77 @@ Game::Game(Gview * gview)
 }
 
 void Game::step(){
-    if(!path.empty()){
-        tile_t * t_t = path.back();
-        if(t_t->poison > 0){
-            //            cout << "POISON" << endl;
-        }
-        Tile * nextTile = t_t -> t;
-        protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
-        protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
-
-        //CHECK COLLISIONS WITH ENEMIES
-        for(auto &enemy : enemies){
-            if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
-                protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
-                //                cout << protagonist->getHealth() << endl;
-                cout << "Type Enemy: " ;
-                if(typeid (*enemy) == typeid (Enemy)){
-                    enemy->setDefeated(true);
-                    cout << "Enemy" << endl;
-
-                } else if(typeid (*enemy) == typeid (PEnemy)){
-                    dynamic_cast<PEnemy*>(enemy.get())->poison();
-                    cout << "Poison" << endl;
-                } else {
-                    cout << "Bowser" << endl;
-                }
-                //Erase–remove idiom
-                //enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
-                protagonist->setEnergy(100);
-                //                emit sendSound("qrc:/sound/smw_kick.wav");
-                break;
-            }
-        }
-
-        //CHECK COLLISIONS WITH HEALTHPACKS
-        for(auto &hp : healthpacks){
-            if((protagonist->getXPos() == hp->getXPos()) && (protagonist->getYPos() == hp->getYPos())){
-                float h = protagonist->getHealth()+hp->getValue();
-                if(h > 100){
-                    h = 100;
-                }
-                protagonist->setHealth(h);
-                //cout << "samy is gay" << endl;
-                emit healthpackGained(hp.get());
-                //                cout <<"HEALTHPACK: " << hp->getValue() << endl;
-                emit sendSound("qrc:/sound/smw_1-up.wav");
-                healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
-                break;
-            }
-        }
-        if(finalGameStarted){
-            if((protagonist->getXPos() == bowser->getXPos()) && (protagonist->getYPos() == bowser->getYPos())){
-                if(bowser->getLives() != 1){
-                bowser->setLives(bowser->getLives()-1);
-                } else {
-                    cout << "you win' " << endl;
-                }
-            }
-        }
-        path.pop_back();
-        //emit energychanged(protagonist->getEnergy());
-    } else {
+    if(protagonist->getEnergy() < 0 || protagonist->getHealth() < 0){
+        cout << "HELEMAAL DOOD" << endl;
         timer->stop();
-        if(!finalGameStarted){
-            bowser->setLives(5);
-            finalGameStarted = true;
-            // enemies.push_back(make_unique<XEnemy>(bowser));
+    } else {
+        //LEVEND
+        if(!path.empty()){
+            tile_t * t_t = path.back();
+            if(t_t->poison > 0){
+//                protagonist->setHealth(protagonist->getHealth() - (t_t->poison/100));
+            }
+            Tile * nextTile = t_t -> t;
+            protagonist->setEnergy(protagonist->getEnergy() - 5 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
+            protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
+
+            //CHECK COLLISIONS WITH ENEMIES
+            for(auto &enemy : enemies){
+                if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
+                    protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
+                    //                cout << protagonist->getHealth() << endl;
+                    cout << "Type Enemy: " ;
+                    if(typeid (*enemy) == typeid (Enemy)){
+                        enemy->setDefeated(true);
+                        cout << "Enemy" << endl;
+
+                    } else if(typeid (*enemy) == typeid (PEnemy)){
+                        dynamic_cast<PEnemy*>(enemy.get())->poison();
+                        cout << "Poison" << endl;
+                    }
+                    //Erase–remove idiom
+                    enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+                    protagonist->setEnergy(100);
+                    //                emit sendSound("qrc:/sound/smw_kick.wav");
+                    break;
+
+                }
+
+            }
+            //CHECK COLLISIONS WITH HEALTHPACKS
+            for(auto &hp : healthpacks){
+                if((protagonist->getXPos() == hp->getXPos()) && (protagonist->getYPos() == hp->getYPos())){
+                    float h = protagonist->getHealth()+hp->getValue();
+                    if(h > 100){
+                        h = 100;
+                    }
+                    protagonist->setHealth(h);;
+                    emit healthpackGained(hp.get());
+                    cout <<"HEALTHPACK: " << hp->getValue() << endl;
+                    emit sendSound("qrc:/sound/smw_1-up.wav");
+                    healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
+                    break;
+                }
+            }
+            if(finalGameStarted){
+                if((protagonist->getXPos() == bowser->getXPos()) && (protagonist->getYPos() == bowser->getYPos())){
+                    if(bowser->getLives() != 1){
+                        bowser->setLives(bowser->getLives()-1);
+                        protagonist->setEnergy(100);
+                    } else {
+                        cout << "you win' " << endl;
+                    }
+                }
+            }
+            path.pop_back();
+
+        } else {
+            timer->stop();
+            if(!finalGameStarted){
+                bowser->setLives(5);
+                finalGameStarted = true;
+                // enemies.push_back(make_unique<XEnemy>(bowser));
+            }
         }
     }
 }
@@ -198,7 +203,7 @@ void Game::hpTrigger(int x, int y)
 
 void Game::gametimer()
 {
-    timer->start(4);
+    timer->start(0);
 }
 
 void Game::setBowser(Tile * t)
@@ -272,7 +277,7 @@ void Game::setNeighboursPoison(qreal x, qreal y){
 }
 
 void Game::startTime(){
-    timer->start(1);
+    timer->start(0);
 }
 
 void Game::checkTile(int x, int y)

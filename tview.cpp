@@ -2,8 +2,21 @@
 #include "math.h"
 #include "game.h"
 #include "view.h"
+#include <cstdlib>
+#include <stdio.h>
+#include <iostream>
+#include <unistd.h>
 
-Tview::Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPacks, vector<unique_ptr<Enemy>> enemies, int columns, int rows)
+using namespace std;
+
+
+Tview::Tview()
+{
+
+}
+
+
+void Tview::setup(vector<unique_ptr<Tile>> & tiles, vector<unique_ptr<Tile>> & healthPacks, vector<unique_ptr<Enemy>> & enemies, int columns, int rows)
 {
     protagonistIndex = 0;
     worldColumns = columns;
@@ -52,18 +65,25 @@ Tview::Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPack
 void Tview::updateProtagonist(int x, int y){
     centerX = x;
     centerY = y;
-    characters.at(protagonistIndex) = "";
+    characters.at(protagonistIndex) = prevChar;
     protagonistIndex = (worldColumns*centerY + centerX);
+    if (characters.at(protagonistIndex).find("\x1b[48;5") != std::string::npos || characters.at(protagonistIndex).find("!") != std::string::npos) {
+        prevChar = characters.at(protagonistIndex);
+    }
+
     characters.at(protagonistIndex) = "P";
     drawCharacters();
 }
+
+
 
 void Tview::drawCharacters(){
     int xStart = centerX - terminalMapSize;
     int yStart = centerY - terminalMapSize;
     int xEnd = centerX + terminalMapSize;
     int yEnd = centerY + terminalMapSize;
-
+    cout << "\x1B[2J"; // Clear the screen
+    cout << "\x1B[0;0H"; // place cursor at home position
     //making sure map follows protagonist and when reaching limits of the worldmap that you can see the protagonist move
     if(xStart < 1){
         xStart = 0;
@@ -78,9 +98,10 @@ void Tview::drawCharacters(){
         yStart = worldRows - 2*terminalMapSize;
         yEnd = worldRows;
     }
-
+    string printScreen = "";
     //drawing the terminal view per column, per row
     for(int i =0; i < 2*terminalMapSize;i++){
+        //printScreen.append("\x1b[0m");
         cout << "\x1b[0m";
         for(int j =0; j < 2*terminalMapSize;j++){
             int charIndex = (yStart+i)*worldColumns + j+xStart;
@@ -91,12 +112,19 @@ void Tview::drawCharacters(){
             string charac = characters.at(charIndex);
             if(charac == "O" || prevCharac=="O"){
                 cout << "\x1b[40m" << "+---+" << "\x1b[0m";
+                //printScreen.append("\x1b[45m+---+\x1b[0m");
+            } else if(charac.find("!") != std::string::npos || prevCharac.find("!") != std::string::npos){
+                cout << "\x1b[45m" << "+---+" << "\x1b[0m";
+                //printScreen.append("\x1b[45m+---+\x1b[0m");
             } else if(charac.length()>2){
                 cout << charac << "+---+" << "\x1b[0m";
+                //printScreen.append("+---+\x1b[0m");
             } else if(prevCharac.length()>2){
                 cout << prevCharac << "+---+" << "\x1b[0m";
+                //printScreen.append("+---+\x1b[0m");
             } else {
                 cout << "+---+";
+                //printScreen.append("+---+");
             }
 
         }
@@ -106,26 +134,32 @@ void Tview::drawCharacters(){
             string charac = characters.at(charIndex);
             if(charac == "O"){
                 cout << "\x1b[40m" << "| "<< charac<<" |" << "\x1b[0m";
+                //printScreen.append("+---+");
             } else if (charac == "P"){
                 cout << "\x1b[44m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
+                //printScreen.append("+---+");
             } else if(charac == "E"){
                 cout << "\x1b[41m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-            } else if(charac == "B"){
+                //printScreen.append("+---+");
+            } else if(charac == "B" ||charac == "!"){
                 cout << "\x1b[45m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-            } else if(charac == "!"){
-                cout << "\x1b[48;5;91m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
+                //printScreen.append("+---+");
             } else if(charac == "H"){
                 cout << "\x1b[42m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
+                //printScreen.append("+---+");
             } else if(charac.length()>2){
                 cout << charac <<  "|" << "   " << "|" <<"\x1b[0m";
+                //printScreen.append("+---+");
             } else {
                 if(charac.empty()){
                     charac = " ";
                 }
                 cout << "| "<< charac<<" |";
+                //printScreen.append("+---+");
             }
         }
         cout <<""<< endl;
+        //printScreen.append("+---+");
     }
     //healthbar and energybar
     for(int j =0; j < 2*terminalMapSize;j++){
@@ -152,6 +186,7 @@ void Tview::drawCharacters(){
         }
     }
     cout <<""<< endl;
+    usleep(10000);
 }
 
 void Tview::updatePoisonTiles(int x, int y, int r){
@@ -160,7 +195,7 @@ void Tview::updatePoisonTiles(int x, int y, int r){
         for(int j = 0; j<=r ; j++){
             int positionY = y-(r/2)+j;
             int index = (worldColumns*positionY + positionX);
-            if(characters.at(index).empty()){
+            if (characters.at(index).find("\x1b[48;5") != std::string::npos) {
                 characters.at(index) = "!";
             }
         }

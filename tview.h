@@ -10,13 +10,13 @@
 
 using namespace std;
 
-class Tview  /*: public view*/
+class Tview : public QObject/*: public view*/
 {
-   //Q_OBJECT
+   Q_OBJECT
 public:
-    Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPacks, vector<unique_ptr<Enemy>> enemies, int columns, int rows);
+    Tview();
     //~Tview() Q_DECL_OVERRIDE;
-    int terminalMapSize = 15;
+    int terminalMapSize = 10;
     void drawCharacters();
     vector<string> characters;
     int worldColumns;
@@ -24,15 +24,17 @@ public:
     int protagonistIndex;
     int healthPercentage = 20;
     int energyPercentage = 80;
+    string prevChar = "";
     int centerX;
     int centerY;
 
 
-    //public slots :
+    public slots :
          void updateProtagonist(int x, int y);
          void updatePoisonTiles(int x, int y, int r);
          void changeHealthbar(int healthPercentage);
          void changeEnergybar(int energyPercentage);
+         void setup(vector<unique_ptr<Tile>> & tiles, vector<unique_ptr<Tile>> & healthPacks, vector<unique_ptr<Enemy>> & enemies, int columns, int rows);
 };
 
 #endif // TVIEW_H

@@ -23,6 +23,10 @@ Game::Game(Gview * gview)
     protagonist = world->getProtagonist();
     enemies = world->getEnemies(enemiesCount);
     healthpacks = world->getHealthPacks(healthpackCount);
+
+    Tview * tview = new Tview();
+    tview->setup(tiles, healthpacks, enemies, world->getCols(), world->getRows());
+    tview->updateProtagonist(protagonist->getXPos(), protagonist->getYPos());
     for(int i = 0; i < healthpackCount; i++){
 //        healthpacks.at(i)->setValue(30);
     }
@@ -42,7 +46,9 @@ Game::Game(Gview * gview)
 
     //CONNECTIONS WHEN PROTAGONIST DATA CHANGES
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
+    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
     QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), gview,SLOT(changeHealthbar(int)));
+    QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), tview,SLOT(changeHealthbar(int)));
 
     //CONNECTIONS WHEN SPECIAL TILES DATA CHANGES
     for(unique_ptr<Enemy> & a: enemies){
@@ -57,6 +63,7 @@ Game::Game(Gview * gview)
     connect(gview, SIGNAL(poisonExplosion(qreal,qreal)), this, SLOT(setNeighboursPoison(qreal,qreal)));
     connect(this, SIGNAL(poisonedTile(qreal,qreal)), gview, SLOT(drawPoisoned(qreal,qreal)));
     connect(m,SIGNAL(setTilesPoisoned(int,int,int)),gview,SLOT(updatePoisonedTiles(int,int,int)));
+    connect(m,SIGNAL(setTilesPoisoned(int,int,int)),tview,SLOT(updatePoisonTiles(int,int,int)));
     QObject::connect(this,SIGNAL(healthpackGained(Tile *)), gview,SLOT(triggerHealthpack(Tile *)));
     QObject::connect(gview,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
@@ -68,6 +75,7 @@ Game::Game(Gview * gview)
     QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
     QObject::connect(gview,SIGNAL(hpUser(int,int)),this,SLOT(hpTrigger(int,int)));
     connect(protagonist.get(), SIGNAL(energyChanged(int)), gview, SLOT(changeEnergybar(int)));
+    connect(protagonist.get(), SIGNAL(energyChanged(int)), tview, SLOT(changeEnergybar(int)));
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
 
@@ -217,7 +225,7 @@ void Game::setNeighboursPoison(qreal x, qreal y){
 }
 
 void Game::startTime(){
-    timer->start(4);
+    timer->start(1);
 }
 
 void Game::checkTile(int x, int y)

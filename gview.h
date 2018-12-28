@@ -72,7 +72,7 @@ public slots:
     void drawPoisoned(qreal,qreal);
     void penemyDead();
     void collisonDetect();
-    void changeEnergybar(double energy);
+    void changeEnergybar(int energy);
 private slots:
 
     void changeHealthbar(int);

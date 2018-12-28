@@ -142,7 +142,10 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
 
                 tile_t * tile = map.at(uint(get));
 
-                double energy = double(abs(t->t->getValue() - tile->t->getValue()));
+                double energy = double(t->t->getValue() - tile->t->getValue());
+                if(energy < 0){
+                    energy *= -1;
+                }
                 newg += (energy * energyweight);
 
                 //cout << " "<< tile->t->getXPos() << ", " << tile->t->getYPos() << endl;
@@ -229,7 +232,7 @@ void Model::weightchanged(int i, double val){
 
 
 void Model::dotheSalesmanG(){
-    unsigned long populationSize = 80;
+    unsigned long populationSize = 200;
     vector<vector<int>> population(populationSize,vector<int>(enemiesCount+1,0));
     vector<int> bestOrder(enemiesCount + 1, 0);
     float mutationRate = 0.05;
@@ -368,10 +371,119 @@ void Model::dotheSalesmanG(){
 
     printElement(bestOrder);
 
+    //check if solvable
+    double sumh = 0;
+    for(int i = 0; i < healthpacksOver.size(); i++){
+        sumh += healthpacksOver.at(i)->getValue();
+    }
+
+    double sume = 0;
+    for(int i = 0; i < enemiesToDefeat.size(); i++){
+        sume += enemiesToDefeat.at(i)->getValue();
+    }
+
+    if(sumh+100 > sume){
+        //solve
+        double h = 100;
+        int besthindex = healthpacksOver.size()*2;
+        vector<int> checkedh;
+        for(uint i = 0; i < bestOrder.size() - 1; i++){
+            //cout << h << " - " << enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue() << ", " << i << endl;
+            double temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
+            //double temp = 0;
+            //cout << temp << endl;
+            //cout << i << endl;
+            while(temp <= 0){
+                double bestdist = INFINITY;
+                //look for healthpack between enemy and enemy - 1
+                for(uint j = 0; j < healthpacksOver.size(); j++){
+                    //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                    if(bestOrder.at(i) == j + enemiesCount + 1){
+                        continue;
+                    }
+                    double dist = distanceBetweenEnemies.at(bestOrder.at(i)).at(j + enemiesCount + 1)->cost;
+                    dist += distanceBetweenEnemies.at(j + enemiesCount + 1).at(bestOrder.at(i + 1))->cost;
+                    //cout << dist << endl;
+                    //best healthpack
+                    if(dist < bestdist && temp + healthpacksOver.at(j)->getValue() > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
+                        besthindex = j + enemiesCount + 1;
+                        bestdist = dist;
+                    }
+                }
+                if(find(checkedh.begin(), checkedh.end(), besthindex - enemiesCount - 1) == checkedh.end() && besthindex < healthpacksOver.size() + enemiesCount + 1){
+                    i++;
+                    checkedh.push_back(besthindex - enemiesCount - 1);
+                    bestOrder.insert(bestOrder.begin() + int(i), besthindex);
+                    //cout << besthindex << endl;
+                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    //cout << h << endl;
+                    //printElement(bestOrder);
+                    cout << "checked: ";
+                    printElement(checkedh);
+                    besthindex = healthpacksOver.size() * 2;
+                    if(h > 100){
+                        h = 100;
+                    }
+                    temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
+                    if(temp <= 0){
+                        cout << "TEMP STILL BELOW 0?" << endl;
+                    }
+                    h = temp;
+                } else{
+                    //check again without checking survive
+                    for(uint j = 0; j < healthpacksOver.size(); j++){
+                        //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                        if(bestOrder.at(i) == j + enemiesCount + 1){
+                            continue;
+                        }
+                        double dist = distanceBetweenEnemies.at(bestOrder.at(i)).at(j + enemiesCount + 1)->cost;
+                        dist += distanceBetweenEnemies.at(j + enemiesCount + 1).at(bestOrder.at(i + 1))->cost;
+                        //cout << dist << endl;
+                        //best healthpack
+                        if(dist < bestdist > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
+                            besthindex = j + enemiesCount + 1;
+                            bestdist = dist;
+                        }
+                    }
+                    i++;
+                    checkedh.push_back(besthindex - enemiesCount - 1);
+                    bestOrder.insert(bestOrder.begin() + int(i), besthindex);
+                    //cout << besthindex << endl;
+                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    cout << h << endl;
+                    printElement(bestOrder);
+                    cout << "checked: ";
+                    printElement(checkedh);
+                    //besthindex = 1000;
+                    if(h > 100){
+                        h = 100;
+                    }
+                    temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
+                    if(temp <= 0){
+                        cout << "RIP" << endl;
+                        temp = h;
+                        i--;
+                    }
+                    h = temp;
+                }
+            }
+            if(temp > 100){
+                temp = 100;
+            }
+            h = temp;
+        }
+        cout << "done checking healthpacks " << h << endl;
+        printElement(bestOrder);
+    } else {
+        cout << "NOT SOLVABLE" << endl;
+    }
     //
-    for(int i = 0; i < enemiesCount;i++){
+    for(int i = 0; i < bestOrder.size() - 1;i++){
+
         path_t * pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
+        //cout << "insert errorrrrrr" << endl;
         path->insert(path->begin(),pathBetweenEnemies->path.begin(),pathBetweenEnemies->path.end());
+        //cout << "nope" << endl;
     }
     emit salesmanDone();
 }

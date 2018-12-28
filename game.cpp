@@ -24,6 +24,9 @@ Game::Game(Gview * gview)
     protagonist = world->getProtagonist();
     enemies = world->getEnemies(enemiesCount);
     healthpacks = world->getHealthPacks(healthpackCount);
+    for(int i = 0; i < healthpackCount; i++){
+        healthpacks.at(i)->setValue(30);
+    }
     copyEnemies();
     gview->initDisplay(enemies,healthpacks);
     makeModel();
@@ -65,7 +68,7 @@ Game::Game(Gview * gview)
     QObject::connect(this,SIGNAL(checkCollision()), gview,SLOT(collisonDetect()));
     QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
     QObject::connect(gview,SIGNAL(hpUser(int,int)),this,SLOT(hpTrigger(int,int)));
-    connect(this, SIGNAL(energychanged(double)), gview, SLOT(changeEnergybar(double)));
+    connect(protagonist.get(), SIGNAL(energyChanged(int)), gview, SLOT(changeEnergybar(int)));
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
 
@@ -79,6 +82,7 @@ void Game::step(){
         for(auto &enemy : enemies){
             if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
                 protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
+                cout << protagonist->getHealth() << endl;
                 if(typeid (*enemy) == typeid (Enemy)){
                     enemy->setDefeated(true);
 
@@ -96,9 +100,16 @@ void Game::step(){
         //CHECK COLLISIONS WITH HEALTHPACKS
         for(auto &hp : healthpacks){
             if((protagonist->getXPos() == hp->getXPos()) && (protagonist->getYPos() == hp->getYPos())){
-                protagonist->setHealth(protagonist->getHealth()+hp->getValue());
+                float h = protagonist->getHealth()+hp->getValue();
+                if(h > 100){
+                    h = 100;
+                }
+                protagonist->setHealth(h);
+                //cout << "samy is gay" << endl;
                 emit healthpackGained(hp.get());
+                cout <<"HEALTHPACK: " << hp->getValue() << endl;
                 emit sendSound("qrc:/sound/smw_1-up.wav");
+                healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
                 break;
             }
         }
@@ -108,7 +119,7 @@ void Game::step(){
             emit sendSound("qrc:/sound/smw_castle_clear.wav");
         }
         path.pop_back();
-        emit energychanged(double(protagonist->getEnergy()));
+        //emit energychanged(protagonist->getEnergy());
     } else {
         //cout << "PATH EMPTY" << endl;
     }

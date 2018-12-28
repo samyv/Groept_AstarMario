@@ -144,7 +144,7 @@ void Game::step(){
                     }
                     protagonist->setHealth(h);;
                     emit healthpackGained(hp.get());
-                    cout <<"HEALTHPACK: " << hp->getValue() << endl;
+                    //cout <<"HEALTHPACK: " << hp->getValue() << endl;
                     emit sendSound("qrc:/sound/smw_1-up.wav");
                     //ptrdiff_t index = find(healthpacks.begin(),healthpacks.end(),hp) - healthpacks.begin();
                     healthpacksOver.erase(remove(healthpacksOver.begin(),healthpacksOver.end(),hp.get()),healthpacksOver.end());
@@ -155,7 +155,7 @@ void Game::step(){
             if(finalGameStarted){
                 if((protagonist->getXPos() == bowser->getXPos()) && (protagonist->getYPos() == bowser->getYPos())){
                     if(bowser->getLives() != 1){
-                        cout << "BOWSER HAS BEEN TOUCHED #METOO" << endl;
+                        //cout << "BOWSER HAS BEEN TOUCHED #METOO" << endl;
                         protagonist->setHealth(protagonist->getHealth() - bowser->getValue() * 100);
                         bowser->setLives(bowser->getLives()-1);
                         protagonist->setEnergy(100);

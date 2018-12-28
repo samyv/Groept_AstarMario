@@ -278,6 +278,7 @@ void Gview::drawCurrentBest(vector<tile_t*> path){
 
 void Gview::changeHealthbar(int health){
     ui->healthbar->setValue(health);
+    cout << "GVIEW: " << health << endl;
 }
 
 void Gview::changeEnergybar(int energy){
@@ -414,7 +415,7 @@ void Gview::displayEnd(bool won){
 
 void Gview::on_Pause_clicked()
 {
-    if(ui->Pause->text() =="Pause"){
+    if(ui->Pause->text() =="PAUSE"){
         ui->Pause->setText("CONTINUE");
     } else {
         ui->Pause->setText("PAUSE");

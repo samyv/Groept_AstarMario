@@ -2,7 +2,7 @@
 #include <time.h>
 #include <queue>
 
-Model::Model(vector<Enemy *> & enemiesToDefeat, vector<Tile *> & healthpacksOver, unsigned long e, int g, Protagonist * pro, vector<tile_t *> * p): enemiesToDefeat{enemiesToDefeat}, healthpacksOver{healthpacksOver},
+Model::Model(vector<Enemy *> & enemiesToDefeat, vector<Tile *> * healthpacksOver, unsigned long e, int g, Protagonist * pro, vector<tile_t *> * p): enemiesToDefeat{enemiesToDefeat}, healthpacksOver{healthpacksOver},
     enemiesCount{e}, generationsAmount{g}, protagonist{pro}, path{p}
 {
 
@@ -376,8 +376,8 @@ void Model::dotheSalesmanG(){
 
     //check if solvable
     double sumh = 0;
-    for(int i = 0; i < healthpacksOver.size(); i++){
-        sumh += healthpacksOver.at(i)->getValue();
+    for(int i = 0; i < healthpacksOver->size(); i++){
+        sumh += healthpacksOver->at(i)->getValue();
     }
 
     double sume = 0;
@@ -388,7 +388,7 @@ void Model::dotheSalesmanG(){
     if(sumh+100 > sume){
         //solve
         double h = 100;
-        int besthindex = healthpacksOver.size()*2;
+        int besthindex = healthpacksOver->size()*2;
         vector<int> checkedh;
         bool noh = false;
         for(uint i = 0; i < bestOrder.size() - 1 && noh == false; i++){
@@ -400,8 +400,8 @@ void Model::dotheSalesmanG(){
             while(temp <= 0){
                 double bestdist = INFINITY;
                 //look for healthpack between enemy and enemy - 1
-                for(uint j = 0; j < healthpacksOver.size(); j++){
-                    //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                for(uint j = 0; j < healthpacksOver->size(); j++){
+                    //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver->at(j)->getValue() << endl;
                     if(bestOrder.at(i) == j + enemiesCount + 1){
                         continue;
                     }
@@ -409,22 +409,22 @@ void Model::dotheSalesmanG(){
                     dist += distanceBetweenEnemies.at(j + enemiesCount + 1).at(bestOrder.at(i + 1))->cost;
                     //cout << dist << endl;
                     //best healthpack
-                    if(dist < bestdist && temp + healthpacksOver.at(j)->getValue() > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
+                    if(dist < bestdist && temp + healthpacksOver->at(j)->getValue() > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
                         besthindex = j + enemiesCount + 1;
                         bestdist = dist;
                     }
                 }
-                if(find(checkedh.begin(), checkedh.end(), besthindex - enemiesCount - 1) == checkedh.end() && besthindex < healthpacksOver.size() + enemiesCount + 1){
+                if(find(checkedh.begin(), checkedh.end(), besthindex - enemiesCount - 1) == checkedh.end() && besthindex < healthpacksOver->size() + enemiesCount + 1){
                     i++;
                     checkedh.push_back(besthindex - enemiesCount - 1);
                     bestOrder.insert(bestOrder.begin() + int(i), besthindex);
                     //cout << besthindex << endl;
-                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    h += double(healthpacksOver->at(uint(besthindex - enemiesCount - 1))->getValue());
                     cout << h << endl;
                     printElement(bestOrder);
                     cout << "checked: ";
                     printElement(checkedh);
-                    besthindex = healthpacksOver.size() * 2;
+                    besthindex = healthpacksOver->size() * 2;
                     if(h > 100){
                         h = 100;
                     }
@@ -437,8 +437,8 @@ void Model::dotheSalesmanG(){
                     h = temp;
                 } else{
                     //check again without checking survive
-                    for(uint j = 0; j < healthpacksOver.size(); j++){
-                        cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                    for(uint j = 0; j < healthpacksOver->size(); j++){
+                        cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver->at(j)->getValue() << endl;
                         if(bestOrder.at(i) == j + enemiesCount + 1){
                             continue;
                         }
@@ -452,7 +452,7 @@ void Model::dotheSalesmanG(){
                         }
                     }
                     i++;
-                    if(checkedh.size() >= healthpacksOver.size()){
+                    if(checkedh.size() >= healthpacksOver->size()){
                         cout << "KIEKE" << endl;
                         noh = true;
                         break;
@@ -460,7 +460,7 @@ void Model::dotheSalesmanG(){
                     checkedh.push_back(besthindex - enemiesCount - 1);
                     bestOrder.insert(bestOrder.begin() + int(i), besthindex);
                     cout << besthindex << endl;
-                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    h += double(healthpacksOver->at(uint(besthindex - enemiesCount - 1))->getValue());
                     cout << h << endl;
                     printElement(bestOrder);
                     cout << "checked: ";
@@ -500,9 +500,9 @@ void Model::dotheSalesmanG(){
 }
 
 vector<vector<path_t *>> Model::calculateDistances(){
-    vector<vector<path_t *>> localArray(enemiesCount + healthpacksOver.size() + 1, vector<path_t *>(enemiesCount + healthpacksOver.size() + 1, nullptr));
-    for(unsigned long i = 0; i<enemiesCount + healthpacksOver.size() + 1;i++){
-        for(unsigned long j = 0; j<enemiesCount + healthpacksOver.size() + 1;j++){
+    vector<vector<path_t *>> localArray(enemiesCount + healthpacksOver->size() + 1, vector<path_t *>(enemiesCount + healthpacksOver->size() + 1, nullptr));
+    for(unsigned long i = 0; i<enemiesCount + healthpacksOver->size() + 1;i++){
+        for(unsigned long j = 0; j<enemiesCount + healthpacksOver->size() + 1;j++){
             //cout << i << ", " << j << endl;
             if(j == i){
                 localArray.at(i).at(j) = nullptr;
@@ -511,7 +511,7 @@ vector<vector<path_t *>> Model::calculateDistances(){
                 if(j <  enemiesCount + 1){
                     pathBetweenEnemies = calculateDistance(protagonist,enemiesToDefeat.at(j-1));
                 } else {
-                    pathBetweenEnemies = calculateDistance(protagonist,healthpacksOver.at(j-1 - enemiesCount));
+                    pathBetweenEnemies = calculateDistance(protagonist,healthpacksOver->at(j-1 - enemiesCount));
                 }
                 localArray.at(i).at(j) = pathBetweenEnemies;
                 path_t * pathBetweenEnemiesRevert = new path_t;
@@ -525,7 +525,7 @@ vector<vector<path_t *>> Model::calculateDistances(){
                 if(j < enemiesCount + 1){
                     pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i-1)->getXPos() + enemiesToDefeat.at(i-1)->getYPos()*cols),map.at(enemiesToDefeat.at(j-1)->getXPos()+enemiesToDefeat.at(j-1)->getYPos()*cols),map);
                 } else {
-                    pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i - 1)->getXPos() + enemiesToDefeat.at(i - 1)->getYPos()*cols),map.at(healthpacksOver.at(j - 1 - enemiesCount)->getXPos()+healthpacksOver.at(j - 1 - enemiesCount)->getYPos()*cols),map);
+                    pathBetweenEnemies = aStar(map.at(enemiesToDefeat.at(i - 1)->getXPos() + enemiesToDefeat.at(i - 1)->getYPos()*cols),map.at(healthpacksOver->at(j - 1 - enemiesCount)->getXPos()+healthpacksOver->at(j - 1 - enemiesCount)->getYPos()*cols),map);
                 }
 
                 localArray.at(i).at(j) = pathBetweenEnemies;
@@ -536,7 +536,7 @@ vector<vector<path_t *>> Model::calculateDistances(){
                 resetMap(map);
             } else if (i != 0 && j != 0 && j > i && i > enemiesCount){
                 path_t * pathBetweenEnemies = new path_t;
-                pathBetweenEnemies = aStar(map.at(healthpacksOver.at(i - 1 - enemiesCount)->getXPos() + healthpacksOver.at(i - 1 - enemiesCount)->getYPos()*cols),map.at(healthpacksOver.at(j - 1 - enemiesCount)->getXPos()+healthpacksOver.at(j - 1 - enemiesCount)->getYPos()*cols),map);
+                pathBetweenEnemies = aStar(map.at(healthpacksOver->at(i - 1 - enemiesCount)->getXPos() + healthpacksOver->at(i - 1 - enemiesCount)->getYPos()*cols),map.at(healthpacksOver->at(j - 1 - enemiesCount)->getXPos()+healthpacksOver->at(j - 1 - enemiesCount)->getYPos()*cols),map);
 
                 localArray.at(i).at(j) = pathBetweenEnemies;
                 path_t * pathBetweenEnemiesRevert = new path_t;
@@ -619,8 +619,8 @@ void Model::dotheSalesman(){
 
     //check if solvable
     double sumh = 0;
-    for(int i = 0; i < healthpacksOver.size(); i++){
-        sumh += healthpacksOver.at(i)->getValue();
+    for(int i = 0; i < healthpacksOver->size(); i++){
+        sumh += healthpacksOver->at(i)->getValue();
     }
 
     double sume = 0;
@@ -631,7 +631,7 @@ void Model::dotheSalesman(){
     if(sumh+100 > sume){
         //solve
         double h = 100;
-        int besthindex = healthpacksOver.size()*2;
+        int besthindex = healthpacksOver->size()*2;
         vector<int> checkedh;
         bool noh = false;
         for(uint i = 0; i < bestOrder.size() - 1 && noh == false; i++){
@@ -643,8 +643,8 @@ void Model::dotheSalesman(){
             while(temp <= 0){
                 double bestdist = INFINITY;
                 //look for healthpack between enemy and enemy - 1
-                for(uint j = 0; j < healthpacksOver.size(); j++){
-                    //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                for(uint j = 0; j < healthpacksOver->size(); j++){
+                    //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver->at(j)->getValue() << endl;
                     if(bestOrder.at(i) == j + enemiesCount + 1){
                         continue;
                     }
@@ -652,22 +652,22 @@ void Model::dotheSalesman(){
                     dist += distanceBetweenEnemies.at(j + enemiesCount + 1).at(bestOrder.at(i + 1))->cost;
                     //cout << dist << endl;
                     //best healthpack
-                    if(dist < bestdist && temp + healthpacksOver.at(j)->getValue() > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
+                    if(dist < bestdist && temp + healthpacksOver->at(j)->getValue() > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
                         besthindex = j + enemiesCount + 1;
                         bestdist = dist;
                     }
                 }
-                if(find(checkedh.begin(), checkedh.end(), besthindex - enemiesCount - 1) == checkedh.end() && besthindex < healthpacksOver.size() + enemiesCount + 1){
+                if(find(checkedh.begin(), checkedh.end(), besthindex - enemiesCount - 1) == checkedh.end() && besthindex < healthpacksOver->size() + enemiesCount + 1){
                     i++;
                     checkedh.push_back(besthindex - enemiesCount - 1);
                     bestOrder.insert(bestOrder.begin() + int(i), besthindex);
                     //cout << besthindex << endl;
-                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    h += double(healthpacksOver->at(uint(besthindex - enemiesCount - 1))->getValue());
                     cout << h << endl;
                     printElement(bestOrder);
                     cout << "checked: ";
                     printElement(checkedh);
-                    besthindex = healthpacksOver.size() * 2;
+                    besthindex = healthpacksOver->size() * 2;
                     if(h > 100){
                         h = 100;
                     }
@@ -680,8 +680,8 @@ void Model::dotheSalesman(){
                     h = temp;
                 } else{
                     //check again without checking survive
-                    for(uint j = 0; j < healthpacksOver.size(); j++){
-                        cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                    for(uint j = 0; j < healthpacksOver->size(); j++){
+                        cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver->at(j)->getValue() << endl;
                         if(bestOrder.at(i) == j + enemiesCount + 1){
                             continue;
                         }
@@ -695,7 +695,7 @@ void Model::dotheSalesman(){
                         }
                     }
                     i++;
-                    if(checkedh.size() >= healthpacksOver.size()){
+                    if(checkedh.size() >= healthpacksOver->size()){
                         cout << "KIEKE" << endl;
                         noh = true;
                         break;
@@ -703,7 +703,7 @@ void Model::dotheSalesman(){
                     checkedh.push_back(besthindex - enemiesCount - 1);
                     bestOrder.insert(bestOrder.begin() + int(i), besthindex);
                     cout << besthindex << endl;
-                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    h += double(healthpacksOver->at(uint(besthindex - enemiesCount - 1))->getValue());
                     cout << h << endl;
                     printElement(bestOrder);
                     cout << "checked: ";
@@ -789,14 +789,14 @@ void Model::startGame(){
 
             //---------NO => Search healthpack----------------\\
             //CHECK IF THERE ARE HEALTHPACKS LEFT
-        } else if (!healthpacksOver.empty()) {
+        } else if (!healthpacksOver->empty()) {
             //YES => find CLOSEST HEALTHPACK
             unsigned int closest_index = findClosestHealtpack(protagonist);
-            Tile * closest_hp = healthpacksOver.at(closest_index);
+            Tile * closest_hp = healthpacksOver->at(closest_index);
             healtpacksInOrder.push_back(closest_hp);
 
             //erase from list
-            healthpacksOver.erase(remove(healthpacksOver.begin(), healthpacksOver.end(),healthpacksOver.at(closest_index)), healthpacksOver.end());
+            healthpacksOver->erase(remove(healthpacksOver->begin(), healthpacksOver->end(),healthpacksOver->at(closest_index)), healthpacksOver->end());
 
             calc_health = 100;
 
@@ -806,7 +806,7 @@ void Model::startGame(){
 
             //SET NEW STARTPOSITION = LAST GOAL
             start = closest_hp;
-        } else if(healthpacksOver.empty() && calc_health > 0){
+        } else if(healthpacksOver->empty() && calc_health > 0){
             calc_health -= closest->getValue();
 
             //PUSH closest enemy in the list to defeat
@@ -848,8 +848,8 @@ unsigned int Model::findClosestEnemy(Tile * t){
 unsigned int Model::findClosestHealtpack(Tile * t){
     unsigned int index = 0;
     double minD = double(INFINITY);
-    for(unsigned int i = 0; i<healthpacksOver.size();i++){
-        double d = calculateDistance(t,healthpacksOver.at(i))->cost;
+    for(unsigned int i = 0; i<healthpacksOver->size();i++){
+        double d = calculateDistance(t,healthpacksOver->at(i))->cost;
         if (d<minD){
             minD = d;
             index = i;
@@ -879,13 +879,13 @@ void Model::setPoisonedTiles(int strength)
         }
     }
 
-//    for(auto &tile : tiles_t_Poisoned){
-//        if(heuristic(middle,tile)>radius){
-//            tiles_t_Poisoned.erase(remove(tiles_t_Poisoned.begin(),tiles_t_Poisoned.end(),tile),tiles_t_Poisoned.end());
-//        } else {
+    //    for(auto &tile : tiles_t_Poisoned){
+    //        if(heuristic(middle,tile)>radius){
+    //            tiles_t_Poisoned.erase(remove(tiles_t_Poisoned.begin(),tiles_t_Poisoned.end(),tile),tiles_t_Poisoned.end());
+    //        } else {
 
-//        }
-//    }
+    //        }
+    //    }
 
     emit setTilesPoisoned(x,y,radius);
 }
@@ -895,9 +895,9 @@ void Model::findBowserPos()
     bool greyTile = false;
     tile_t * bowser;
     while(true){
-    int randX = rand() % cols;
-    int randY= rand() % rows;
-    bowser = map.at(randX + randY*cols);
+        int randX = rand() % cols;
+        int randY= rand() % rows;
+        bowser = map.at(randX + randY*cols);
         if(bowser->t->getValue() != INFINITY && bowser->t->getValue() < 1.0f && bowser->poison == 0.0f){
             emit BowerPosFound(bowser->t);
             break;
@@ -910,9 +910,103 @@ void Model::findBowser(int x, int y)
 {
     Tile * bowser = map.at(x+y*cols)->t;
     float damage = bowser->getValue() *100;
+    float h = protagonist->getHealth();
+    float temp = h - damage;
+
+    vector<vector<path_t *>> disttable(healthpacksOver->size() + 2, vector<path_t *>(healthpacksOver->size() + 2, nullptr));
+    resetMap(map);
+    cout << healthpacksOver->size() << endl;
+    for(int i = 0; i < healthpacksOver->size() + 2; i++){
+        for(int j = 0; j < healthpacksOver->size() + 2; j++){
+            cout << i << ", " << j << endl;
+            if(j == i){
+                disttable.at(i).at(j) = nullptr;
+            } else if(i==0 && j != 0){
+                //cout << "INDEX: " << healthpacksOver->at(j - 1)->getXPos() + healthpacksOver->at(j - 1)->getYPos()*cols << endl;
+                path_t * pathBetweenEnemies = new path_t;
+                if(j < healthpacksOver->size() + 1){
+                    cout << "HP" << endl;
+                    pathBetweenEnemies = aStar(map.at(protagonist->getXPos() + protagonist->getYPos()*cols), map.at(healthpacksOver->at(j - 1)->getXPos() + healthpacksOver->at(j - 1)->getYPos()*cols), map);
+                } else {
+                    cout << "BOWSER" << endl;
+                    pathBetweenEnemies = aStar(map.at(protagonist->getXPos() + protagonist->getYPos()*cols), map.at(bowser->getXPos() + bowser->getYPos()*cols), map);
+                }
+                disttable.at(i).at(j) = pathBetweenEnemies;
+                path_t * pathBetweenEnemiesRevert = new path_t;
+                *pathBetweenEnemiesRevert = *pathBetweenEnemies;
+                reverse(pathBetweenEnemiesRevert->path.begin(), pathBetweenEnemiesRevert->path.end());
+                //pathBetweenEnemiesRevert->path(pathBetweenEnemiesRevert->path.rbegin(),pathBetweenEnemies->path.rend());
+                disttable.at(j).at(i) = pathBetweenEnemiesRevert;
+                resetMap(map);
+            } else if(i != 0 && j != 0 && j > i && i < healthpacksOver->size() + 1){
+                //cout << "INDEX: " << healthpacksOver->at(i - 1)->getXPos() + healthpacksOver->at(i - 1)->getYPos()*cols << endl;
+                path_t * pathBetweenEnemies = new path_t;
+                if(j < healthpacksOver->size() + 1){
+                    pathBetweenEnemies = aStar(map.at(healthpacksOver->at(i - 1)->getXPos() + healthpacksOver->at(i - 1)->getYPos()*cols), map.at(healthpacksOver->at(j - 1)->getXPos() + healthpacksOver->at(j - 1)->getYPos()*cols), map);
+                } else {
+                    cout << "BOWSER" << endl;
+                    pathBetweenEnemies = aStar(map.at(healthpacksOver->at(i - 1)->getXPos() + healthpacksOver->at(i - 1)->getYPos()*cols), map.at(bowser->getXPos() + bowser->getYPos()*cols), map);
+                }
+                disttable.at(i).at(j) = pathBetweenEnemies;
+                path_t * pathBetweenEnemiesRevert = new path_t;
+                *pathBetweenEnemiesRevert = *pathBetweenEnemies;
+                reverse(pathBetweenEnemiesRevert->path.begin(), pathBetweenEnemiesRevert->path.end());
+                disttable.at(j).at(i) = pathBetweenEnemiesRevert;
+                resetMap(map);
+            } else if(i != 0 && j != 0 && j > i && i > healthpacksOver->size()){
+                //cout << "INDEX2: " << healthpacksOver->at(i - 2)->getXPos() + healthpacksOver->at(i - 1)->getYPos()*cols << endl;
+                path_t * pathBetweenEnemies = new path_t;
+                pathBetweenEnemies = aStar(map.at(healthpacksOver->at(i - 1)->getXPos() + healthpacksOver->at(i - 1)->getYPos()*cols), map.at(bowser->getXPos() + bowser->getYPos()*cols), map);
+                disttable.at(i).at(j) = pathBetweenEnemies;
+                path_t * pathBetweenEnemiesRevert = new path_t;
+                *pathBetweenEnemiesRevert = *pathBetweenEnemies;
+                reverse(pathBetweenEnemiesRevert->path.begin(), pathBetweenEnemiesRevert->path.end());
+                disttable.at(j).at(i) = pathBetweenEnemiesRevert;
+                resetMap(map);
+            }
+        }
+    }
+    cout << "disttable done" << endl;
+    int index = 0;
+    double bestdist = INFINITY;
+    int besthindex = 0;
+    vector<int> checkedh;
+    bool noh = false;
+    while (temp <= 0 && noh == false){
+        cout << "TEMP: " << temp << endl;
+        for(int i = 0; i < healthpacksOver->size(); i++){
+            if(index == i + 1){
+                continue;
+            }
+            double dist = disttable.at(index).at(i + 1)->cost;
+            dist += disttable.at(i + 1).at(healthpacksOver->size() + 1)->cost;
+            if(dist < bestdist && find(checkedh.begin(), checkedh.end(), i) == checkedh.end()){
+                cout << "BESTTTTTTTTTT " << i << endl;
+                bestdist = dist;
+                besthindex = i;
+            }
+        }
+        if(find(checkedh.begin(), checkedh.end(), besthindex) == checkedh.end() && besthindex < healthpacksOver->size()){
+            cout << checkedh.size() << endl;
+            checkedh.push_back(besthindex);
+            cout << "BEST FOUND" << endl;
+            path->insert(path->begin(), disttable.at(index).at(besthindex + 1)->path.begin(), disttable.at(index).at(besthindex + 1)->path.end());
+            index = besthindex + 1;
+            h += healthpacksOver->at(besthindex)->getValue();
+            if(h > 100){
+                h = 100;
+            }
+            temp = h - damage;
+            cout << index << ", " << healthpacksOver->at(besthindex)->getValue() << endl;
+            bestdist = INFINITY;
+        } else {
+            noh = true;
+            cout << "NO HEALTH LEFT" << endl;
+        }
+    }
     cout << "*star to Bowser" << endl;
     resetMap(map);
-    path_t * path_to_bowser  = calculateDistance(protagonist,bowser);
+    path_t * path_to_bowser  = disttable.at(index).at(healthpacksOver->size() + 1);
     path->insert(path->begin(),path_to_bowser->path.begin(),path_to_bowser->path.end());
     emit startGameTimer();
 }

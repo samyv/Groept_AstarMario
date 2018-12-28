@@ -50,10 +50,10 @@ class Model: public QObject
 {
     Q_OBJECT
 public:
-    explicit Model(vector<Enemy *> & enemiesToDefeat,vector<Tile *> & healthpacksOver, unsigned long e, int g, Protagonist * pro, vector<tile_t *> * p);
+    explicit Model(vector<Enemy *> & enemiesToDefeat,vector<Tile *> * healthpacksOver, unsigned long e, int g, Protagonist * pro, vector<tile_t *> * p);
     Protagonist * protagonist;
     vector<Enemy *> enemiesToDefeat;
-    vector<Tile *> healthpacksOver;
+    vector<Tile *> * healthpacksOver;
     vector<tile_t *> * path;
     void makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols);
     vector<tile_t *> map;

@@ -16,10 +16,7 @@ public:
     bool ai = true;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
-<<<<<<< HEAD
-    vector<unique_ptr<Tile>> healthPacks;
-//    vector<unique_ptr<Tile>> healthpacks;
-=======
+
     vector<Enemy *> enemiesInOrder;
     vector<int> enemiesInOrderIndexes;
     void makeSomePoison();
@@ -29,8 +26,6 @@ public:
     QMediaPlayer * background;
     QMediaPlayer * player;
     int enemiesDefeated = 0;
-
->>>>>>> gview_displayItems
     Protagonist * getProtagonist();
     vector<unique_ptr<Tile>> greyTiles;
     unique_ptr<Protagonist> protagonist;

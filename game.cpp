@@ -12,23 +12,6 @@ Game::Game(Gview * gview)
 { 
     world = new World();
     tiles = world->createWorld(":/worldmap4.png");
-<<<<<<< HEAD
-    makeModel();
-    Tview * tview = new Tview(move(tiles), move(healthPacks), move(enemies), world->getCols(), world->getRows());
-    //gview->show();
-    //generateWorld();
-    ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
-    protagonist = world->getProtagonist();
-    tview->updateProtagonist(protagonist->getXPos(), protagonist->getYPos());
-    /*QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
-    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
-    QTimer * timer = new QTimer(gview);
-    QObject::connect(timer,SIGNAL(timeout()),this,SLOT(step()));
-    timer->start(20); */
-}
-
-=======
-
     gview->show();
     background = new QMediaPlayer();
     background->setMedia(QUrl("qrc:/sound/backgroundmusic.mp3"));
@@ -41,7 +24,7 @@ Game::Game(Gview * gview)
     enemies = world->getEnemies(enemiesCount);
     healthpacks = world->getHealthPacks(healthpackCount);
     for(int i = 0; i < healthpackCount; i++){
-        healthpacks.at(i)->setValue(30);
+//        healthpacks.at(i)->setValue(30);
     }
     copyEnemies();
     gview->initDisplay(enemies,healthpacks);
@@ -91,11 +74,10 @@ Game::Game(Gview * gview)
 void Game::step(){
     if(!path.empty()){
         tile_t * t_t = path.back();
-        if(t_t->poison > 0.0f){
-             protagonist->setHealth(protagonist->getHealth()-t_t->poison);
+        if(t_t->poison > 0){
+            cout << "POISON" << endl;
         }
-
-        Tile * nextTile = t_t->t;
+        Tile * nextTile = t_t -> t;
         protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
         protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
 
@@ -106,16 +88,14 @@ void Game::step(){
                 cout << protagonist->getHealth() << endl;
                 if(typeid (*enemy) == typeid (Enemy)){
                     enemy->setDefeated(true);
-                    emit sendSound("qrc:/sound/smw_kick.wav");
-                    enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
 
                 } else if(typeid (*enemy) == typeid (PEnemy)){
                     dynamic_cast<PEnemy*>(enemy.get())->poison();
-                    emit PEnemyTrigger(enemy->getXPos(),enemy->getYPos());
                 }
                 //Erase–remove idiom
-
+                enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
                 protagonist->setEnergy(100);
+//                emit sendSound("qrc:/sound/smw_kick.wav");
                 break;
             }
         }
@@ -133,7 +113,6 @@ void Game::step(){
                 cout <<"HEALTHPACK: " << hp->getValue() << endl;
                 emit sendSound("qrc:/sound/smw_1-up.wav");
                 healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
-                cout << " healtpack gained: " << hp->getValue() << endl;
                 break;
             }
         }
@@ -143,6 +122,7 @@ void Game::step(){
             emit sendSound("qrc:/sound/smw_castle_clear.wav");
         }
         path.pop_back();
+        //emit energychanged(protagonist->getEnergy());
     } else {
         //cout << "PATH EMPTY" << endl;
     }
@@ -175,7 +155,6 @@ void Game::hpTrigger(int x, int y)
         }
     }
 }
->>>>>>> gview_displayItems
 
 
 
@@ -191,34 +170,11 @@ void Game::makeModel(){
     m->makeMap(tiles, world->getRows(), world->getCols());
 }
 
-<<<<<<< HEAD
-    Model * m = new Model();
-    map = m->makeMap(tiles, world->getRows(), world->getCols());
-    cout << "success " << map.size() << endl;
-    path = m->aStar(map.at(5 + 6*world->getCols()), map.at(1 + 492*world->getCols()), map);
-    //    int count = 0;
-    //    QBrush brush(Qt::SolidPattern);
-    //    QPen pen(Qt::NoPen);
-    //    brush.setColor(QColor(255,0,0));
-    //    pen.setColor(QColor(255,0,0));
-    //    for(auto & tile: path){
-    //        //shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->t->getXPos()*displaySize,tile->t->getYPos()*displaySize, displaySize,displaySize,nullptr);
-    //        //rects.push_back(rect);
-    //        scene->addRect(tile->t->getXPos()*displaySize, tile->t->getYPos()*displaySize, displaySize, displaySize,pen,brush);
-    //        //cout << tile->t->getXPos()*displaySize << " " << tile->t->getYPos()*displaySize << endl;
-    //        count++;
-    //    }
-    //    cout << count<< endl;
-    enemies = world->getEnemies(15);
-
-    healthPacks = world->getHealthPacks(2);
-=======
 
 void Game::playSound(QString file){
     player->setMedia(QUrl(file));
     player->setVolume(100);
     player->play();
->>>>>>> gview_displayItems
 }
 
 

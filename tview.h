@@ -7,10 +7,11 @@
 #include <string>
 #include <sstream>
 #include <view.h>
+#include "gview.h"
 
 using namespace std;
 
-class Tview : public QObject/*: public view*/
+class Tview : public Gview/*: public view*/
 {
    Q_OBJECT
 public:

@@ -66,17 +66,17 @@ signals:
     void bowserDrawed();
     void setnumbers(int,int);
 public slots:
-    void updateProtagonist(int x, int y);
-    void explodeEnemy(int,int);
-    void triggerHealthpack(Tile * hp);
-    void drawCurrentBest(vector<tile_t*> path);
-    void enemyDead();
-    void drawPoisoned(qreal,qreal);
-    void penemyDead();
-    void collisonDetect();
-    void changeEnergybar(int energy);
-    void updatePoisonedTiles(int,int,int);
-    void displayBowser(int,int);
+   virtual void updateProtagonist(int x, int y);
+    virtual void explodeEnemy(int,int);
+    virtual void triggerHealthpack(Tile * hp);
+    virtual void drawCurrentBest(vector<tile_t*> path);
+    virtual void enemyDead();
+    virtual void drawPoisoned(qreal,qreal);
+    virtual void penemyDead();
+    virtual void collisonDetect();
+    virtual void changeEnergybar(int energy);
+    virtual void updatePoisonedTiles(int,int,int);
+    virtual void displayBowser(int,int);
 
 private slots:
 

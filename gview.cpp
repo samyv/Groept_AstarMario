@@ -28,8 +28,10 @@ Gview::Gview(QWidget *parent) :
     bowser = bowser.scaled(int(displaySize*24*2),int(displaySize*24*2));
     QPixmap bowserPixmap = QPixmap::fromImage(bowser);
     bowserPix = new QGraphicsPixmapItem(bowserPixmap);
+    bowserPix->setOffset(-bowser.width()/2,-bowser.height());
     bowserPix->hide();
     scene->addItem(bowserPix);
+
     //draw rects for each tile (not used for now)
     //    drawWorld();
 

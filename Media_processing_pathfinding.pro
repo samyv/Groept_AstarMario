@@ -38,7 +38,8 @@ SOURCES += \
     tview.cpp \
     DisplayManner.cpp \
     customview.cpp \
-    protagonistuser.cpp
+    protagonistuser.cpp \
+    xenemy.cpp
 
 HEADERS += \
     model.h \
@@ -48,7 +49,8 @@ HEADERS += \
     tview.h \
     DisplayManner.h \
     customview.h \
-    protagonistuser.h
+    protagonistuser.h \
+    xenemy.h
 
 FORMS += \
         mainwindow.ui

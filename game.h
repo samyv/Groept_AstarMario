@@ -4,6 +4,7 @@
 #include <QMediaPlayer>
 #include <world.h>
 #include "gview.h"
+#include "xenemy.h"
 
 using namespace std;
 class Game: public QObject
@@ -16,7 +17,7 @@ public:
     bool ai = true;
     vector<unique_ptr<Tile>> tiles;
     vector<unique_ptr<Enemy>> enemies;
-
+    XEnemy * bowser;
     vector<Enemy *> enemiesInOrder;
     vector<int> enemiesInOrderIndexes;
     void makeSomePoison();
@@ -25,6 +26,7 @@ public:
     vector<Tile *> healthpacksOver;
     QMediaPlayer * background;
     QMediaPlayer * player;
+
     int enemiesDefeated = 0;
     Protagonist * getProtagonist();
     vector<unique_ptr<Tile>> greyTiles;
@@ -32,6 +34,8 @@ public:
     void generateWorld();
     bool geneticCont = false;
     vector<tile_t *> path;
+    bool finalGameStarted = false;
+    vector<tile_t *> final_path;
     float poisonPercentage = 0.3;
     unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
@@ -41,6 +45,7 @@ public:
     Model * m;
     void copyEnemies();
     QTimer * timer;
+    void here(int);
     void eventFilter(QKeyEvent *e);
 signals:
     void enemyDefeated(float health,Enemy *);
@@ -59,6 +64,7 @@ public slots:
     void startTime();
     void checkTile(int,int);
     void hpTrigger(int,int);
+
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);
 

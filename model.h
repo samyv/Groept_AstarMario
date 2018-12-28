@@ -87,12 +87,14 @@ signals:
     void newBest(vector<tile_t*> newBest);
     void salesmanDone();
     void setTilesPoisoned(int,int,int);
+    void BowerPosFound(Tile *);
 public slots:
     void weightchanged(int,double);
     void dotheSalesmanG();
     void dotheSalesman();
     void startGame();
     void setPoisonedTiles(int strength);
+    void findBowserPos();
 };
 
 

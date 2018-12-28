@@ -9,5 +9,6 @@
         <file>mushroom.png</file>
         <file>PEnemy.png</file>
         <file>explosion.gif</file>
+        <file>bowser.png</file>
     </qresource>
 </RCC>

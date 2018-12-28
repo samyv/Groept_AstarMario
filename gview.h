@@ -63,6 +63,7 @@ signals:
     void enemyDeadUser(int,int);
     void hpUser(int,int);
     void sendSound(QString);
+    void bowserDrawed();
 public slots:
     void updateProtagonist(int x, int y);
     void explodeEnemy(int,int);
@@ -74,7 +75,7 @@ public slots:
     void collisonDetect();
     void changeEnergybar(int energy);
     void updatePoisonedTiles(int,int,int);
-    void displayBowser(Tile *);
+    void displayBowser(int,int);
 
 private slots:
 

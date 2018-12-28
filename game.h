@@ -37,10 +37,10 @@ public:
     bool finalGameStarted = false;
     vector<tile_t *> final_path;
     float poisonPercentage = 0.3;
-    unsigned int healthpackCount = 8;
+    unsigned int healthpackCount = 3;
     float defaultStrength = 0.5f;
     int generationsAmount = 300;
-    unsigned long enemiesCount = 6;
+    unsigned long enemiesCount = 3;
     void makeModel();
     Model * m;
     void copyEnemies();
@@ -64,6 +64,8 @@ public slots:
     void startTime();
     void checkTile(int,int);
     void hpTrigger(int,int);
+    void gametimer();
+    void setBowser(Tile*);
 
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);

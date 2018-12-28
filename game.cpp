@@ -38,8 +38,10 @@ Game::Game(Gview * gview)
 
     bowser = new XEnemy(5);
     QObject::connect(bowser,SIGNAL(livesChanged()),m,SLOT(findBowserPos()));
-    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),gview,SLOT(displayBowser(Tile *)));
-    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),tview,SLOT(displayBowser(Tile *)));
+    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),this,SLOT(setBowser(Tile *)));
+    QObject::connect(bowser,SIGNAL(posChanged(int,int)),gview,SLOT(displayBowser(int,int)));
+    QObject::connect(bowser,SIGNAL(posChanged(int,int)),tview,SLOT(displayBowser(int,int)));
+    QObject::connect(bowser,SIGNAL(posChanged(int,int)),m,SLOT(findBowser(int,int)));
 
     //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
     timer = new QTimer(gview);
@@ -57,6 +59,7 @@ Game::Game(Gview * gview)
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
     QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), gview,SLOT(changeHealthbar(int)));
     QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), tview,SLOT(changeHealthbar(int)));
+    QObject::connect(m,SIGNAL(startGameTimer()),this,SLOT(gametimer()));
 
     //CONNECTIONS WHEN SPECIAL TILES DATA CHANGES
     for(unique_ptr<Enemy> & a: enemies){
@@ -84,7 +87,7 @@ Game::Game(Gview * gview)
     QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
     QObject::connect(gview,SIGNAL(hpUser(int,int)),this,SLOT(hpTrigger(int,int)));
 
-//    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),this,SLOT(initBowser(Tile *)));
+    //    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),this,SLOT(initBowser(Tile *)));
 
 
 
@@ -97,7 +100,7 @@ void Game::step(){
     if(!path.empty()){
         tile_t * t_t = path.back();
         if(t_t->poison > 0){
-            cout << "POISON" << endl;
+//            cout << "POISON" << endl;
         }
         Tile * nextTile = t_t -> t;
         protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
@@ -107,7 +110,7 @@ void Game::step(){
         for(auto &enemy : enemies){
             if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
                 protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
-                cout << protagonist->getHealth() << endl;
+//                cout << protagonist->getHealth() << endl;
                 if(typeid (*enemy) == typeid (Enemy)){
                     enemy->setDefeated(true);
 
@@ -132,7 +135,7 @@ void Game::step(){
                 protagonist->setHealth(h);
                 //cout << "samy is gay" << endl;
                 emit healthpackGained(hp.get());
-                cout <<"HEALTHPACK: " << hp->getValue() << endl;
+//                cout <<"HEALTHPACK: " << hp->getValue() << endl;
                 emit sendSound("qrc:/sound/smw_1-up.wav");
                 healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
                 break;
@@ -175,6 +178,16 @@ void Game::hpTrigger(int x, int y)
             break;
         }
     }
+}
+
+void Game::gametimer()
+{
+    timer->start(4);
+}
+
+void Game::setBowser(Tile * t)
+{
+    bowser->setPos(t->getXPos(),t->getYPos());
 }
 
 
@@ -249,9 +262,9 @@ void Game::startTime(){
 void Game::checkTile(int x, int y)
 {
     Tile * t = tiles.at(uint(protagonist->getXPos()+x+(protagonist->getYPos()+y)*world->getCols())).get();
-    cout << t->getValue() << endl;
+
     if(t->getValue() != INFINITY & t->getValue() != 0.0f){
-        cout << "set x: "<<x<<" y: "<<y<< endl;
+
         protagonist->setPos(protagonist->getXPos()+x,protagonist->getYPos()+y);
     }
 }

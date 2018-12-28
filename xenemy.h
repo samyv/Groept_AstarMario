@@ -10,7 +10,7 @@ class XEnemy : public Enemy
     Q_OBJECT
 public:
     XEnemy(int);
-
+    void setPos(int x, int y);
     int getLives() const;
     void setLives(int value);
 
@@ -20,8 +20,9 @@ public slots:
 signals:
    void showBowser(int x,int y);
    void livesChanged();
+   void posChanged(int,int);
 private:
     int lives = 5;
-    void newPosition();
+
 };
 #endif // XENEMY_H

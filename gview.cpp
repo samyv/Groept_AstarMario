@@ -252,7 +252,6 @@ void Gview::drawCurrentBest(vector<tile_t*> path){
 }
 
 void Gview::changeHealthbar(int health){
-    cout << "GVIEW: " << health << endl;
     ui->healthbar->setValue(health);
 }
 
@@ -269,10 +268,10 @@ void Gview::updatePoisonedTiles(int x,int y,int r)
 
 }
 
-void Gview::displayBowser(Tile * t)
+void Gview::displayBowser(int x,int y)
 {
     bowserPix->show();
-    bowserPix->setPos(t->getXPos()*displaySize,t->getYPos()*displaySize);
+    bowserPix->setPos(x*displaySize,y*displaySize);
 }
 
 void Gview::enemyDead(){

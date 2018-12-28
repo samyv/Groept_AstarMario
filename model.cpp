@@ -773,6 +773,17 @@ void Model::findBowserPos()
             break;
         }
     }
+    cout << "new Bowser pos: " << bowser->t->getXPos() << " " << bowser->t->getYPos() << endl;
     emit BowerPosFound(bowser->t);
+}
+
+void Model::findBowser(int x, int y)
+{
+    Tile * bowser = map.at(x+y*cols)->t;
+    cout << "*star to Bowser" << endl;
+    resetMap(map);
+    path_t * path_to_bowser  = calculateDistance(protagonist,bowser);
+    path->insert(path->begin(),path_to_bowser->path.begin(),path_to_bowser->path.end());
+    emit startGameTimer();
 }
 

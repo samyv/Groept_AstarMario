@@ -88,6 +88,7 @@ signals:
     void salesmanDone();
     void setTilesPoisoned(int,int,int);
     void BowerPosFound(Tile *);
+    void startGameTimer();
 public slots:
     void weightchanged(int,double);
     void dotheSalesmanG();
@@ -95,6 +96,7 @@ public slots:
     void startGame();
     void setPoisonedTiles(int strength);
     void findBowserPos();
+    void findBowser(int,int);
 };
 
 

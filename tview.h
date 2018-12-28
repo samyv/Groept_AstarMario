@@ -6,17 +6,18 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <view.h>
 
 using namespace std;
 
-class Tview : public QObject
+class Tview  /*: public view*/
 {
-   Q_OBJECT
+   //Q_OBJECT
 public:
     Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPacks, vector<unique_ptr<Enemy>> enemies, int columns, int rows);
-    int terminalMapSize = 50;
-
-    void updatePoisonTiles(vector<unique_ptr<Tile>> poisonTiles);
+    //~Tview() Q_DECL_OVERRIDE;
+    int terminalMapSize = 15;
+    void drawCharacters();
     vector<string> characters;
     int worldColumns;
     int worldRows;
@@ -25,10 +26,13 @@ public:
     int energyPercentage = 80;
     int centerX;
     int centerY;
-    /*public slots : */ void updateProtagonist(int x, int y);
-    void drawCharacters();
-    void updateHealth(int healthPercentage);
-    void changeEnergyBar(int energyPercentage);
+
+
+    //public slots :
+         void updateProtagonist(int x, int y);
+         void updatePoisonTiles(int x, int y, int r);
+         void changeHealthbar(int healthPercentage);
+         void changeEnergybar(int energyPercentage);
 };
 
 #endif // TVIEW_H

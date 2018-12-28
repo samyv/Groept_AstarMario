@@ -44,7 +44,7 @@ void Game::makeModel(){
     //        count++;
     //    }
     //    cout << count<< endl;
-    enemies = world->getEnemies(500);
+    enemies = world->getEnemies(15);
 
     healthPacks = world->getHealthPacks(2);
 }

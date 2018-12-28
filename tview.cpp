@@ -1,6 +1,7 @@
 #include "tview.h"
 #include "math.h"
 #include "game.h"
+#include "view.h"
 
 Tview::Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPacks, vector<unique_ptr<Enemy>> enemies, int columns, int rows)
 {
@@ -51,6 +52,9 @@ Tview::Tview(vector<unique_ptr<Tile>> tiles, vector<unique_ptr<Tile>> healthPack
 void Tview::updateProtagonist(int x, int y){
     centerX = x;
     centerY = y;
+    characters.at(protagonistIndex) = "";
+    protagonistIndex = (worldColumns*centerY + centerX);
+    characters.at(protagonistIndex) = "P";
     drawCharacters();
 }
 
@@ -59,14 +63,6 @@ void Tview::drawCharacters(){
     int yStart = centerY - terminalMapSize;
     int xEnd = centerX + terminalMapSize;
     int yEnd = centerY + terminalMapSize;
-
-
-    protagonistIndex = (worldColumns*centerY + centerX);
-    if(!characters.at(protagonistIndex).empty()){
-        characters.at(protagonistIndex) = "";
-    }
-    //set protagonist character
-    characters.at(protagonistIndex) = "P";
 
     //making sure map follows protagonist and when reaching limits of the worldmap that you can see the protagonist move
     if(xStart < 1){
@@ -158,22 +154,27 @@ void Tview::drawCharacters(){
     cout <<""<< endl;
 }
 
-void Tview::updatePoisonTiles(vector<unique_ptr<Tile>> poisonTiles){
-    for(unsigned long i =0; i <poisonTiles.size();i++){
-        int x = poisonTiles.at(i)->getXPos();
-        int y = poisonTiles.at(i)->getYPos();
-        int index = (worldColumns*y + x);
-        characters.at(index) = "!"; //set character for poisoned tiles
+void Tview::updatePoisonTiles(int x, int y, int r){
+    for(int i = 0 ; i<r ; i++){
+        int positionX = x-(r/2)+i;
+        for(int j = 0; j<=r ; j++){
+            int positionY = y-(r/2)+j;
+            int index = (worldColumns*positionY + positionX);
+            if(characters.at(index).empty()){
+                characters.at(index) = "!";
+            }
+        }
     }
     drawCharacters();
 }
 
-void Tview::updateHealth(int healthPercentage){
+void Tview::changeHealthbar(int healthPercentage){
     this->healthPercentage = healthPercentage;
     drawCharacters();
 }
 
-void Tview::changeEnergyBar(int energyPercentage){
+void Tview::changeEnergybar(int energyPercentage){
     this->energyPercentage = energyPercentage;
     drawCharacters();
 }
+

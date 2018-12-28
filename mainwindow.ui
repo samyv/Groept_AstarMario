@@ -347,6 +347,19 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetNoConstraint</enum>
          </property>
+         <item row="3" column="2">
+          <widget class="QLabel" name="speedsliderval">
+           <property name="minimumSize">
+            <size>
+             <width>15</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="1">
           <widget class="QSlider" name="enemiesval">
            <property name="maximum">
@@ -354,36 +367,6 @@
            </property>
            <property name="value">
             <number>2</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>#Enemies</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>#Healthpacks</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QSlider" name="hpval">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>20</number>
-           </property>
-           <property name="value">
-            <number>3</number>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -398,21 +381,21 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>50</number>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="minimumSize">
-            <size>
-             <width>90</width>
-             <height>0</height>
-            </size>
-           </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>Speed</string>
+            <string>#Enemies</string>
            </property>
           </widget>
          </item>
@@ -435,6 +418,42 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>#Healthpacks</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="minimumSize">
+            <size>
+             <width>90</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Speed</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSlider" name="hpval">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>20</number>
+           </property>
+           <property name="value">
+            <number>3</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="2">
           <widget class="QLabel" name="healthsliderval">
            <property name="minimumSize">
@@ -448,16 +467,10 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="2">
-          <widget class="QLabel" name="speedsliderval">
-           <property name="minimumSize">
-            <size>
-             <width>15</width>
-             <height>0</height>
-            </size>
-           </property>
+         <item row="4" column="0" colspan="3">
+          <widget class="QPushButton" name="generateWorldButton">
            <property name="text">
-            <string>2</string>
+            <string>Generate a new World!</string>
            </property>
           </widget>
          </item>

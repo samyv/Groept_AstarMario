@@ -13,6 +13,7 @@ class Game: public QObject
 public:
     explicit Game(Gview * gview);
     ~Game();
+    Gview * gview;
     World * world;
     bool ai = true;
     vector<unique_ptr<Tile>> tiles;
@@ -55,6 +56,7 @@ signals:
     void checkCollision();
     void poisonedTile(qreal,qreal);
     void PEnemyTrigger(int,int);
+    void displayNewWorld(vector<unique_ptr<Tile>> & ,vector<unique_ptr<Enemy>> & ,vector<unique_ptr<Tile>> &);
 public slots:
     void step();
     void userEnemyDefeated(int,int);
@@ -67,6 +69,10 @@ public slots:
     void gametimer();
     void pauseTimer();
     void setBowser(Tile*);
+    void defineGlobalEnemies(int);
+    void defineGlobalHp(int);
+    void changeTimer(int);
+    void generateWorld(int e, int hp);
 
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);

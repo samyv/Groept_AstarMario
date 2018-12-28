@@ -127,6 +127,10 @@ void Gview::updateProtagonist(int x, int y){
 }
 
 void Gview::initDisplay(vector<unique_ptr<Tile>> & tiles,vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks){
+    scene->clear();
+    drawBackground();
+    drawMarioInit();
+    enemiesPixs.clear();
     QImage goomba = QImage(":/goombaretro.png");
     goomba = goomba.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap goombapix = QPixmap::fromImage(goomba);
@@ -148,6 +152,8 @@ void Gview::initDisplay(vector<unique_ptr<Tile>> & tiles,vector<unique_ptr<Enemy
         scene->addItem(enemypix);
     }
 
+    hpPixs.clear();
+
     QImage mushroom = QImage(":/mushroom.png");
     mushroom = mushroom.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap mushroompix = QPixmap::fromImage(mushroom);
@@ -159,8 +165,6 @@ void Gview::initDisplay(vector<unique_ptr<Tile>> & tiles,vector<unique_ptr<Enemy
         healthpackpix->setOffset(-mushroom.width()/2,-mushroom.height()/2);
         scene->addItem(healthpackpix);
     }
-
-
 }
 
 
@@ -190,6 +194,7 @@ void Gview::on_startGame_clicked()
 
     displaySize = ui->displaysizeval->text().toDouble();
 
+    cout <<"displaysize: " << displaySize<< endl;
     emit setnumbers(ui->enemiesval->value(), ui->hpval->value());
 
     if(ui->salesmanbox->currentIndex() == 0){
@@ -397,16 +402,25 @@ void Gview::drawPoisoned(qreal x,qreal y){
 void Gview::on_enemiesval_sliderMoved(int position)
 {
     ui->enemiessliderval->setText(QString::number(position));
+    emit changeAmountEnemies(position);
 }
 
 void Gview::on_hpval_sliderMoved(int position)
 {
     ui->healthsliderval->setText(QString::number(position));
+    emit changeAmountHp(position);
 }
 
 void Gview::on_horizontalSlider_sliderMoved(int position)
 {
     ui->speedsliderval->setText(QString::number(position));
+    emit changeSpeed(50-position);
+}
+
+
+void Gview::on_generateWorldButton_clicked()
+{
+    emit generateWorldbutton(ui->enemiesval->value(),ui->hpval->value());
 }
 
 void Gview::displayEnd(bool won){

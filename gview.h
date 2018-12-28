@@ -45,7 +45,6 @@ public:
     void drawBackground();
     void drawMarioInit();
     int prevX = 0;
-    void initDisplay(vector<unique_ptr<Tile>> & tiles,vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
     vector<unique_ptr<QGraphicsRectItem>> bestPath;
     vector<QGraphicsRectItem *> rects;
 
@@ -64,6 +63,10 @@ signals:
     void sendSound(QString);
     void bowserDrawed();
     void setnumbers(int,int);
+    void changeSpeed(int);
+    void changeAmountEnemies(int);
+    void changeAmountHp(int);
+    void generateWorldbutton(int,int);
 public slots:
     virtual void updateProtagonist(int x, int y);
     virtual void explodeEnemy(int,int);
@@ -78,6 +81,8 @@ public slots:
     virtual void displayBowser(int,int);
     virtual void changeHealthbar(int);
     virtual void displayEnd(bool won);
+    virtual void initDisplay(vector<unique_ptr<Tile>> & ,vector<unique_ptr<Enemy>> & ,vector<unique_ptr<Tile>> &);
+
 
 private slots:
 
@@ -91,6 +96,8 @@ private slots:
     void on_horizontalSlider_sliderMoved(int position);
 
     void on_Pause_clicked();
+
+    void on_generateWorldButton_clicked();
 
 private:
     Ui::Gview *ui;

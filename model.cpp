@@ -5,11 +5,41 @@
 Model::Model(vector<Enemy *> & enemiesToDefeat, vector<Tile *> * healthpacksOver, unsigned long e, int g, Protagonist * pro, vector<tile_t *> * p): enemiesToDefeat{enemiesToDefeat}, healthpacksOver{healthpacksOver},
     enemiesCount{e}, generationsAmount{g}, protagonist{pro}, path{p}
 {
+    cout << "make a new modol" << endl;
+}
 
+vector<Tile *> * Model::getHealthpacksOver() const
+{
+    return healthpacksOver;
+}
+
+void Model::setHealthpacksOver(const vector<Tile *> *value)
+{
+    *healthpacksOver = *value;
+}
+
+vector<Enemy *> Model::getEnemiesToDefeat() const
+{
+    return enemiesToDefeat;
+}
+
+void Model::setEnemiesToDefeat(const vector<Enemy *> &value)
+{
+    enemiesToDefeat = value;
+}
+
+Protagonist *Model::getProtagonist() const
+{
+    return protagonist;
+}
+
+void Model::setProtagonist(Protagonist *value)
+{
+    protagonist = value;
 }
 
 void Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols){
-
+    map.clear();
     for(unique_ptr<Tile> & tile : tiles){
         tile_t * t = new tile_t;
         t->t = tile.get();
@@ -548,6 +578,26 @@ vector<vector<path_t *>> Model::calculateDistances(){
         }
     }
     return localArray;
+}
+
+int Model::getGenerationsAmount() const
+{
+    return generationsAmount;
+}
+
+void Model::setGenerationsAmount(int value)
+{
+    generationsAmount = value;
+}
+
+unsigned long Model::getEnemiesCount() const
+{
+    return enemiesCount;
+}
+
+void Model::setEnemiesCount(unsigned long value)
+{
+    enemiesCount = value;
 }
 
 void Model::dotheSalesman(){

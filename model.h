@@ -71,6 +71,21 @@ public:
     bool enoughHealth(float curr_health,float strength);
     unsigned int findClosestEnemy(Tile * t);
     unsigned int findClosestHealtpack(Tile * t);
+    Protagonist *getProtagonist() const;
+    void setProtagonist(Protagonist *value);
+
+    vector<Enemy *> getEnemiesToDefeat() const;
+    void setEnemiesToDefeat(const vector<Enemy *> &value);
+
+    vector<Tile *> * getHealthpacksOver() const;
+    void setHealthpacksOver(const vector<Tile *> *value);
+
+    unsigned long getEnemiesCount() const;
+    void setEnemiesCount(unsigned long value);
+
+    int getGenerationsAmount() const;
+    void setGenerationsAmount(int value);
+
 private:
     priority_queue<tile_t *, vector<tile_t *>, comp> open;
     //vector<tile_t *> open;

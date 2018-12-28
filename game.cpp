@@ -146,13 +146,17 @@ void Game::step(){
                     emit healthpackGained(hp.get());
                     cout <<"HEALTHPACK: " << hp->getValue() << endl;
                     emit sendSound("qrc:/sound/smw_1-up.wav");
-                    healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
+                    //ptrdiff_t index = find(healthpacks.begin(),healthpacks.end(),hp) - healthpacks.begin();
+                    healthpacksOver.erase(remove(healthpacksOver.begin(),healthpacksOver.end(),hp.get()),healthpacksOver.end());
+                    //healthpacksOver.erase(index, healthpacksOver.end());
                     break;
                 }
             }
             if(finalGameStarted){
                 if((protagonist->getXPos() == bowser->getXPos()) && (protagonist->getYPos() == bowser->getYPos())){
                     if(bowser->getLives() != 1){
+                        cout << "BOWSER HAS BEEN TOUCHED #METOO" << endl;
+                        protagonist->setHealth(protagonist->getHealth() - bowser->getValue() * 100);
                         bowser->setLives(bowser->getLives()-1);
                         protagonist->setEnergy(100);
                     } else {
@@ -209,6 +213,7 @@ void Game::gametimer()
 void Game::setBowser(Tile * t)
 {
     bowser->setPos(t->getXPos(),t->getYPos());
+    bowser->setValue(t->getValue());
 }
 
 
@@ -222,7 +227,7 @@ void Game::stepUser(){
 
 
 void Game::makeModel(){
-    m = new Model(enemiesToDefeat, healthpacksOver, enemiesCount, generationsAmount, protagonist.get(), &path);
+    m = new Model(enemiesToDefeat, &healthpacksOver, enemiesCount, generationsAmount, protagonist.get(), &path);
     m->makeMap(tiles, world->getRows(), world->getCols());
 }
 

@@ -278,6 +278,7 @@ void Gview::drawCurrentBest(vector<tile_t*> path){
 
 void Gview::changeHealthbar(int health){
     ui->healthbar->setValue(health);
+    cout << "GVIEW: " << health << endl;
 }
 
 void Gview::changeEnergybar(int energy){

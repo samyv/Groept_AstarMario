@@ -37,7 +37,7 @@ public:
     bool finalGameStarted = false;
     vector<tile_t *> final_path;
     float poisonPercentage = 0.3;
-    unsigned int healthpackCount = 3;
+    unsigned int healthpackCount = 10;
     float defaultStrength = 0.5f;
     int generationsAmount = 300;
     unsigned long enemiesCount = 3;

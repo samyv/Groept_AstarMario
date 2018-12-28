@@ -76,7 +76,7 @@ void Game::step(){
     if(!path.empty()){
         tile_t * t_t = path.back();
         if(t_t->poison > 0.0f){
-//             protagonist->setHealth(protagonist->getHealth()-t_t->poison);
+             protagonist->setHealth(protagonist->getHealth()-t_t->poison);
         }
 
         Tile * nextTile = t_t->t;

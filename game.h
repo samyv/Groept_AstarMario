@@ -35,7 +35,7 @@ public:
     float poisonPercentage = 0.3;
     unsigned int healthpackCount = 8;
     float defaultStrength = 0.5f;
-    int generationsAmount = 600;
+    int generationsAmount = 300;
     unsigned long enemiesCount = 6;
     void makeModel();
     Model * m;
@@ -49,6 +49,7 @@ signals:
     void updateHealthbar(float);
     void checkCollision();
     void poisonedTile(qreal,qreal);
+    void PEnemyTrigger(int,int);
 public slots:
     void step();
     void userEnemyDefeated(int,int);

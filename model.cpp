@@ -16,6 +16,7 @@ void Model::makeMap(vector<unique_ptr<Tile>> & tiles, int rows, int cols){
         t->f = 0;
         t->g = 0;
         t->h = 0;
+        t->poison = 0.0f;
         t->open = false;
         t->closed = false;
         t->prev = nullptr;
@@ -727,3 +728,35 @@ unsigned int Model::findClosestHealtpack(Tile * t){
     }
     return index;
 }
+
+
+void Model::setPoisonedTiles(int strength)
+{
+    PEnemy * sender = dynamic_cast<PEnemy *>(QObject::sender());
+    int x = sender->getXPos();
+    int y = sender->getYPos();
+    tile_t * middle = map.at(x+y*cols);
+    vector<tile_t *> tiles_t_Poisoned;
+    int radius = 800/(strength+1);
+    int min_x = (x-radius/2>0?x-radius/2:0);
+    int min_y = (y-radius/2>0?y-radius/2:0);
+    int max_x = (x+radius/2<cols?x+radius/2:cols);
+    int max_y = (y+radius/2<cols?y+radius/2:rows);
+    for(int i = min_x; i<=max_x;i++){
+        for(int j = min_y; j<=max_y;j++){
+            tile_t * t = map.at(i+j*cols);
+            t->poison = t->poison + strength;
+        }
+    }
+
+//    for(auto &tile : tiles_t_Poisoned){
+//        if(heuristic(middle,tile)>radius){
+//            tiles_t_Poisoned.erase(remove(tiles_t_Poisoned.begin(),tiles_t_Poisoned.end(),tile),tiles_t_Poisoned.end());
+//        } else {
+
+//        }
+//    }
+
+    emit setTilesPoisoned(x,y,radius);
+}
+

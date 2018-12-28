@@ -30,6 +30,7 @@ typedef struct tile{
     double h;
     bool open;
     bool closed;
+    float poison;
 } tile_t;
 
 typedef struct {
@@ -84,11 +85,13 @@ private:
 signals:
     void newBest(vector<tile_t*> newBest);
     void salesmanDone();
+    void setTilesPoisoned(int,int,int);
 public slots:
     void weightchanged(int,double);
     void dotheSalesmanG();
     void dotheSalesman();
     void startGame();
+    void setPoisonedTiles(int strength);
 };
 
 

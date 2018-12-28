@@ -50,6 +50,7 @@ public:
     int prevX = 0;
     void initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
     vector<unique_ptr<QGraphicsRectItem>> bestPath;
+    vector<QGraphicsRectItem *> rects;
 
     ProtagonistUser *getMariopix() const;
 
@@ -65,7 +66,7 @@ signals:
     void sendSound(QString);
 public slots:
     void updateProtagonist(int x, int y);
-    void explodeEnemy(int poisonlevel);
+    void explodeEnemy(int,int);
     void triggerHealthpack(Tile * hp);
     void drawCurrentBest(vector<tile_t*> path);
     void enemyDead();
@@ -73,6 +74,8 @@ public slots:
     void penemyDead();
     void collisonDetect();
     void changeEnergybar(int energy);
+    void updatePoisonedTiles(int,int,int);
+
 private slots:
 
     void changeHealthbar(int);

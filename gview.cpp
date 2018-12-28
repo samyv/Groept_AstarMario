@@ -24,6 +24,7 @@ Gview::Gview(QWidget *parent) :
 
     drawMarioInit();
 
+
     //draw rects for each tile (not used for now)
     //    drawWorld();
 
@@ -103,14 +104,45 @@ void Gview::updateProtagonist(int x, int y){
     }
 
     prevX = x;
+    ui->graphicsView->centerOn(x*displaySize,y*displaySize);
+
+
+    //rect fading
     QBrush brush(Qt::SolidPattern);
     QPen pen(Qt::SolidLine);
-    pen.setWidth(3);
-    brush.setColor(QColor(255,0,0));
-    pen.setColor(QColor(255,0,0));
-    scene->addRect(x*displaySize, y*displaySize, displaySize, displaySize,pen,brush);
+    pen.setWidth(5);
+    QColor red = QColor(255,0,0);
+    brush.setColor(red);
+
+    pen.setColor(red);
+    QGraphicsRectItem * rect = scene->addRect(x*displaySize,y*displaySize,displaySize,displaySize,pen,brush);
+    rects.push_back(rect);
     mariopix->setZValue(1);
-    ui->graphicsView->centerOn(x*displaySize,y*displaySize);
+    int i = 0;
+    for(auto &rect: rects){
+
+        QColor q = rect->brush().color();
+        QColor  * new_q= new QColor(q.red(),q.green(),q.blue());
+        if(q.alpha() >= 1){
+//            cout << q.alpha() << endl;
+            new_q->setAlpha(q.alpha()-0.1);
+            QBrush new_B(Qt::SolidPattern);
+            QPen new_P(Qt::SolidLine);
+            pen.setWidth(5);
+            new_B.setColor(*new_q);
+            new_P.setColor(*new_q);
+//            cout << "after " << q.alpha() << endl;
+            rect->setPen(new_P);
+            rect->setBrush(new_B);
+            if(i == 1){
+//                cout << rect->brush().color().alpha << endl;
+            }
+            i++;
+        } else {
+            //scene->removeItem(rect);
+            rects.erase(remove(rects.begin(),rects.end(),rect),rects.end());
+        }
+    }
 }
 
 void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks){
@@ -166,21 +198,18 @@ void Gview::on_startGame_clicked()
     emit sendSound("qrc:/sound/sm64_mario_here_we_go.wav");
 }
 
-void Gview::explodeEnemy(int poisonlevel){
-    cout << "explosion" << endl;
+void Gview::explodeEnemy(int x,int y){
     QLabel *gif_anim = new QLabel();
     QMovie *movie = new QMovie(":/explosion.gif", QByteArray(), this);
     new QGraphicsProxyWidget();
     gif_anim->setAttribute( Qt::WA_NoSystemBackground);
     gif_anim->setMovie(movie);
-    PEnemy* e =dynamic_cast<PEnemy*>(sender());
-    cout << typeid (e).name() << endl;
     movie->start();
     QGraphicsProxyWidget * w =scene->addWidget(gif_anim);
     emit sendSound("qrc:/sound/smw_thunder.wav");
     w->setWidget(gif_anim);
     w->setScale(0.3f);
-    w->setPos(e->getXPos()*displaySize - 0.3f*w->size().width()/2,e->getYPos()*displaySize - 0.3f*w->size().height());
+    w->setPos(x*displaySize - 0.3f*w->size().width()/2,x*displaySize - 0.3f*w->size().height());
     eff = new QGraphicsOpacityEffect();
     w->setGraphicsEffect(eff);
     QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
@@ -190,20 +219,20 @@ void Gview::explodeEnemy(int poisonlevel){
     a->setEasingCurve(QEasingCurve::OutBack);
     a->start(QPropertyAnimation::DeleteWhenStopped);
     connect(movie, &QMovie::frameChanged, this,
-        [movie]()
+            [movie]()
+    {
+        if(movie->currentFrameNumber() == (movie->frameCount()-1))
         {
-            if(movie->currentFrameNumber() == (movie->frameCount()-1))
+            movie->stop();
+            //Explicity emit finished signal so that label **
+            //can show the image instead of a frozen gif
+            //Also, double check that movie stopped before emiting
+            if (movie->state() == QMovie::NotRunning)
             {
-                movie->stop();
-                //Explicity emit finished signal so that label **
-                //can show the image instead of a frozen gif
-                //Also, double check that movie stopped before emiting
-                if (movie->state() == QMovie::NotRunning)
-                {
-                    emit movie->finished();
-                }
+                emit movie->finished();
             }
         }
+    }
     );
 }
 
@@ -215,6 +244,7 @@ void Gview::triggerHealthpack(Tile * hp){
             QPixmap mushroompix = QPixmap::fromImage(mushroom);
             pix->setOffset(-mushroom.width()/2,-mushroom.height()/2);
             QTransform transform;
+            cout << "trigger healthpack"<< endl;
             transform.translate(0, mushroom.height()/2);
             pix->setTransform(transform);
             pix->setPixmap(mushroompix);
@@ -251,6 +281,15 @@ void Gview::changeEnergybar(int energy){
     ui->energybar->setValue(energy);
 }
 
+void Gview::updatePoisonedTiles(int x,int y,int r)
+{
+    QBrush * brush = new QBrush(QColor(0,255,0,120));
+    QPen greenp(Qt::green);
+//    scene->addEllipse((x-r/2)*displaySize,(y-r/2)*displaySize,r*displaySize,r*displaySize,greenp,*brush);
+    scene->addRect((x-r/2)*displaySize,(y-r/2)*displaySize,r*displaySize,r*displaySize,greenp,*brush);
+
+}
+
 void Gview::enemyDead(){
     QPixmap enemyPix;
     QImage goomba = QImage(":/goombaretro.png");
@@ -284,7 +323,7 @@ void Gview::penemyDead(){
             green.setAlpha(100);
             brush.setColor(green);
             pen.setColor(green);
-            scene->addEllipse(epix->pos().x()-displaySize*200/2,epix->pos().y()-displaySize*200/2,displaySize*200,displaySize*200,pen,brush);
+            //scene->addEllipse(epix->pos().x()-displaySize*200/2,epix->pos().y()-displaySize*200/2,displaySize*200,displaySize*200,pen,brush);
             cout << "penemy" << endl;
             emit poisonExplosion(epix->x(),epix->y());
             enemyPix = QPixmap::fromImage(pE);

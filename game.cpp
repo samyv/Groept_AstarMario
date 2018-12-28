@@ -51,13 +51,13 @@ Game::Game(Gview * gview)
             connect(a.get(), SIGNAL(dead()), gview, SLOT(enemyDead()));
         } else if(typeid (*a) == typeid (PEnemy)){
             connect(a.get(), SIGNAL(dead()), gview, SLOT(penemyDead()));
-            connect(a.get(), SIGNAL(poisonLevelUpdated(int)), gview, SLOT(explodeEnemy(int)));
+            connect(a.get(), SIGNAL(poisonLevelUpdated(int)), m,SLOT(setPoisonedTiles(int)));
         }
-
     }
+    connect(this, SIGNAL(PEnemyTrigger(int,int)), gview, SLOT(explodeEnemy(int,int)));
     connect(gview, SIGNAL(poisonExplosion(qreal,qreal)), this, SLOT(setNeighboursPoison(qreal,qreal)));
     connect(this, SIGNAL(poisonedTile(qreal,qreal)), gview, SLOT(drawPoisoned(qreal,qreal)));
-
+    connect(m,SIGNAL(setTilesPoisoned(int,int,int)),gview,SLOT(updatePoisonedTiles(int,int,int)));
     QObject::connect(this,SIGNAL(healthpackGained(Tile *)), gview,SLOT(triggerHealthpack(Tile *)));
     QObject::connect(gview,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
@@ -74,7 +74,12 @@ Game::Game(Gview * gview)
 
 void Game::step(){
     if(!path.empty()){
-        Tile * nextTile = path.back()->t;
+        tile_t * t_t = path.back();
+        if(t_t->poison > 0.0f){
+//             protagonist->setHealth(protagonist->getHealth()-t_t->poison);
+        }
+
+        Tile * nextTile = t_t->t;
         protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
         protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
 
@@ -85,14 +90,16 @@ void Game::step(){
                 cout << protagonist->getHealth() << endl;
                 if(typeid (*enemy) == typeid (Enemy)){
                     enemy->setDefeated(true);
+                    emit sendSound("qrc:/sound/smw_kick.wav");
+                    enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
 
                 } else if(typeid (*enemy) == typeid (PEnemy)){
                     dynamic_cast<PEnemy*>(enemy.get())->poison();
+                    emit PEnemyTrigger(enemy->getXPos(),enemy->getYPos());
                 }
                 //Erase–remove idiom
-                enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+
                 protagonist->setEnergy(100);
-//                emit sendSound("qrc:/sound/smw_kick.wav");
                 break;
             }
         }
@@ -110,6 +117,7 @@ void Game::step(){
                 cout <<"HEALTHPACK: " << hp->getValue() << endl;
                 emit sendSound("qrc:/sound/smw_1-up.wav");
                 healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
+                cout << " healtpack gained: " << hp->getValue() << endl;
                 break;
             }
         }
@@ -119,7 +127,6 @@ void Game::step(){
             emit sendSound("qrc:/sound/smw_castle_clear.wav");
         }
         path.pop_back();
-        //emit energychanged(protagonist->getEnergy());
     } else {
         //cout << "PATH EMPTY" << endl;
     }
@@ -152,6 +159,7 @@ void Game::hpTrigger(int x, int y)
         }
     }
 }
+
 
 
 

@@ -101,7 +101,6 @@ void Tview::drawCharacters(){
     string printScreen = "";
     //drawing the terminal view per column, per row
     for(int i =0; i < 2*terminalMapSize;i++){
-        //printScreen.append("\x1b[0m");
         cout << "\x1b[0m";
         for(int j =0; j < 2*terminalMapSize;j++){
             int charIndex = (yStart+i)*worldColumns + j+xStart;
@@ -112,19 +111,14 @@ void Tview::drawCharacters(){
             string charac = characters.at(charIndex);
             if(charac == "O" || prevCharac=="O"){
                 cout << "\x1b[40m" << "+---+" << "\x1b[0m";
-                //printScreen.append("\x1b[45m+---+\x1b[0m");
             } else if(charac.find("!") != std::string::npos || prevCharac.find("!") != std::string::npos){
                 cout << "\x1b[45m" << "+---+" << "\x1b[0m";
-                //printScreen.append("\x1b[45m+---+\x1b[0m");
             } else if(charac.length()>2){
                 cout << charac << "+---+" << "\x1b[0m";
-                //printScreen.append("+---+\x1b[0m");
             } else if(prevCharac.length()>2){
                 cout << prevCharac << "+---+" << "\x1b[0m";
-                //printScreen.append("+---+\x1b[0m");
             } else {
                 cout << "+---+";
-                //printScreen.append("+---+");
             }
 
         }
@@ -134,32 +128,26 @@ void Tview::drawCharacters(){
             string charac = characters.at(charIndex);
             if(charac == "O"){
                 cout << "\x1b[40m" << "| "<< charac<<" |" << "\x1b[0m";
-                //printScreen.append("+---+");
             } else if (charac == "P"){
                 cout << "\x1b[44m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-                //printScreen.append("+---+");
             } else if(charac == "E"){
                 cout << "\x1b[41m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-                //printScreen.append("+---+");
             } else if(charac == "B" ||charac == "!"){
                 cout << "\x1b[45m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-                //printScreen.append("+---+");
+            } else if(charac == "R"){
+                cout << "\x1b[43m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
             } else if(charac == "H"){
                 cout << "\x1b[42m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-                //printScreen.append("+---+");
             } else if(charac.length()>2){
                 cout << charac <<  "|" << "   " << "|" <<"\x1b[0m";
-                //printScreen.append("+---+");
             } else {
                 if(charac.empty()){
                     charac = " ";
                 }
                 cout << "| "<< charac<<" |";
-                //printScreen.append("+---+");
             }
         }
         cout <<""<< endl;
-        //printScreen.append("+---+");
     }
     //healthbar and energybar
     for(int j =0; j < 2*terminalMapSize;j++){
@@ -200,6 +188,7 @@ void Tview::updatePoisonTiles(int x, int y, int r){
             }
         }
     }
+    characters.at(worldColumns*y + x) = "!";
     drawCharacters();
 }
 
@@ -213,5 +202,20 @@ void Tview::changeEnergybar(int energyPercentage){
     drawCharacters();
 }
 
+void Tview::displayBowser(int x, int y){
+    if(browserX != -1){
+        int previousBrowserIndex = (worldColumns*browserY + browserX);
+        characters.at(previousBrowserIndex) = prevBrowserChar;
+    }
+    browserX = x;
+    browserY = y;
+    int browserIndex = (worldColumns*browserY + browserX);
 
+    if (characters.at(browserIndex).find("\x1b[48;5") != std::string::npos || characters.at(protagonistIndex).find("!") != std::string::npos) {
+        prevBrowserChar = characters.at(browserIndex);
+    }
+
+    characters.at(browserIndex) = "R";
+    drawCharacters();
+}
 

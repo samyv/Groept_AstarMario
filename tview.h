@@ -22,15 +22,19 @@ public:
     int worldColumns;
     int worldRows;
     int protagonistIndex;
-    int healthPercentage = 20;
-    int energyPercentage = 80;
+    int healthPercentage = 100;
+    int energyPercentage = 100;
     string prevChar = "";
-    int centerX;
+    int centerX = -1;
     int centerY;
+    int browserX;
+    int browserY;
+    string prevBrowserChar = "";
 
 
     public slots :
          void updateProtagonist(int x, int y);
+         void displayBowser(int x, int y);
          void updatePoisonTiles(int x, int y, int r);
          void changeHealthbar(int healthPercentage);
          void changeEnergybar(int energyPercentage);

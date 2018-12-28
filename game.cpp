@@ -39,6 +39,7 @@ Game::Game(Gview * gview)
     bowser = new XEnemy(5);
     QObject::connect(bowser,SIGNAL(livesChanged()),m,SLOT(findBowserPos()));
     QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),gview,SLOT(displayBowser(Tile *)));
+    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),tview,SLOT(displayBowser(Tile *)));
 
     //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
     timer = new QTimer(gview);
@@ -242,11 +243,7 @@ void Game::setNeighboursPoison(qreal x, qreal y){
 }
 
 void Game::startTime(){
-<<<<<<< HEAD
     timer->start(1);
-=======
-    timer->start(0);
->>>>>>> 94d2a1c8a388ae82f5707631b4750166c7abae09
 }
 
 void Game::checkTile(int x, int y)

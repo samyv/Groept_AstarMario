@@ -135,8 +135,10 @@ void Model::checkNeighbours(tile_t ** temp, vector<tile_t *> & map){
                 newg = t->g + SQRT;
             }
 
-            if(x + i >= 0  && x + i < cols && y + j >= 0 && y + j < rows && ((i != 0) || (j != 0))){
-
+            if(x >= 0  && x < cols && y >= 0 && y < rows && ((i != 0) || (j != 0))){
+                /*if(y + j == 0 && x + i == 600){
+                    cout << "ouch" << endl;
+                }*/
                 int get = x + y*cols;
 
                 //cout << x << ", " << y << " get: " << get;
@@ -382,14 +384,15 @@ void Model::dotheSalesmanG(){
     for(int i = 0; i < enemiesToDefeat.size(); i++){
         sume += enemiesToDefeat.at(i)->getValue();
     }
-
+    cout << sumh << ", " << sume << endl;
     if(sumh+100 > sume){
         //solve
         double h = 100;
         int besthindex = healthpacksOver.size()*2;
         vector<int> checkedh;
-        for(uint i = 0; i < bestOrder.size() - 1; i++){
-            //cout << h << " - " << enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue() << ", " << i << endl;
+        bool noh = false;
+        for(uint i = 0; i < bestOrder.size() - 1 && noh == false; i++){
+            cout << h << " - " << enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue() << ", " << i << endl;
             double temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
             //double temp = 0;
             //cout << temp << endl;
@@ -417,8 +420,8 @@ void Model::dotheSalesmanG(){
                     bestOrder.insert(bestOrder.begin() + int(i), besthindex);
                     //cout << besthindex << endl;
                     h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
-                    //cout << h << endl;
-                    //printElement(bestOrder);
+                    cout << h << endl;
+                    printElement(bestOrder);
                     cout << "checked: ";
                     printElement(checkedh);
                     besthindex = healthpacksOver.size() * 2;
@@ -428,12 +431,14 @@ void Model::dotheSalesmanG(){
                     temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
                     if(temp <= 0){
                         cout << "TEMP STILL BELOW 0?" << endl;
+                        temp = h;
+                        i--;
                     }
                     h = temp;
                 } else{
                     //check again without checking survive
                     for(uint j = 0; j < healthpacksOver.size(); j++){
-                        //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                        cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
                         if(bestOrder.at(i) == j + enemiesCount + 1){
                             continue;
                         }
@@ -447,9 +452,14 @@ void Model::dotheSalesmanG(){
                         }
                     }
                     i++;
+                    if(checkedh.size() >= healthpacksOver.size()){
+                        cout << "KIEKE" << endl;
+                        noh = true;
+                        break;
+                    }
                     checkedh.push_back(besthindex - enemiesCount - 1);
                     bestOrder.insert(bestOrder.begin() + int(i), besthindex);
-                    //cout << besthindex << endl;
+                    cout << besthindex << endl;
                     h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
                     cout << h << endl;
                     printElement(bestOrder);
@@ -604,7 +614,125 @@ void Model::dotheSalesman(){
             order[i] = reversed[i];
         }
     }
-    for(int i = 0; i < enemiesCount;i++){
+
+    printElement(bestOrder);
+
+    //check if solvable
+    double sumh = 0;
+    for(int i = 0; i < healthpacksOver.size(); i++){
+        sumh += healthpacksOver.at(i)->getValue();
+    }
+
+    double sume = 0;
+    for(int i = 0; i < enemiesToDefeat.size(); i++){
+        sume += enemiesToDefeat.at(i)->getValue();
+    }
+    cout << sumh << ", " << sume << endl;
+    if(sumh+100 > sume){
+        //solve
+        double h = 100;
+        int besthindex = healthpacksOver.size()*2;
+        vector<int> checkedh;
+        bool noh = false;
+        for(uint i = 0; i < bestOrder.size() - 1 && noh == false; i++){
+            cout << h << " - " << enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue() << ", " << i << endl;
+            double temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
+            //double temp = 0;
+            //cout << temp << endl;
+            //cout << i << endl;
+            while(temp <= 0){
+                double bestdist = INFINITY;
+                //look for healthpack between enemy and enemy - 1
+                for(uint j = 0; j < healthpacksOver.size(); j++){
+                    //cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                    if(bestOrder.at(i) == j + enemiesCount + 1){
+                        continue;
+                    }
+                    double dist = distanceBetweenEnemies.at(bestOrder.at(i)).at(j + enemiesCount + 1)->cost;
+                    dist += distanceBetweenEnemies.at(j + enemiesCount + 1).at(bestOrder.at(i + 1))->cost;
+                    //cout << dist << endl;
+                    //best healthpack
+                    if(dist < bestdist && temp + healthpacksOver.at(j)->getValue() > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
+                        besthindex = j + enemiesCount + 1;
+                        bestdist = dist;
+                    }
+                }
+                if(find(checkedh.begin(), checkedh.end(), besthindex - enemiesCount - 1) == checkedh.end() && besthindex < healthpacksOver.size() + enemiesCount + 1){
+                    i++;
+                    checkedh.push_back(besthindex - enemiesCount - 1);
+                    bestOrder.insert(bestOrder.begin() + int(i), besthindex);
+                    //cout << besthindex << endl;
+                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    cout << h << endl;
+                    printElement(bestOrder);
+                    cout << "checked: ";
+                    printElement(checkedh);
+                    besthindex = healthpacksOver.size() * 2;
+                    if(h > 100){
+                        h = 100;
+                    }
+                    temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
+                    if(temp <= 0){
+                        cout << "TEMP STILL BELOW 0?" << endl;
+                        temp = h;
+                        i--;
+                    }
+                    h = temp;
+                } else{
+                    //check again without checking survive
+                    for(uint j = 0; j < healthpacksOver.size(); j++){
+                        cout << temp << ", " << i << ", " << j + enemiesCount + 1 << ", Health " << healthpacksOver.at(j)->getValue() << endl;
+                        if(bestOrder.at(i) == j + enemiesCount + 1){
+                            continue;
+                        }
+                        double dist = distanceBetweenEnemies.at(bestOrder.at(i)).at(j + enemiesCount + 1)->cost;
+                        dist += distanceBetweenEnemies.at(j + enemiesCount + 1).at(bestOrder.at(i + 1))->cost;
+                        //cout << dist << endl;
+                        //best healthpack
+                        if(dist < bestdist > 0 && find(checkedh.begin(), checkedh.end(), j) == checkedh.end()){
+                            besthindex = j + enemiesCount + 1;
+                            bestdist = dist;
+                        }
+                    }
+                    i++;
+                    if(checkedh.size() >= healthpacksOver.size()){
+                        cout << "KIEKE" << endl;
+                        noh = true;
+                        break;
+                    }
+                    checkedh.push_back(besthindex - enemiesCount - 1);
+                    bestOrder.insert(bestOrder.begin() + int(i), besthindex);
+                    cout << besthindex << endl;
+                    h += double(healthpacksOver.at(uint(besthindex - enemiesCount - 1))->getValue());
+                    cout << h << endl;
+                    printElement(bestOrder);
+                    cout << "checked: ";
+                    printElement(checkedh);
+                    //besthindex = 1000;
+                    if(h > 100){
+                        h = 100;
+                    }
+                    temp = h - double(enemiesToDefeat.at(uint(bestOrder.at(i + 1)) - 1)->getValue());
+                    if(temp <= 0){
+                        cout << "RIP" << endl;
+                        temp = h;
+                        i--;
+                    }
+                    h = temp;
+                }
+            }
+            if(temp > 100){
+                temp = 100;
+            }
+            h = temp;
+        }
+        cout << "done checking healthpacks " << h << endl;
+        printElement(bestOrder);
+    } else {
+        cout << "NOT SOLVABLE" << endl;
+    }
+
+    for(int i = 0; i < bestOrder.size();i++){
         path_t * pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
         path->insert(path->begin(),pathBetweenEnemies->path.begin(),pathBetweenEnemies->path.end());
     }
@@ -742,10 +870,11 @@ void Model::setPoisonedTiles(int strength)
     int min_y = (y-radius/2>0?y-radius/2:0);
     int max_x = (x+radius/2<cols?x+radius/2:cols);
     int max_y = (y+radius/2<cols?y+radius/2:rows);
-    for(int i = min_x; i<=max_x;i++){
-        for(int j = min_y; j<=max_y;j++){
+    for(int i = min_x; i<max_x;i++){
+        for(int j = min_y; j<max_y;j++){
+            //cout << "CHECK MAP: " << i << ", " << j << endl;
             tile_t * t = map.at(i+j*cols);
-            t->poison = t->poison + strength;
+            t->poison = strength;
         }
     }
 

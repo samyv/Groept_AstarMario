@@ -22,9 +22,11 @@ Game::Game(Gview * gview)
     ////    Tview * tview = new Tview(move(greyTiles), move(enemies), move(protagonist), world->getCols(), world->getRows());
     protagonist = world->getProtagonist();
     enemies = world->getEnemies(enemiesCount);
+    enemies.at(2).get()->setYPos(0);
+    enemies.at(2).get()->setXPos(600);
     healthpacks = world->getHealthPacks(healthpackCount);
     for(int i = 0; i < healthpackCount; i++){
-//        healthpacks.at(i)->setValue(30);
+        //        healthpacks.at(i)->setValue(30);
     }
     copyEnemies();
     gview->initDisplay(enemies,healthpacks);
@@ -72,59 +74,66 @@ Game::Game(Gview * gview)
 }
 
 void Game::step(){
-    if(!path.empty()){
-        tile_t * t_t = path.back();
-        if(t_t->poison > 0){
-            cout << "POISON" << endl;
-        }
-        Tile * nextTile = t_t -> t;
-        protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
-        protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
-
-        //CHECK COLLISIONS WITH ENEMIES
-        for(auto &enemy : enemies){
-            if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
-                protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
-                cout << protagonist->getHealth() << endl;
-                if(typeid (*enemy) == typeid (Enemy)){
-                    enemy->setDefeated(true);
-
-                } else if(typeid (*enemy) == typeid (PEnemy)){
-                    dynamic_cast<PEnemy*>(enemy.get())->poison();
-                }
-                //Erase–remove idiom
-                enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
-                protagonist->setEnergy(100);
-//                emit sendSound("qrc:/sound/smw_kick.wav");
-                break;
-            }
-        }
-
-        //CHECK COLLISIONS WITH HEALTHPACKS
-        for(auto &hp : healthpacks){
-            if((protagonist->getXPos() == hp->getXPos()) && (protagonist->getYPos() == hp->getYPos())){
-                float h = protagonist->getHealth()+hp->getValue();
-                if(h > 100){
-                    h = 100;
-                }
-                protagonist->setHealth(h);
-                //cout << "samy is gay" << endl;
-                emit healthpackGained(hp.get());
-                cout <<"HEALTHPACK: " << hp->getValue() << endl;
-                emit sendSound("qrc:/sound/smw_1-up.wav");
-                healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
-                break;
-            }
-        }
-        if(enemies.empty()){
-            cout << "you won" << endl;
-            background->stop();
-            emit sendSound("qrc:/sound/smw_castle_clear.wav");
-        }
-        path.pop_back();
-        //emit energychanged(protagonist->getEnergy());
+    if(protagonist->getEnergy() < 0 || protagonist->getHealth() < 0){
+        cout << "HELEMAAL DOOD" << endl;
+        timer->stop();
     } else {
-        //cout << "PATH EMPTY" << endl;
+
+        if(!path.empty()){
+            tile_t * t_t = path.back();
+            Tile * nextTile = t_t -> t;
+            protagonist->setEnergy(protagonist->getEnergy() - 2 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
+            protagonist->setPos(nextTile->getXPos(),nextTile->getYPos());
+
+            if(t_t->poison > 0){
+                protagonist->setHealth(protagonist->getHealth() - (t_t->poison/100));
+            }
+
+            //CHECK COLLISIONS WITH ENEMIES
+            for(auto &enemy : enemies){
+                if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
+                    protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
+                    cout << protagonist->getHealth() << endl;
+                    if(typeid (*enemy) == typeid (Enemy)){
+                        enemy->setDefeated(true);
+
+                    } else if(typeid (*enemy) == typeid (PEnemy)){
+                        dynamic_cast<PEnemy*>(enemy.get())->poison();
+                    }
+                    //Erase–remove idiom
+                    enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+                    protagonist->setEnergy(100);
+                    //                emit sendSound("qrc:/sound/smw_kick.wav");
+                    break;
+                }
+            }
+
+            //CHECK COLLISIONS WITH HEALTHPACKS
+            for(auto &hp : healthpacks){
+                if((protagonist->getXPos() == hp->getXPos()) && (protagonist->getYPos() == hp->getYPos())){
+                    float h = protagonist->getHealth()+hp->getValue();
+                    if(h > 100){
+                        h = 100;
+                    }
+                    protagonist->setHealth(h);
+                    //cout << "samy is gay" << endl;
+                    emit healthpackGained(hp.get());
+                    cout <<"HEALTHPACK: " << hp->getValue() << endl;
+                    emit sendSound("qrc:/sound/smw_1-up.wav");
+                    healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
+                    break;
+                }
+            }
+            if(enemies.empty()){
+                cout << "you won" << endl;
+                background->stop();
+                emit sendSound("qrc:/sound/smw_castle_clear.wav");
+            }
+            path.pop_back();
+            //emit energychanged(protagonist->getEnergy());
+        } else {
+            //cout << "PATH EMPTY" << endl;
+        }
     }
 }
 

@@ -1,7 +1,6 @@
 #include "tview.h"
 #include "math.h"
 #include "game.h"
-#include "view.h"
 #include <cstdlib>
 #include <stdio.h>
 #include <iostream>
@@ -60,11 +59,19 @@ void Tview::setup(vector<unique_ptr<Tile>> & tiles, vector<unique_ptr<Tile>> & h
             characters.at(index) = "O";
         }
     }
+
+    int horizontal = 2*(terminalMapSize)*5 + 2;
+    int vertical = 4*terminalMapSize + 3;
+    cout << "\e[8;" + to_string(vertical) + ";"+to_string(horizontal)+"t";
+    drawCharacters();
 }
 
 void Tview::updateProtagonist(int x, int y){
     centerX = x;
     centerY = y;
+    if(prevChar.empty()){
+       prevChar = characters.at(protagonistIndex);
+    }
     characters.at(protagonistIndex) = prevChar;
     protagonistIndex = (worldColumns*centerY + centerX);
     if (characters.at(protagonistIndex).find("\x1b[48;5") != std::string::npos || characters.at(protagonistIndex).find("!") != std::string::npos) {
@@ -117,8 +124,10 @@ void Tview::drawCharacters(){
                 cout << charac << "+---+" << "\x1b[0m";
             } else if(prevCharac.length()>2){
                 cout << prevCharac << "+---+" << "\x1b[0m";
+            } else if(charIndex<= worldColumns){
+                cout << characters.at(charIndex+1) << "+---+" << "\x1b[0m";
             } else {
-                cout << "+---+";
+                cout << "+---+" << "\x1b[0m";
             }
 
         }
@@ -134,7 +143,7 @@ void Tview::drawCharacters(){
                 cout << "\x1b[41m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
             } else if(charac == "B" ||charac == "!"){
                 cout << "\x1b[45m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
-            } else if(charac == "R"){
+            } else if(charac == "X"){
                 cout << "\x1b[43m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
             } else if(charac == "H"){
                 cout << "\x1b[42m" <<  "|"<< " "<< charac<< " " << "|"<< "\x1b[0m";
@@ -144,7 +153,7 @@ void Tview::drawCharacters(){
                 if(charac.empty()){
                     charac = " ";
                 }
-                cout << "| "<< charac<<" |";
+                cout << "| "<< charac<<" |" << "\x1b[0m";
             }
         }
         cout <<""<< endl;
@@ -177,7 +186,7 @@ void Tview::drawCharacters(){
     usleep(10000);
 }
 
-void Tview::updatePoisonTiles(int x, int y, int r){
+void Tview::updatePoisonedTiles(int x, int y, int r){
     for(int i = 0 ; i<r ; i++){
         int positionX = x-(r/2)+i;
         for(int j = 0; j<=r ; j++){
@@ -215,7 +224,19 @@ void Tview::displayBowser(int x, int y){
         prevBrowserChar = characters.at(browserIndex);
     }
 
-    characters.at(browserIndex) = "R";
+    characters.at(browserIndex) = "X";
     drawCharacters();
+}
+
+void Tview::displayEnd(bool won){
+    if(won){
+        for (string& charac : characters) {
+            charac="H";
+        }
+    } else {
+        for (string& charac : characters) {
+            charac="E";
+        }
+    }
 }
 

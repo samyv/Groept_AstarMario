@@ -6,11 +6,9 @@
 #include <world.h>
 #include <world_global.h>
 #include "ui_mainwindow.h"
-
 #include <QtCore>
 #include <QtGui>
 #include "math.h"
-
 #include "model.h"
 #include <iostream>
 #include <QObject>
@@ -56,6 +54,7 @@ public:
 signals:
     void buttonClicked(QString);
     void gameStart();
+    void gamePause();
     void poisonExplosion(qreal,qreal);
     void changeweight(int, double);
     void geneticTrigger();
@@ -66,7 +65,7 @@ signals:
     void bowserDrawed();
     void setnumbers(int,int);
 public slots:
-   virtual void updateProtagonist(int x, int y);
+    virtual void updateProtagonist(int x, int y);
     virtual void explodeEnemy(int,int);
     virtual void triggerHealthpack(Tile * hp);
     virtual void drawCurrentBest(vector<tile_t*> path);
@@ -77,10 +76,10 @@ public slots:
     virtual void changeEnergybar(int energy);
     virtual void updatePoisonedTiles(int,int,int);
     virtual void displayBowser(int,int);
+    virtual void changeHealthbar(int);
+    virtual void displayEnd(bool won);
 
 private slots:
-
-    void changeHealthbar(int);
 
     void on_startGame_clicked();
 
@@ -90,6 +89,8 @@ private slots:
     void on_hpval_sliderMoved(int position);
 
     void on_horizontalSlider_sliderMoved(int position);
+
+    void on_Pause_clicked();
 
 private:
     Ui::Gview *ui;

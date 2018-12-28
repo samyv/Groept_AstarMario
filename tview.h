@@ -6,23 +6,22 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <view.h>
 #include "gview.h"
 
 using namespace std;
 
-class Tview : public Gview/*: public view*/
+class Tview : public Gview
 {
    Q_OBJECT
 public:
     Tview();
     //~Tview() Q_DECL_OVERRIDE;
-    int terminalMapSize = 10;
+    int terminalMapSize = 15;
     void drawCharacters();
     vector<string> characters;
     int worldColumns;
     int worldRows;
-    int protagonistIndex;
+    int protagonistIndex=0;
     int healthPercentage = 100;
     int energyPercentage = 100;
     string prevChar = "";
@@ -36,10 +35,11 @@ public:
     public slots :
          void updateProtagonist(int x, int y);
          void displayBowser(int x, int y);
-         void updatePoisonTiles(int x, int y, int r);
+         void updatePoisonedTiles(int x, int y, int r);
          void changeHealthbar(int healthPercentage);
          void changeEnergybar(int energyPercentage);
          void setup(vector<unique_ptr<Tile>> & tiles, vector<unique_ptr<Tile>> & healthPacks, vector<unique_ptr<Enemy>> & enemies, int columns, int rows);
+         void displayEnd(bool won);
 };
 
 #endif // TVIEW_H

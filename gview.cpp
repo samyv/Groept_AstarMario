@@ -407,3 +407,19 @@ void Gview::on_horizontalSlider_sliderMoved(int position)
 {
     ui->speedsliderval->setText(QString::number(position));
 }
+
+void Gview::displayEnd(bool won){
+    //TODO
+}
+
+void Gview::on_Pause_clicked()
+{
+    if(ui->Pause->text() =="Pause"){
+        ui->Pause->setText("CONTINUE");
+    } else {
+        ui->Pause->setText("PAUSE");
+    }
+    emit gamePause();
+}
+
+

@@ -65,6 +65,7 @@ public slots:
     void checkTile(int,int);
     void hpTrigger(int,int);
     void gametimer();
+    void pauseTimer();
     void setBowser(Tile*);
 
 };

@@ -33,7 +33,6 @@ SOURCES += \
         main.cpp \
     model.cpp \
     game.cpp \
-    view.cpp \
     gview.cpp \
     tview.cpp \
     DisplayManner.cpp \
@@ -44,7 +43,6 @@ SOURCES += \
 HEADERS += \
     model.h \
     game.h \
-    view.h \
     gview.h \
     tview.h \
     DisplayManner.h \

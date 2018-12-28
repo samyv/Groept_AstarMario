@@ -13,6 +13,7 @@ public:
     void setPos(int x, int y);
     int getLives() const;
     void setLives(int value);
+    int getLives();
 
 public slots:
     void showRandomPosition(int x, int y);

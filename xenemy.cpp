@@ -38,3 +38,6 @@ void XEnemy::setPos(int x, int y)
 
 }
 
+int XEnemy::getLives(){
+    return lives;
+}

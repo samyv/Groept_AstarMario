@@ -26,9 +26,9 @@ Game::Game(Gview * gview)
     enemies = world->getEnemies(enemiesCount);
     healthpacks = world->getHealthPacks(healthpackCount);
 
-    Tview * tview = new Tview();
-    tview->setup(tiles, healthpacks, enemies, world->getCols(), world->getRows());
-    tview->updateProtagonist(protagonist->getXPos(), protagonist->getYPos());
+    //  Tview * tview = new Tview();
+    //tview->setup(tiles, healthpacks, enemies, world->getCols(), world->getRows());
+    //tview->updateProtagonist(protagonist->getXPos(), protagonist->getYPos());
     for(int i = 0; i < healthpackCount; i++){
         //        healthpacks.at(i)->setValue(30);
     }
@@ -40,7 +40,7 @@ Game::Game(Gview * gview)
     QObject::connect(bowser,SIGNAL(livesChanged()),m,SLOT(findBowserPos()));
     QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),this,SLOT(setBowser(Tile *)));
     QObject::connect(bowser,SIGNAL(posChanged(int,int)),gview,SLOT(displayBowser(int,int)));
-    QObject::connect(bowser,SIGNAL(posChanged(int,int)),tview,SLOT(displayBowser(int,int)));
+  //  QObject::connect(bowser,SIGNAL(posChanged(int,int)),tview,SLOT(displayBowser(int,int)));
     QObject::connect(bowser,SIGNAL(posChanged(int,int)),m,SLOT(findBowser(int,int)));
 
     //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
@@ -56,9 +56,10 @@ Game::Game(Gview * gview)
 
     //CONNECTIONS WHEN PROTAGONIST DATA CHANGES
     QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), gview,SLOT(updateProtagonist(int, int)));
-    QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
+    //QObject::connect(protagonist.get(),SIGNAL(posChanged(int,int)), tview,SLOT(updateProtagonist(int, int)));
     QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), gview,SLOT(changeHealthbar(int)));
-    QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), tview,SLOT(changeHealthbar(int)));
+
+   // QObject::connect(protagonist.get(),SIGNAL(healthChanged(int)), tview,SLOT(changeHealthbar(int)));
     QObject::connect(m,SIGNAL(startGameTimer()),this,SLOT(gametimer()));
 
     //CONNECTIONS WHEN SPECIAL TILES DATA CHANGES
@@ -75,7 +76,7 @@ Game::Game(Gview * gview)
     connect(gview, SIGNAL(poisonExplosion(qreal,qreal)), this, SLOT(setNeighboursPoison(qreal,qreal)));
     connect(this, SIGNAL(poisonedTile(qreal,qreal)), gview, SLOT(drawPoisoned(qreal,qreal)));
     connect(m,SIGNAL(setTilesPoisoned(int,int,int)),gview,SLOT(updatePoisonedTiles(int,int,int)));
-    connect(m,SIGNAL(setTilesPoisoned(int,int,int)),tview,SLOT(updatePoisonTiles(int,int,int)));
+    //connect(m,SIGNAL(setTilesPoisoned(int,int,int)),tview,SLOT(updatePoisonTiles(int,int,int)));
     QObject::connect(this,SIGNAL(healthpackGained(Tile *)), gview,SLOT(triggerHealthpack(Tile *)));
     QObject::connect(gview,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
     QObject::connect(this,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
@@ -92,7 +93,7 @@ Game::Game(Gview * gview)
 
 
     connect(protagonist.get(), SIGNAL(energyChanged(int)), gview, SLOT(changeEnergybar(int)));
-    connect(protagonist.get(), SIGNAL(energyChanged(int)), tview, SLOT(changeEnergybar(int)));
+    //connect(protagonist.get(), SIGNAL(energyChanged(int)), tview, SLOT(changeEnergybar(int)));
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
 }
 
@@ -100,7 +101,7 @@ void Game::step(){
     if(!path.empty()){
         tile_t * t_t = path.back();
         if(t_t->poison > 0){
-//            cout << "POISON" << endl;
+            //            cout << "POISON" << endl;
         }
         Tile * nextTile = t_t -> t;
         protagonist->setEnergy(protagonist->getEnergy() - 10 * abs(tiles.at(uint(protagonist->getXPos() + protagonist->getYPos() * world->getCols()))->getValue() - nextTile->getValue()));
@@ -110,15 +111,20 @@ void Game::step(){
         for(auto &enemy : enemies){
             if((protagonist->getXPos() == enemy->getXPos()) && (protagonist->getYPos() == enemy->getYPos())){
                 protagonist->setHealth(protagonist->getHealth()-enemy->getValue());
-//                cout << protagonist->getHealth() << endl;
+                //                cout << protagonist->getHealth() << endl;
+                cout << "Type Enemy: " ;
                 if(typeid (*enemy) == typeid (Enemy)){
                     enemy->setDefeated(true);
+                    cout << "Enemy" << endl;
 
                 } else if(typeid (*enemy) == typeid (PEnemy)){
                     dynamic_cast<PEnemy*>(enemy.get())->poison();
+                    cout << "Poison" << endl;
+                } else {
+                    cout << "Bowser" << endl;
                 }
                 //Erase–remove idiom
-                enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
+                //enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
                 protagonist->setEnergy(100);
                 //                emit sendSound("qrc:/sound/smw_kick.wav");
                 break;
@@ -135,10 +141,19 @@ void Game::step(){
                 protagonist->setHealth(h);
                 //cout << "samy is gay" << endl;
                 emit healthpackGained(hp.get());
-//                cout <<"HEALTHPACK: " << hp->getValue() << endl;
+                //                cout <<"HEALTHPACK: " << hp->getValue() << endl;
                 emit sendSound("qrc:/sound/smw_1-up.wav");
                 healthpacks.erase(remove(healthpacks.begin(),healthpacks.end(),hp),healthpacks.end());
                 break;
+            }
+        }
+        if(finalGameStarted){
+            if((protagonist->getXPos() == bowser->getXPos()) && (protagonist->getYPos() == bowser->getYPos())){
+                if(bowser->getLives() != 1){
+                bowser->setLives(bowser->getLives()-1);
+                } else {
+                    cout << "you win' " << endl;
+                }
             }
         }
         path.pop_back();
@@ -148,6 +163,7 @@ void Game::step(){
         if(!finalGameStarted){
             bowser->setLives(5);
             finalGameStarted = true;
+            // enemies.push_back(make_unique<XEnemy>(bowser));
         }
     }
 }
@@ -218,7 +234,7 @@ void Game::copyEnemies(){
     for(unsigned i = 0; i<enemies.size();i++){
         enemiesToDefeat.push_back(enemies.at(i).get());
     }
-    
+
     for(unsigned i = 0; i<healthpacks.size();i++){
         healthpacksOver.push_back(healthpacks.at(i).get());
     }

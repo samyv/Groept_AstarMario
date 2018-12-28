@@ -774,7 +774,6 @@ void Model::findBowserPos()
         }
     }
     cout << "new Bowser pos: " << bowser->t->getXPos() << " " << bowser->t->getYPos() << endl;
-    emit BowerPosFound(bowser->t);
 }
 
 void Model::findBowser(int x, int y)

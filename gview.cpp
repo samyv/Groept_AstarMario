@@ -25,7 +25,7 @@ Gview::Gview(QWidget *parent) :
     drawMarioInit();
 
     QImage bowser = QImage(":/bowser.png");
-    bowser = bowser.scaled(int(displaySize*24),int(displaySize*24));
+    bowser = bowser.scaled(int(displaySize*24*2),int(displaySize*24*2));
     QPixmap bowserPixmap = QPixmap::fromImage(bowser);
     bowserPix = new QGraphicsPixmapItem(bowserPixmap);
     bowserPix->hide();

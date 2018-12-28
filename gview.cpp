@@ -186,6 +186,10 @@ void Gview::on_startGame_clicked()
         //user
     }
 
+    displaySize = ui->displaysizeval->text().toDouble();
+
+    emit setnumbers(ui->enemiesval->value(), ui->hpval->value());
+
     if(ui->salesmanbox->currentIndex() == 0){
         cout << ui->salesmanbox->currentIndex() << endl;
         emit gameStart();
@@ -386,3 +390,18 @@ void Gview::drawPoisoned(qreal x,qreal y){
 
 
 
+
+void Gview::on_enemiesval_sliderMoved(int position)
+{
+    ui->enemiessliderval->setText(QString::number(position));
+}
+
+void Gview::on_hpval_sliderMoved(int position)
+{
+    ui->healthsliderval->setText(QString::number(position));
+}
+
+void Gview::on_horizontalSlider_sliderMoved(int position)
+{
+    ui->speedsliderval->setText(QString::number(position));
+}

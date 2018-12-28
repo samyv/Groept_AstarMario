@@ -64,6 +64,7 @@ signals:
     void hpUser(int,int);
     void sendSound(QString);
     void bowserDrawed();
+    void setnumbers(int,int);
 public slots:
     void updateProtagonist(int x, int y);
     void explodeEnemy(int,int);
@@ -84,6 +85,12 @@ private slots:
     void on_startGame_clicked();
 
     void on_startGenetic_toggled(bool checked);
+    void on_enemiesval_sliderMoved(int position);
+
+    void on_hpval_sliderMoved(int position);
+
+    void on_horizontalSlider_sliderMoved(int position);
+
 private:
     Ui::Gview *ui;
     ProtagonistUser * mariopix;

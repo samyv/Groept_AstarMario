@@ -732,10 +732,11 @@ void Model::dotheSalesman(){
         cout << "NOT SOLVABLE" << endl;
     }
 
-    for(int i = 0; i < bestOrder.size();i++){
+    for(int i = 0; i < bestOrder.size() - 1;i++){
         path_t * pathBetweenEnemies  = distanceBetweenEnemies[uint(bestOrder[uint(i)])][uint(bestOrder[uint(i+1)])];
         path->insert(path->begin(),pathBetweenEnemies->path.begin(),pathBetweenEnemies->path.end());
     }
+    cout << "done adding paths" << endl;
     emit salesmanDone();
 }
 void Model::printElement(vector<int> e){
@@ -908,6 +909,7 @@ void Model::findBowserPos()
 void Model::findBowser(int x, int y)
 {
     Tile * bowser = map.at(x+y*cols)->t;
+    float damage = bowser->getValue() *100;
     cout << "*star to Bowser" << endl;
     resetMap(map);
     path_t * path_to_bowser  = calculateDistance(protagonist,bowser);

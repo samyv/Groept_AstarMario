@@ -213,3 +213,5 @@ void Tview::changeEnergybar(int energyPercentage){
     drawCharacters();
 }
 
+
+

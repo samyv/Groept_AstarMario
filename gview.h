@@ -37,18 +37,17 @@ public:
     vector<std::unique_ptr<Tile>> createWorld();
     vector<QGraphicsPixmapItem *> enemiesPixs;
     vector<QGraphicsPixmapItem *> hpPixs;
-    void drawWorld();
     World * world;
     double displaySize = 0.8;
     QGraphicsScene * scene;
     QGraphicsOpacityEffect *eff;
 
-
+    QGraphicsPixmapItem * bowserPix;
     void makeModel();
     void drawBackground();
     void drawMarioInit();
     int prevX = 0;
-    void initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
+    void initDisplay(vector<unique_ptr<Tile>> & tiles,vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks);
     vector<unique_ptr<QGraphicsRectItem>> bestPath;
     vector<QGraphicsRectItem *> rects;
 
@@ -75,6 +74,7 @@ public slots:
     void collisonDetect();
     void changeEnergybar(int energy);
     void updatePoisonedTiles(int,int,int);
+    void displayBowser(Tile *);
 
 private slots:
 

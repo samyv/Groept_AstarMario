@@ -760,3 +760,19 @@ void Model::setPoisonedTiles(int strength)
     emit setTilesPoisoned(x,y,radius);
 }
 
+void Model::findBowserPos()
+{
+    bool greyTile = false;
+    tile_t * bowser;
+    while(true){
+    int randX = rand() % cols;
+    int randY= rand() % rows;
+    bowser = map.at(randX + randY*cols);
+        if(bowser->t->getValue() != INFINITY && bowser->t->getValue() < 1.0f && bowser->poison == 0.0f){
+            emit BowerPosFound(bowser->t);
+            break;
+        }
+    }
+    emit BowerPosFound(bowser->t);
+}
+

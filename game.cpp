@@ -2,6 +2,7 @@
 #include "math.h"
 #include "tview.h"
 #include "gview.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
@@ -10,6 +11,7 @@
 using namespace std;
 Game::Game(Gview * gview)
 { 
+
     world = new World();
     tiles = world->createWorld(":/worldmap4.png");
     gview->show();
@@ -28,11 +30,16 @@ Game::Game(Gview * gview)
     tview->setup(tiles, healthpacks, enemies, world->getCols(), world->getRows());
     tview->updateProtagonist(protagonist->getXPos(), protagonist->getYPos());
     for(int i = 0; i < healthpackCount; i++){
-//        healthpacks.at(i)->setValue(30);
+        //        healthpacks.at(i)->setValue(30);
     }
     copyEnemies();
-    gview->initDisplay(enemies,healthpacks);
+    gview->initDisplay(tiles,enemies,healthpacks);
     makeModel();
+
+    bowser = new XEnemy(5);
+    QObject::connect(bowser,SIGNAL(livesChanged()),m,SLOT(findBowserPos()));
+    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),gview,SLOT(displayBowser(Tile *)));
+
     //CONNECT TIMOUT OF MAIN TIMER TO STEP FUNCTION
     timer = new QTimer(gview);
     if(ai){
@@ -59,6 +66,7 @@ Game::Game(Gview * gview)
             connect(a.get(), SIGNAL(poisonLevelUpdated(int)), m,SLOT(setPoisonedTiles(int)));
         }
     }
+
     connect(this, SIGNAL(PEnemyTrigger(int,int)), gview, SLOT(explodeEnemy(int,int)));
     connect(gview, SIGNAL(poisonExplosion(qreal,qreal)), this, SLOT(setNeighboursPoison(qreal,qreal)));
     connect(this, SIGNAL(poisonedTile(qreal,qreal)), gview, SLOT(drawPoisoned(qreal,qreal)));
@@ -74,6 +82,11 @@ Game::Game(Gview * gview)
     QObject::connect(this,SIGNAL(checkCollision()), gview,SLOT(collisonDetect()));
     QObject::connect(gview,SIGNAL(enemyDeadUser(int,int)),this,SLOT(userEnemyDefeated(int,int)));
     QObject::connect(gview,SIGNAL(hpUser(int,int)),this,SLOT(hpTrigger(int,int)));
+
+//    QObject::connect(m,SIGNAL(BowerPosFound(Tile *)),this,SLOT(initBowser(Tile *)));
+
+
+
     connect(protagonist.get(), SIGNAL(energyChanged(int)), gview, SLOT(changeEnergybar(int)));
     connect(protagonist.get(), SIGNAL(energyChanged(int)), tview, SLOT(changeEnergybar(int)));
     connect(m, SIGNAL(salesmanDone()), this, SLOT(startTime()));
@@ -103,7 +116,7 @@ void Game::step(){
                 //Erase–remove idiom
                 enemies.erase(remove(enemies.begin(),enemies.end(),enemy),enemies.end());
                 protagonist->setEnergy(100);
-//                emit sendSound("qrc:/sound/smw_kick.wav");
+                //                emit sendSound("qrc:/sound/smw_kick.wav");
                 break;
             }
         }
@@ -124,15 +137,14 @@ void Game::step(){
                 break;
             }
         }
-        if(enemies.empty()){
-            cout << "you won" << endl;
-            background->stop();
-            emit sendSound("qrc:/sound/smw_castle_clear.wav");
-        }
         path.pop_back();
         //emit energychanged(protagonist->getEnergy());
     } else {
-        //cout << "PATH EMPTY" << endl;
+        timer->stop();
+        if(!finalGameStarted){
+            bowser->setLives(5);
+            finalGameStarted = true;
+        }
     }
 }
 
@@ -167,6 +179,7 @@ void Game::hpTrigger(int x, int y)
 
 
 
+
 void Game::stepUser(){
     emit checkCollision();
 }
@@ -197,6 +210,10 @@ void Game::copyEnemies(){
     }
 }
 
+void Game::here(int h)
+{
+    cout << "here: " << h << endl;
+}
 
 
 Game::~Game(){
@@ -225,7 +242,11 @@ void Game::setNeighboursPoison(qreal x, qreal y){
 }
 
 void Game::startTime(){
+<<<<<<< HEAD
     timer->start(1);
+=======
+    timer->start(0);
+>>>>>>> 94d2a1c8a388ae82f5707631b4750166c7abae09
 }
 
 void Game::checkTile(int x, int y)

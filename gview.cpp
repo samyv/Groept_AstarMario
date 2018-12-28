@@ -24,7 +24,12 @@ Gview::Gview(QWidget *parent) :
 
     drawMarioInit();
 
-
+    QImage bowser = QImage(":/bowser.png");
+    bowser = bowser.scaled(int(displaySize*24),int(displaySize*24));
+    QPixmap bowserPixmap = QPixmap::fromImage(bowser);
+    bowserPix = new QGraphicsPixmapItem(bowserPixmap);
+    bowserPix->hide();
+    scene->addItem(bowserPix);
     //draw rects for each tile (not used for now)
     //    drawWorld();
 
@@ -59,32 +64,6 @@ void Gview::drawMarioInit(){
     mariopix->setOffset(-mario.width()/2,-mario.height());
     mariopix->setOffset(-mario.width()/2,-mario.height());
     scene->addItem(mariopix);
-}
-
-void Gview::drawWorld(){
-    vector<std::shared_ptr<QGraphicsRectItem>> rects;
-    QBrush brush(Qt::SolidPattern);
-    QPen pen(Qt::NoPen);
-    float greyscale = 0.0f;
-    for(auto & tile: tiles){
-        if(tile->getValue() != INFINITY && tile->getValue() != 1.0f){
-            greyscale = tile->getValue()*255.0f;
-            brush.setColor(QColor(greyscale,greyscale,greyscale));
-            pen.setColor(QColor(greyscale,greyscale,greyscale));
-
-
-        } else if(tile->getValue() == INFINITY){
-            brush.setColor(Qt::black);
-            pen.setColor(Qt::black);
-
-        } else {
-            brush.setColor(Qt::white);
-            pen.setColor(Qt::white);
-        }
-        //        shared_ptr<QGraphicsRectItem> rect = make_shared<QGraphicsRectItem>(tile->getXPos()*displaySize,tile->getYPos()*displaySize, displaySize,displaySize,nullptr);
-        //        rects.push_back(rect);
-        //                scene->addRect(tile->getXPos()*displaySize, tile->getYPos()*displaySize, displaySize, displaySize,pen,brush);
-    }
 }
 
 void Gview::setupScene(){
@@ -124,18 +103,18 @@ void Gview::updateProtagonist(int x, int y){
         QColor q = rect->brush().color();
         QColor  * new_q= new QColor(q.red(),q.green(),q.blue());
         if(q.alpha() >= 1){
-//            cout << q.alpha() << endl;
+            //            cout << q.alpha() << endl;
             new_q->setAlpha(q.alpha()-0.1);
             QBrush new_B(Qt::SolidPattern);
             QPen new_P(Qt::SolidLine);
             pen.setWidth(5);
             new_B.setColor(*new_q);
             new_P.setColor(*new_q);
-//            cout << "after " << q.alpha() << endl;
+            //            cout << "after " << q.alpha() << endl;
             rect->setPen(new_P);
             rect->setBrush(new_B);
             if(i == 1){
-//                cout << rect->brush().color().alpha << endl;
+                //                cout << rect->brush().color().alpha << endl;
             }
             i++;
         } else {
@@ -145,7 +124,7 @@ void Gview::updateProtagonist(int x, int y){
     }
 }
 
-void Gview::initDisplay(vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks){
+void Gview::initDisplay(vector<unique_ptr<Tile>> & tiles,vector<unique_ptr<Enemy>> & enemies,vector<unique_ptr<Tile>> & healthpacks){
     QImage goomba = QImage(":/goombaretro.png");
     goomba = goomba.scaled(int(displaySize*24),int(displaySize*24));
     QPixmap goombapix = QPixmap::fromImage(goomba);
@@ -285,9 +264,15 @@ void Gview::updatePoisonedTiles(int x,int y,int r)
 {
     QBrush * brush = new QBrush(QColor(0,255,0,120));
     QPen greenp(Qt::green);
-//    scene->addEllipse((x-r/2)*displaySize,(y-r/2)*displaySize,r*displaySize,r*displaySize,greenp,*brush);
+    //    scene->addEllipse((x-r/2)*displaySize,(y-r/2)*displaySize,r*displaySize,r*displaySize,greenp,*brush);
     scene->addRect((x-r/2)*displaySize,(y-r/2)*displaySize,r*displaySize,r*displaySize,greenp,*brush);
 
+}
+
+void Gview::displayBowser(Tile * t)
+{
+    bowserPix->show();
+    bowserPix->setPos(t->getXPos()*displaySize,t->getYPos()*displaySize);
 }
 
 void Gview::enemyDead(){
@@ -380,4 +365,6 @@ void Gview::drawPoisoned(qreal x,qreal y){
     pen.setColor(QColor(0,255,0));
     scene->addRect(x*displaySize,y*displaySize,displaySize,displaySize,pen,brush);
 }
+
+
 

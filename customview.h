@@ -11,6 +11,9 @@ class Customview: public QGraphicsView
 public:
     explicit Customview(QWidget* parent = nullptr);
     int _numScheduledScalings = 0;
+    void keyPressEvent(QKeyEvent *event);
+signals:
+    void marioMoved(int,int);
 protected:
     virtual void wheelEvent ( QWheelEvent * event );
 public slots:

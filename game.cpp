@@ -66,7 +66,7 @@ Game::Game(Gview * gview)
     QObject::connect(gview,SIGNAL(changeAmountEnemies(int)),this,SLOT(defineGlobalEnemies(int)));
     QObject::connect(gview,SIGNAL(changeAmountHp(int)),this,SLOT(defineGlobalEnemies(int)));
     QObject::connect(gview,SIGNAL(generateWorldbutton(int,int)),this,SLOT(generateWorld(int,int)));
-    QObject::connect(gview->getMariopix(),SIGNAL(marioMoved(int,int)),this,SLOT(checkTile(int,int)));
+    QObject::connect(gview->ui->graphicsView,SIGNAL(marioMoved(int,int)),this,SLOT(checkTile(int,int)));
     QObject::connect(gview, SIGNAL(poisonExplosion(qreal,qreal)), this, SLOT(setNeighboursPoison(qreal,qreal)));
     QObject::connect(gview,SIGNAL(sendSound(QString)), this,SLOT(playSound(QString)));
 
@@ -88,8 +88,9 @@ Game::Game(Gview * gview)
     QObject::connect(gview,SIGNAL(gamePause()), this,SLOT(pauseTimer()));
     connect(protagonist.get(), SIGNAL(energyChanged(int)), tview, SLOT(changeEnergybar(int)));
 
+    connect(gview, SIGNAL(settbool(bool)), tview, SLOT(settbool(bool)));
 
-
+    connect(gview, SIGNAL(setai(bool)), this, SLOT(setai(bool)));
 
     /*----TVIEW CONNECTIONS---*/
     //  QObject::connect(bowser,SIGNAL(posChanged(int,int)),tview,SLOT(displayBowser(int,int)));
@@ -265,6 +266,19 @@ void Game::generateWorld(int e, int hp)
     makeModel();
     emit displayNewWorld(tiles,enemies,healthpacks);
 }
+
+void Game::setai(bool a)
+{
+    ai = a;
+
+    if(!ai){
+        QObject::disconnect(timer,SIGNAL(timeout()),this,SLOT(step()));
+        QObject::connect(timer,SIGNAL(timeout()),this,SLOT(stepUser()));
+        timer->start(0);
+    }
+}
+
+
 
 void Game::stepUser(){
     emit checkCollision();

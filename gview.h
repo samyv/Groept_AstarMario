@@ -49,7 +49,7 @@ public:
     vector<QGraphicsRectItem *> rects;
 
     ProtagonistUser *getMariopix() const;
-
+    Ui::Gview *ui;
 signals:
     void buttonClicked(QString);
     void gameStart();
@@ -67,6 +67,8 @@ signals:
     void changeAmountEnemies(int);
     void changeAmountHp(int);
     void generateWorldbutton(int,int);
+    void settbool(bool);
+    void setai(bool);
 public slots:
     virtual void updateProtagonist(int x, int y);
     virtual void explodeEnemy(int,int);
@@ -100,7 +102,7 @@ private slots:
     void on_generateWorldButton_clicked();
 
 private:
-    Ui::Gview *ui;
+
     ProtagonistUser * mariopix;
 };
 

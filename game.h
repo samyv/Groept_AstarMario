@@ -73,7 +73,7 @@ public slots:
     void defineGlobalHp(int);
     void changeTimer(int);
     void generateWorld(int e, int hp);
-
+    void setai(bool);
 };
 //unique_ptr<Protagonist> Game::protagonist = unique_ptr<Protagonist>(new Protagonist);
 

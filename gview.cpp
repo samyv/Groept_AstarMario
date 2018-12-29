@@ -175,15 +175,15 @@ void Gview::on_startGame_clicked()
     cout << val <<endl;
 
     if(ui->viewbox->currentIndex() == 0){
-        //Gview
+        emit settbool(false);
     } else {
-        //Tview
+        emit settbool(true);
     }
 
     if(ui->controlBox->currentIndex() == 0){
-        //ai
+        emit setai(true);
     } else {
-        //user
+        emit setai(false);
     }
 
     displaySize = ui->displaysizeval->text().toDouble();

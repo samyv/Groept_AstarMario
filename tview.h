@@ -30,7 +30,7 @@ public:
     int browserX;
     int browserY;
     string prevBrowserChar = "";
-
+    bool show = false;
 
     public slots :
          void updateProtagonist(int x, int y);
@@ -40,6 +40,8 @@ public:
          void changeEnergybar(int energyPercentage);
          void setup(vector<unique_ptr<Tile>> & tiles, vector<unique_ptr<Tile>> & healthPacks, vector<unique_ptr<Enemy>> & enemies, int columns, int rows);
          void displayEnd(bool won);
+         void settbool(bool);
+
 };
 
 #endif // TVIEW_H

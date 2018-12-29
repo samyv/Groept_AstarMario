@@ -24,13 +24,7 @@ Gview::Gview(QWidget *parent) :
 
     drawMarioInit();
 
-    QImage bowser = QImage(":/bowser.png");
-    bowser = bowser.scaled(int(displaySize*24*2),int(displaySize*24*2));
-    QPixmap bowserPixmap = QPixmap::fromImage(bowser);
-    bowserPix = new QGraphicsPixmapItem(bowserPixmap);
-    bowserPix->setOffset(-bowser.width()/2,-bowser.height());
-    bowserPix->hide();
-    scene->addItem(bowserPix);
+
 
     //draw rects for each tile (not used for now)
     //    drawWorld();
@@ -301,6 +295,12 @@ void Gview::updatePoisonedTiles(int x,int y,int r)
 
 void Gview::displayBowser(int x,int y)
 {
+    QImage bowser = QImage(":/bowser.png");
+    bowser = bowser.scaled(int(displaySize*24*2),int(displaySize*24*2));
+    QPixmap bowserPixmap = QPixmap::fromImage(bowser);
+    bowserPix = new QGraphicsPixmapItem(bowserPixmap);
+    bowserPix->setOffset(-bowser.width()/2,-bowser.height());
+    scene->addItem(bowserPix);
     bowserPix->show();
     bowserPix->setPos(x*displaySize,y*displaySize);
 }
